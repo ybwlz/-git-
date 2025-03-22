@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曲谱管理 - 苗韵琴行管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3a5a78;
+            --secondary-color: #f8f9fa;
+            --accent-color: #e3b04b;
+            --text-color: #333;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu a {
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+        
+        .sheet-music-card {
+            height: 100%;
+        }
+        
+        .sheet-music-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .sheet-music-card .difficulty {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .sheet-music-card .card-body {
+            padding: 15px;
+        }
+        
+        .sheet-music-card .composer {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .sheet-music-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .upload-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-zone:hover {
+            border-color: var(--primary-color);
+            background-color: var(--secondary-color);
+        }
+        
+        .upload-zone i {
+            font-size: 48px;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
+                display: none;
+            }
+            
+            .sidebar-menu a {
+                padding: 15px 0;
+                justify-content: center;
+            }
+            
+            .sidebar-menu i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block !important;
+            }
+        }
+        
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-toggle btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="sidebar">
+        <div class="sidebar-header d-flex align-items-center">
+            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像">
+            <span class="ms-2">
+                <div class="fw-bold">王老师</div>
+                <div class="small text-white-50">钢琴教师</div>
+            </span>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="teacher_dashboard.html">
+                <i class="fas fa-home"></i>
+                <span>仪表盘</span>
+            </a>
+            <a href="teacher_students.html">
+                <i class="fas fa-user-graduate"></i>
+                <span>学生管理</span>
+            </a>
+            <a href="teacher_courses.html">
+                <i class="fas fa-book"></i>
+                <span>课程管理</span>
+            </a>
+            <a href="teacher_attendance.html">
+                <i class="fas fa-clipboard-check"></i>
+                <span>考勤管理</span>
+            </a>
+            <a href="teacher_sheet_music.html" class="active">
+                <i class="fas fa-music"></i>
+                <span>曲谱管理</span>
+            </a>
+            <a href="teacher_finance.html">
+                <i class="fas fa-yuan-sign"></i>
+                <span>财务管理</span>
+            </a>
+            <a href="teacher_profile.html">
+                <i class="fas fa-user-cog"></i>
+                <span>个人设置</span>
+            </a>
+            <a href="../login.html">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>退出登录</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">曲谱管理</h2>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        <i class="fas fa-plus me-2"></i>上传新曲谱
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8 mb-3 mb-md-0">
+                            <div class="sheet-music-filter">
+                                <select class="form-select" style="width: auto;">
+                                    <option selected>所有难度</option>
+                                    <option>入门级</option>
+                                    <option>初级</option>
+                                    <option>中级</option>
+                                    <option>高级</option>
+                                    <option>专业级</option>
+                                </select>
+                                <select class="form-select" style="width: auto;">
+                                    <option selected>所有风格</option>
+                                    <option>古典</option>
+                                    <option>浪漫</option>
+                                    <option>现代</option>
+                                    <option>爵士</option>
+                                    <option>流行</option>
+                                </select>
+                                <select class="form-select" style="width: auto;">
+                                    <option selected>所有时期</option>
+                                    <option>巴洛克</option>
+                                    <option>古典主义</option>
+                                    <option>浪漫主义</option>
+                                    <option>现代主义</option>
+                                    <option>当代</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="搜索曲谱...">
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="card sheet-music-card">
+                        <img src="https://img.zcool.cn/community/01f9645e0b9600a801216518a5c7f1.jpg@1280w_1l_2o_100sh.jpg" class="card-img-top" alt="曲谱封面">
+                        <span class="difficulty">高级</span>
+                        <div class="card-body">
+                            <h5 class="card-title mb-1">月光奏鸣曲</h5>
+                            <p class="composer mb-3">贝多芬</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">古典</span>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <div class="card sheet-music-card">
+                        <img src="https://img.zcool.cn/community/01cc3d5d3f5f51a8012187f4c73785.jpg@1280w_1l_2o_100sh.jpg" class="card-img-top" alt="曲谱封面">
+                        <span class="difficulty">中级</span>
+                        <div class="card-body">
+                            <h5 class="card-title mb-1">梦中的婚礼</h5>
+                            <p class="composer mb-3">理查德·克莱德曼</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">流行</span>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <div class="card sheet-music-card">
+                        <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="card-img-top" alt="曲谱封面">
+                        <span class="difficulty">专业级</span>
+                        <div class="card-body">
+                            <h5 class="card-title mb-1">肖邦练习曲</h5>
+                            <p class="composer mb-3">肖邦</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">浪漫</span>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <div class="card sheet-music-card">
+                        <img src="https://img.zcool.cn/community/0152295d3f5f52a8012187f4f73d8a.jpg@1280w_1l_2o_100sh.jpg" class="card-img-top" alt="曲谱封面">
+                        <span class="difficulty">入门级</span>
+                        <div class="card-body">
+                            <h5 class="card-title mb-1">小星星变奏曲</h5>
+                            <p class="composer mb-3">莫扎特</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">古典</span>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <nav aria-label="曲谱列表分页" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一页</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">下一页</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- 上传曲谱模态框 -->
+    <div class="modal fade" id="uploadModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">上传新曲谱</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">曲谱名称</label>
+                            <input type="text" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">作曲家</label>
+                            <input type="text" class="form-control" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">难度级别</label>
+                                <select class="form-select" required>
+                                    <option>入门级</option>
+                                    <option>初级</option>
+                                    <option>中级</option>
+                                    <option>高级</option>
+                                    <option>专业级</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">曲谱风格</label>
+                                <select class="form-select" required>
+                                    <option>古典</option>
+                                    <option>浪漫</option>
+                                    <option>现代</option>
+                                    <option>爵士</option>
+                                    <option>流行</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">时期</label>
+                                <select class="form-select" required>
+                                    <option>巴洛克</option>
+                                    <option>古典主义</option>
+                                    <option>浪漫主义</option>
+                                    <option>现代主义</option>
+                                    <option>当代</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">曲谱简介</label>
+                            <textarea class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">上传曲谱文件</label>
+                            <div class="upload-zone">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p class="mb-0">点击或拖拽文件到此处上传</p>
+                                <p class="small text-muted">支持 PDF、JPG、PNG 格式</p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">上传曲谱封面</label>
+                            <div class="upload-zone">
+                                <i class="fas fa-image"></i>
+                                <p class="mb-0">点击或拖拽图片到此处上传</p>
+                                <p class="small text-muted">建议尺寸 800x600px，支持 JPG、PNG 格式</p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">上传</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 移动端侧边栏切换
+        document.querySelector('.mobile-toggle').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebar.style.width === '280px') {
+                sidebar.style.width = '0';
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '280px';
+                mainContent.style.marginLeft = '280px';
+            }
+        });
+        
+        // 文件上传区域交互
+        const uploadZones = document.querySelectorAll('.upload-zone');
+        uploadZones.forEach(zone => {
+            zone.addEventListener('dragover', e => {
+                e.preventDefault();
+                zone.style.borderColor = 'var(--primary-color)';
+                zone.style.backgroundColor = 'var(--secondary-color)';
+            });
+            
+            zone.addEventListener('dragleave', e => {
+                e.preventDefault();
+                zone.style.borderColor = '#dee2e6';
+                zone.style.backgroundColor = 'white';
+            });
+            
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                zone.style.borderColor = '#dee2e6';
+                zone.style.backgroundColor = 'white';
+                // 处理文件上传
+            });
+        });
+    </script>
+</body>
+</html> 

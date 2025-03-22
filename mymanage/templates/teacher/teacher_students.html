@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理 - 苗韵琴行管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3a5a78;
+            --secondary-color: #f8f9fa;
+            --accent-color: #e3b04b;
+            --text-color: #333;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu a {
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .badge-pill {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 300px;
+        }
+        
+        .search-container .form-control {
+            padding-left: 40px;
+            border-radius: 50px;
+        }
+        
+        .search-container .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            color: #6c757d;
+        }
+        
+        .student-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .student-progress {
+            height: 6px;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
+                display: none;
+            }
+            
+            .sidebar-menu a {
+                padding: 15px 0;
+                justify-content: center;
+            }
+            
+            .sidebar-menu i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block !important;
+            }
+        }
+        
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-toggle btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="sidebar">
+        <div class="sidebar-header d-flex align-items-center">
+            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像">
+            <span class="ms-2">
+                <div class="fw-bold">王老师</div>
+                <div class="small text-white-50">钢琴教师</div>
+            </span>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="teacher_dashboard.html">
+                <i class="fas fa-home"></i>
+                <span>仪表盘</span>
+            </a>
+            <a href="teacher_students.html" class="active">
+                <i class="fas fa-user-graduate"></i>
+                <span>学生管理</span>
+            </a>
+            <a href="teacher_courses.html">
+                <i class="fas fa-book"></i>
+                <span>课程管理</span>
+            </a>
+            <a href="teacher_attendance.html">
+                <i class="fas fa-clipboard-check"></i>
+                <span>考勤管理</span>
+            </a>
+            <a href="teacher_sheet_music.html">
+                <i class="fas fa-music"></i>
+                <span>曲谱管理</span>
+            </a>
+            <a href="teacher_finance.html">
+                <i class="fas fa-yuan-sign"></i>
+                <span>财务管理</span>
+            </a>
+            <a href="teacher_profile.html">
+                <i class="fas fa-user-cog"></i>
+                <span>个人设置</span>
+            </a>
+            <a href="../login.html">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>退出登录</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">学生管理</h2>
+                <div>
+                    <span class="me-2">今日日期：2023年5月20日</span>
+                    <button class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-bell me-1"></i>
+                        <span class="badge bg-danger">3</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="search-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" class="form-control" placeholder="搜索学生...">
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="student-filter justify-content-md-end">
+                                <select class="form-select form-select-sm" style="width: auto;">
+                                    <option selected>所有年龄段</option>
+                                    <option>5-8岁</option>
+                                    <option>9-12岁</option>
+                                    <option>13-16岁</option>
+                                    <option>17岁以上</option>
+                                </select>
+                                <select class="form-select form-select-sm" style="width: auto;">
+                                    <option selected>所有课程</option>
+                                    <option>钢琴基础</option>
+                                    <option>钢琴进阶</option>
+                                    <option>流行钢琴</option>
+                                    <option>古典钢琴</option>
+                                </select>
+                                <select class="form-select form-select-sm" style="width: auto;">
+                                    <option selected>所有学习阶段</option>
+                                    <option>入门</option>
+                                    <option>初级</option>
+                                    <option>中级</option>
+                                    <option>高级</option>
+                                </select>
+                                <button class="btn btn-sm btn-primary">
+                                    <i class="fas fa-filter me-1"></i>筛选
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+                    <div class="card text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="display-4 mb-3 text-primary">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <h5 class="card-title">总学生数</h5>
+                            <p class="card-text fs-2 fw-bold">42</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+                    <div class="card text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="display-4 mb-3 text-success">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <h5 class="card-title">本月新增</h5>
+                            <p class="card-text fs-2 fw-bold">8</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+                    <div class="card text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="display-4 mb-3 text-warning">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h5 class="card-title">平均出勤率</h5>
+                            <p class="card-text fs-2 fw-bold">92%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+                    <div class="card text-center h-100">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="display-4 mb-3 text-info">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h5 class="card-title">平均学习时长</h5>
+                            <p class="card-text fs-2 fw-bold">5.2h</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">学生列表</h5>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>添加学生
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>学生信息</th>
+                                    <th>课程</th>
+                                    <th>学习进度</th>
+                                    <th>考勤情况</th>
+                                    <th>最近上课</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://img.zcool.cn/community/01cc3d5d3f5f51a8012187f4c73785.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                            <div>
+                                                <div class="fw-bold">李明</div>
+                                                <div class="small text-muted">8岁 · 电话: 138****1234</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>钢琴基础课</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress student-progress">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 85%"></div>
+                                                </div>
+                                            </div>
+                                            <span>85%</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success badge-pill">优秀</span></td>
+                                    <td>2023-05-18</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
+                                                <i class="fas fa-phone"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                            <div>
+                                                <div class="fw-bold">张华</div>
+                                                <div class="small text-muted">10岁 · 电话: 139****5678</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>钢琴进阶课</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress student-progress">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 92%"></div>
+                                                </div>
+                                            </div>
+                                            <span>92%</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success badge-pill">优秀</span></td>
+                                    <td>2023-05-19</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
+                                                <i class="fas fa-phone"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://img.zcool.cn/community/0152295d3f5f52a8012187f4f73d8a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                            <div>
+                                                <div class="fw-bold">王芳</div>
+                                                <div class="small text-muted">9岁 · 电话: 136****4567</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>钢琴基础课</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress student-progress">
+                                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 78%"></div>
+                                                </div>
+                                            </div>
+                                            <span>78%</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-warning badge-pill">良好</span></td>
+                                    <td>2023-05-20</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
+                                                <i class="fas fa-phone"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                            <div>
+                                                <div class="fw-bold">刘强</div>
+                                                <div class="small text-muted">12岁 · 电话: 135****7890</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>钢琴进阶课</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress student-progress">
+                                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 65%"></div>
+                                                </div>
+                                            </div>
+                                            <span>65%</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-danger badge-pill">需关注</span></td>
+                                    <td>2023-05-17</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
+                                                <i class="fas fa-phone"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                            <div>
+                                                <div class="fw-bold">赵丽</div>
+                                                <div class="small text-muted">11岁 · 电话: 131****3456</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>钢琴基础课</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress student-progress">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 88%"></div>
+                                                </div>
+                                            </div>
+                                            <span>88%</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success badge-pill">优秀</span></td>
+                                    <td>2023-05-19</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
+                                                <i class="fas fa-phone"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <nav aria-label="学生列表分页">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一页</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">下一页</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 移动端侧边栏切换
+        document.querySelector('.mobile-toggle').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebar.style.width === '280px') {
+                sidebar.style.width = '0';
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '280px';
+                mainContent.style.marginLeft = '280px';
+            }
+        });
+    </script>
+</body>
+</html> 

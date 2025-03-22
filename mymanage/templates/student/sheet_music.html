@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线曲谱 - 苗韵琴行管理系统</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 自定义CSS -->
+    <link rel="stylesheet" href="/static/css/student.css">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+        }
+        
+        .sidebar {
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            border-radius: 5px;
+            margin: 5px 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+        
+        .sheet-card {
+            height: 100%;
+        }
+        
+        .sheet-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        
+        .sheet-card .difficulty {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .sheet-card .beginner {
+            background-color: #4cd137;
+            color: white;
+        }
+        
+        .sheet-card .intermediate {
+            background-color: #fbc531;
+            color: white;
+        }
+        
+        .sheet-card .advanced {
+            background-color: #e84118;
+            color: white;
+        }
+        
+        .sheet-card .card-footer {
+            background-color: white;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            padding-left: 40px;
+            border-radius: 20px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            color: #6c757d;
+        }
+        
+        .filter-dropdown {
+            margin-bottom: 20px;
+        }
+        
+        .sheet-viewer {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sheet-viewer img {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .sheet-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .sheet-controls button {
+            margin: 0 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding-bottom: 10px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="text-center mb-4">
+                    <img src="/static/img/logo.png" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px;">
+                    <h5 class="mt-2 text-white">苗韵琴行</h5>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="student_profile.html">
+                            <i class="fas fa-user"></i> 个人主页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="student_practice.html">
+                            <i class="fas fa-music"></i> 今日练琴
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="student_attendance.html">
+                            <i class="fas fa-calendar-check"></i> 考勤记录
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="sheet_music.html">
+                            <i class="fas fa-file-alt"></i> 在线曲谱
+                        </a>
+                    </li>
+                    <li class="nav-item mt-5">
+                        <a class="nav-link" href="../login.html">
+                            <i class="fas fa-sign-out-alt"></i> 退出登录
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 主要内容 -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="fas fa-file-alt"></i> 在线曲谱</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-heart"></i> 收藏夹
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-history"></i> 最近浏览
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 搜索和筛选 -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="form-control" placeholder="搜索曲谱...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select class="form-select filter-dropdown">
+                                    <option selected>难度等级</option>
+                                    <option>初级</option>
+                                    <option>中级</option>
+                                    <option>高级</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select filter-dropdown">
+                                    <option selected>曲风分类</option>
+                                    <option>古典</option>
+                                    <option>流行</option>
+                                    <option>爵士</option>
+                                    <option>民谣</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 曲谱列表 -->
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+                    <!-- 曲谱1 -->
+                    <div class="col">
+                        <div class="card sheet-card">
+                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="月光奏鸣曲">
+                            <span class="difficulty intermediate">中级</span>
+                            <div class="card-body">
+                                <h5 class="card-title">月光奏鸣曲</h5>
+                                <p class="card-text">贝多芬</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">上传时间: 2023-09-15</small>
+                                    <div>
+                                        <span class="badge bg-primary">古典</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-grid">
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sheetModal">
+                                        <i class="fas fa-eye"></i> 查看曲谱
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 曲谱2 -->
+                    <div class="col">
+                        <div class="card sheet-card">
+                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="致爱丽丝">
+                            <span class="difficulty beginner">初级</span>
+                            <div class="card-body">
+                                <h5 class="card-title">致爱丽丝</h5>
+                                <p class="card-text">贝多芬</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">上传时间: 2023-09-10</small>
+                                    <div>
+                                        <span class="badge bg-primary">古典</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-grid">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> 查看曲谱
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 曲谱3 -->
+                    <div class="col">
+                        <div class="card sheet-card">
+                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="梦中的婚礼">
+                            <span class="difficulty beginner">初级</span>
+                            <div class="card-body">
+                                <h5 class="card-title">梦中的婚礼</h5>
+                                <p class="card-text">Richard Clayderman</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">上传时间: 2023-09-05</small>
+                                    <div>
+                                        <span class="badge bg-info">流行</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-grid">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> 查看曲谱
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 曲谱4 -->
+                    <div class="col">
+                        <div class="card sheet-card">
+                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="肖邦夜曲">
+                            <span class="difficulty advanced">高级</span>
+                            <div class="card-body">
+                                <h5 class="card-title">夜曲 Op.9 No.2</h5>
+                                <p class="card-text">肖邦</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">上传时间: 2023-08-28</small>
+                                    <div>
+                                        <span class="badge bg-primary">古典</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-grid">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> 查看曲谱
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 曲谱5 -->
+                    <div class="col">
+                        <div class="card sheet-card">
+                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="卡农">
+                            <span class="difficulty intermediate">中级</span>
+                            <div class="card-body">
+                                <h5 class="card-title">卡农</h5>
+                                <p class="card-text">帕赫贝尔</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">上传时间: 2023-08-20</small>
+                                    <div>
+                                        <span class="badge bg-primary">古典</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-grid">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> 查看曲谱
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 曲谱6 -->
+                    <div class="col">
+                        <div class="card sheet-card">
+                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="天空之城">
+                            <span class="difficulty intermediate">中级</span>
+                            <div class="card-body">
+                                <h5 class="card-title">天空之城</h5>
+                                <p class="card-text">久石让</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">上传时间: 2023-08-15</small>
+                                    <div>
+                                        <span class="badge bg-info">流行</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-grid">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> 查看曲谱
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <nav aria-label="曲谱分页">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一页</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">下一页</a>
+                        </li>
+                    </ul>
+                </nav>
+            </main>
+        </div>
+    </div>
+
+    <!-- 曲谱查看模态框 -->
+    <div class="modal fade" id="sheetModal" tabindex="-1" aria-labelledby="sheetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sheetModalLabel">月光奏鸣曲 - 贝多芬</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="sheet-viewer">
+                        <div class="sheet-controls">
+                            <button class="btn btn-outline-secondary">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary">
+                                <i class="fas fa-search"></i> 100%
+                            </button>
+                            <button class="btn btn-outline-secondary">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                        <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" alt="月光奏鸣曲曲谱第1页">
+                        <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" alt="月光奏鸣曲曲谱第2页">
+                        <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" alt="月光奏鸣曲曲谱第3页">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-download"></i> 下载曲谱
+                    </button>
+                    <button type="button" class="btn btn-danger">
+                        <i class="fas fa-heart"></i> 收藏
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程管理 - 苗韵琴行管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3a5a78;
+            --secondary-color: #f8f9fa;
+            --accent-color: #e3b04b;
+            --text-color: #333;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu a {
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+        
+        .course-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .course-stats .stat-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .course-stats .stat-card .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .course-stats .stat-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+        
+        .course-stats .stat-card .label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .timetable {
+            display: grid;
+            grid-template-columns: 100px repeat(7, 1fr);
+            gap: 1px;
+            background-color: #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .timetable-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .timetable-time {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .timetable-cell {
+            background-color: white;
+            padding: 10px;
+            min-height: 80px;
+        }
+        
+        .course-item {
+            background-color: rgba(58, 90, 120, 0.1);
+            border-left: 3px solid var(--primary-color);
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        
+        .course-item:hover {
+            background-color: rgba(58, 90, 120, 0.2);
+            cursor: pointer;
+        }
+        
+        .course-item .student-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .course-item .course-type {
+            color: #6c757d;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
+                display: none;
+            }
+            
+            .sidebar-menu a {
+                padding: 15px 0;
+                justify-content: center;
+            }
+            
+            .sidebar-menu i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .timetable {
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block !important;
+            }
+            
+            .timetable {
+                grid-template-columns: 60px repeat(7, 1fr);
+            }
+        }
+        
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-toggle btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="sidebar">
+        <div class="sidebar-header d-flex align-items-center">
+            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像">
+            <span class="ms-2">
+                <div class="fw-bold">王老师</div>
+                <div class="small text-white-50">钢琴教师</div>
+            </span>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="teacher_dashboard.html">
+                <i class="fas fa-home"></i>
+                <span>仪表盘</span>
+            </a>
+            <a href="teacher_students.html">
+                <i class="fas fa-user-graduate"></i>
+                <span>学生管理</span>
+            </a>
+            <a href="teacher_courses.html" class="active">
+                <i class="fas fa-book"></i>
+                <span>课程管理</span>
+            </a>
+            <a href="teacher_attendance.html">
+                <i class="fas fa-clipboard-check"></i>
+                <span>考勤管理</span>
+            </a>
+            <a href="teacher_sheet_music.html">
+                <i class="fas fa-music"></i>
+                <span>曲谱管理</span>
+            </a>
+            <a href="teacher_finance.html">
+                <i class="fas fa-yuan-sign"></i>
+                <span>财务管理</span>
+            </a>
+            <a href="teacher_profile.html">
+                <i class="fas fa-user-cog"></i>
+                <span>个人设置</span>
+            </a>
+            <a href="../login.html">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>退出登录</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">课程管理</h2>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                        <i class="fas fa-plus me-2"></i>添加课程
+                    </button>
+                </div>
+            </div>
+            
+            <div class="course-stats mb-4">
+                <div class="stat-card">
+                    <div class="icon text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="value">42</div>
+                    <div class="label">总学生数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon text-success">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="value">168</div>
+                    <div class="label">本周课时</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon text-warning">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="value">95%</div>
+                    <div class="label">课程出勤率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon text-info">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="value">4.8</div>
+                    <div class="label">平均评分</div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">课程表</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-outline-primary">
+                            本周
+                        </button>
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="timetable">
+                        <div class="timetable-header"></div>
+                        <div class="timetable-header">周一</div>
+                        <div class="timetable-header">周二</div>
+                        <div class="timetable-header">周三</div>
+                        <div class="timetable-header">周四</div>
+                        <div class="timetable-header">周五</div>
+                        <div class="timetable-header">周六</div>
+                        <div class="timetable-header">周日</div>
+                        
+                        <div class="timetable-time">09:00</div>
+                        <div class="timetable-cell">
+                            <div class="course-item">
+                                <div class="student-name">李明</div>
+                                <div class="course-type">钢琴基础课</div>
+                            </div>
+                        </div>
+                        <div class="timetable-cell"></div>
+                        <div class="timetable-cell">
+                            <div class="course-item">
+                                <div class="student-name">张华</div>
+                                <div class="course-type">钢琴进阶课</div>
+                            </div>
+                        </div>
+                        <div class="timetable-cell"></div>
+                        <div class="timetable-cell">
+                            <div class="course-item">
+                                <div class="student-name">王芳</div>
+                                <div class="course-type">钢琴基础课</div>
+                            </div>
+                        </div>
+                        <div class="timetable-cell"></div>
+                        <div class="timetable-cell"></div>
+                        
+                        <div class="timetable-time">10:00</div>
+                        <div class="timetable-cell"></div>
+                        <div class="timetable-cell">
+                            <div class="course-item">
+                                <div class="student-name">刘强</div>
+                                <div class="course-type">古典钢琴课</div>
+                            </div>
+                        </div>
+                        <div class="timetable-cell"></div>
+                        <div class="timetable-cell">
+                            <div class="course-item">
+                                <div class="student-name">赵丽</div>
+                                <div class="course-type">流行钢琴课</div>
+                            </div>
+                        </div>
+                        <div class="timetable-cell"></div>
+                        <div class="timetable-cell">
+                            <div class="course-item">
+                                <div class="student-name">陈静</div>
+                                <div class="course-type">钢琴进阶课</div>
+                            </div>
+                        </div>
+                        <div class="timetable-cell"></div>
+                        
+                        <div class="timetable-time">11:00</div>
+                        <div class="timetable-cell">
+                            <div class="course-item">
+                                <div class="student-name">杨明</div>
+                                <div class="course-type">钢琴基础课</div>
+                            </div>
+                        </div>
+                        <div class="timetable-cell"></div>
+                        <div class="timetable-cell">
+                            <div class="course-item">
+                                <div class="student-name">周华</div>
+                                <div class="course-type">古典钢琴课</div>
+                            </div>
+                        </div>
+                        <div class="timetable-cell"></div>
+                        <div class="timetable-cell">
+                            <div class="course-item">
+                                <div class="student-name">吴芳</div>
+                                <div class="course-type">流行钢琴课</div>
+                            </div>
+                        </div>
+                        <div class="timetable-cell"></div>
+                        <div class="timetable-cell"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">课程类型统计</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="courseTypeChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">近期课程</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">李明 - 钢琴基础课</h6>
+                                            <small class="text-muted">今天 09:00-10:00</small>
+                                        </div>
+                                        <span class="badge bg-primary">即将开始</span>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">张华 - 钢琴进阶课</h6>
+                                            <small class="text-muted">明天 14:00-15:00</small>
+                                        </div>
+                                        <span class="badge bg-secondary">未开始</span>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">王芳 - 钢琴基础课</h6>
+                                            <small class="text-muted">后天 10:00-11:00</small>
+                                        </div>
+                                        <span class="badge bg-secondary">未开始</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加课程模态框 -->
+    <div class="modal fade" id="addCourseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">添加课程</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">学生</label>
+                            <select class="form-select" required>
+                                <option>李明</option>
+                                <option>张华</option>
+                                <option>王芳</option>
+                                <option>刘强</option>
+                                <option>赵丽</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">课程类型</label>
+                            <select class="form-select" required>
+                                <option>钢琴基础课</option>
+                                <option>钢琴进阶课</option>
+                                <option>流行钢琴课</option>
+                                <option>古典钢琴课</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">上课时间</label>
+                            <input type="datetime-local" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">课程时长</label>
+                            <select class="form-select" required>
+                                <option>30分钟</option>
+                                <option>45分钟</option>
+                                <option>60分钟</option>
+                                <option>90分钟</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">重复</label>
+                            <select class="form-select" required>
+                                <option>不重复</option>
+                                <option>每周</option>
+                                <option>每两周</option>
+                                <option>每月</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">备注</label>
+                            <textarea class="form-control" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 移动端侧边栏切换
+        document.querySelector('.mobile-toggle').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebar.style.width === '280px') {
+                sidebar.style.width = '0';
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '280px';
+                mainContent.style.marginLeft = '280px';
+            }
+        });
+        
+        // 课程类型统计图表
+        const courseTypeCtx = document.getElementById('courseTypeChart').getContext('2d');
+        const courseTypeChart = new Chart(courseTypeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['钢琴基础课', '钢琴进阶课', '流行钢琴课', '古典钢琴课'],
+                datasets: [{
+                    label: '课程数量',
+                    data: [15, 12, 8, 5],
+                    backgroundColor: [
+                        'rgba(58, 90, 120, 0.8)',
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(227, 176, 75, 0.8)',
+                        'rgba(23, 162, 184, 0.8)'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 5
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

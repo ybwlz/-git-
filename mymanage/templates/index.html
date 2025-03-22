@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>苗韵琴行 - 专业钢琴教育</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        .hero-section {
+            background-image: linear-gradient(rgba(58, 90, 120, 0.8), rgba(58, 90, 120, 0.8)), url('https://img.51miz.com/Element/00/88/13/39/c1f2b1e3_E881339_a4a3d5d9.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .about-img {
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .contact-info i {
+            width: 30px;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-music me-2"></i>苗韵琴行
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#home">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">关于我们</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">教学特色</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">联系方式</a>
+                    </li>
+                </ul>
+                <a href="login.html" class="btn btn-secondary">
+                    <i class="fas fa-sign-in-alt me-1"></i>登录
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h1 class="hero-title">苗韵琴行 - 专业钢琴教育</h1>
+                    <p class="hero-subtitle">培养音乐天赋，点燃艺术激情</p>
+                    <div class="mt-4">
+                        <a href="#features" class="btn btn-secondary me-2">了解更多</a>
+                        <a href="#contact" class="btn btn-outline-light">联系我们</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特色服务 -->
+    <section id="features" class="features-section bg-light">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="section-title">我们的教学特色</h2>
+                    <p class="lead text-muted">专业教师团队，个性化教学方案，全方位培养音乐素养</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h3 class="feature-title">专业师资</h3>
+                        <p>我们的教师均毕业于国内外知名音乐学院，拥有丰富的教学经验和专业资质。</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <h3 class="feature-title">个性化教学</h3>
+                        <p>根据学生的年龄、基础和学习目标，制定个性化的教学计划，因材施教。</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3 class="feature-title">考级辅导</h3>
+                        <p>提供专业的音乐考级辅导，帮助学生顺利通过各级别的音乐考试。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <h3 class="feature-title">丰富曲谱</h3>
+                        <p>提供丰富的钢琴曲谱资源，从入门到高级，满足不同学习阶段的需求。</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h3 class="feature-title">灵活排课</h3>
+                        <p>智能排课系统，根据学生和教师的时间安排，提供最优的课程安排方案。</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="feature-title">学习跟踪</h3>
+                        <p>通过数字化管理系统，实时跟踪学生的学习进度和出勤情况，提供详细的学习报告。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我们 -->
+    <section id="about" class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <img src="https://img.51miz.com/Element/00/92/59/73/b1e2e2e3_E925973_b1e2e2e3.jpg" alt="苗韵琴行" class="about-img">
+                </div>
+                <div class="col-lg-6">
+                    <h2 class="section-title">关于苗韵琴行</h2>
+                    <p class="lead">专注钢琴教育十余年，培养了数千名优秀学员</p>
+                    <p>苗韵琴行成立于2010年，是一家专注于钢琴教育的专业音乐培训机构。我们致力于为学生提供高质量的钢琴教育，培养学生的音乐素养和艺术修养。</p>
+                    <p>多年来，我们不断完善教学体系，引进先进的教学理念和方法，打造了一支专业、敬业的教师团队。我们的学生在各类音乐比赛和考级中取得了优异的成绩，多人被国内外知名音乐学院录取。</p>
+                    <p>我们相信，音乐教育不仅是技能的传授，更是对学生综合素质的培养。通过学习钢琴，学生能够提高专注力、记忆力和创造力，培养良好的审美能力和艺术修养。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系我们 -->
+    <section id="contact" class="py-5 bg-light">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="section-title">联系我们</h2>
+                    <p class="lead text-muted">欢迎咨询，期待您的到来</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="card border-0 h-100">
+                        <div class="card-body">
+                            <h3 class="card-title">联系方式</h3>
+                            <ul class="list-unstyled contact-info">
+                                <li class="mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    地址：北京市海淀区中关村大街1号
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fas fa-phone me-2"></i>
+                                    电话：010-12345678
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    邮箱：info@miaoyunpiano.com
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fas fa-clock me-2"></i>
+                                    营业时间：周一至周日 9:00-21:00
+                                </li>
+                            </ul>
+                            <h4 class="mt-4">关注我们</h4>
+                            <div class="social-icons mt-3">
+                                <a href="#" class="me-3 text-dark fs-4"><i class="fab fa-weixin"></i></a>
+                                <a href="#" class="me-3 text-dark fs-4"><i class="fab fa-weibo"></i></a>
+                                <a href="#" class="me-3 text-dark fs-4"><i class="fab fa-qq"></i></a>
+                                <a href="#" class="text-dark fs-4"><i class="fab fa-tiktok"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card border-0 h-100">
+                        <div class="card-body">
+                            <h3 class="card-title">留言咨询</h3>
+                            <form>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" placeholder="您的姓名">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="email" class="form-control" placeholder="您的邮箱">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="tel" class="form-control" placeholder="您的电话">
+                                </div>
+                                <div class="mb-3">
+                                    <textarea class="form-control" rows="4" placeholder="您的留言"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">提交留言</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h4 class="text-white">苗韵琴行</h4>
+                    <p class="text-white-50">专业钢琴教育，培养音乐天赋</p>
+                    <p class="text-white-50">© 2023 苗韵琴行. 保留所有权利.</p>
+                </div>
+                <div class="col-lg-2 mb-4 mb-lg-0">
+                    <h5 class="text-white">快速链接</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#home" class="text-white-50">首页</a></li>
+                        <li class="mb-2"><a href="#about" class="text-white-50">关于我们</a></li>
+                        <li class="mb-2"><a href="#features" class="text-white-50">教学特色</a></li>
+                        <li class="mb-2"><a href="#contact" class="text-white-50">联系方式</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 mb-4 mb-lg-0">
+                    <h5 class="text-white">课程信息</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-white-50">钢琴课程</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">考级辅导</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">音乐素养</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">师资团队</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h5 class="text-white">订阅我们</h5>
+                    <p class="text-white-50">订阅我们的电子邮件，获取最新课程和活动信息</p>
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="您的邮箱地址">
+                        <button class="btn btn-secondary" type="button">订阅</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

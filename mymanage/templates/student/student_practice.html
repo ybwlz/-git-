@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日练琴 - 苗韵琴行管理系统</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 自定义CSS -->
+    <link rel="stylesheet" href="/static/css/student.css">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+        }
+        
+        .sidebar {
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            border-radius: 5px;
+            margin: 5px 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding-top: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .practice-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .practice-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .practice-header h2 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .practice-header p {
+            color: #777;
+            font-size: 16px;
+        }
+        
+        .practice-status {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .practice-status.inactive {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+        
+        .practice-status.active {
+            background: linear-gradient(135deg, #20bf6b, #0fb9b1);
+        }
+        
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .status-text {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .status-desc {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .timer-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .timer {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .timer-label {
+            font-size: 16px;
+            color: #777;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .btn-action {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .btn-action i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .btn-checkin {
+            background-color: var(--primary-color);
+            border: none;
+        }
+        
+        .btn-checkin:hover {
+            background-color: #5649c0;
+            transform: translateY(-2px);
+        }
+        
+        .btn-checkout {
+            background-color: #e74c3c;
+            border: none;
+        }
+        
+        .btn-checkout:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .btn-scan {
+            background-color: #2ecc71;
+            border: none;
+        }
+        
+        .btn-scan:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .piano-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .piano-info h4 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .piano-info h4 i {
+            margin-right: 10px;
+        }
+        
+        .piano-details {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .piano-detail-item {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 15px;
+        }
+        
+        .piano-detail-label {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 5px;
+        }
+        
+        .piano-detail-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .qr-scanner {
+            display: none;
+            margin: 20px auto;
+            max-width: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .qr-scanner video {
+            width: 100%;
+            height: auto;
+        }
+        
+        .qr-scanner-overlay {
+            position: relative;
+        }
+        
+        .qr-scanner-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        
+        .qr-scanner-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .waiting-info {
+            background-color: #fff3cd;
+            color: #856404;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .waiting-info i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .waiting-time {
+            font-weight: 600;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            <img src="https://img.51miz.com/Element/00/37/79/24/7a2e4a3c_E377924_a2e2a2e3.png" alt="苗韵琴行" width="50">
+            <h5 class="mt-2">苗韵琴行</h5>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="student_profile.html">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="student_practice.html">
+                    <i class="fas fa-music"></i> 今日练琴
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="student_attendance.html">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="sheet_music.html">
+                    <i class="fas fa-file-alt"></i> 在线曲谱
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="../login.html">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="main-content">
+        <div class="container-fluid">
+            <!-- 顶部导航 -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white rounded-3 shadow-sm mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-brand mb-0 h1">今日练琴</span>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        2
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                    <img src="https://img.51miz.com/Element/00/88/05/53/c1f2b1e3_E880553_a4a3d5d9.jpg" class="rounded-circle" width="30" height="30">
+                                    <span class="ms-1">王小明</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="student_profile.html"><i class="fas fa-user me-2"></i>个人资料</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>账号设置</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="../login.html"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- 练琴卡片 -->
+            <div class="practice-card">
+                <div class="practice-header">
+                    <h2>今日练琴</h2>
+                    <p>2023年3月15日 星期三</p>
+                </div>
+                
+                <!-- 练琴状态 -->
+                <div class="practice-status inactive" id="practiceStatus">
+                    <div class="status-icon">
+                        <i class="fas fa-hourglass-start"></i>
+                    </div>
+                    <div class="status-text">未开始练琴</div>
+                    <div class="status-desc">请扫描二维码或点击打卡按钮开始练琴</div>
+                </div>
+                
+                <!-- 练琴计时器 -->
+                <div class="timer-container" id="timerContainer" style="display: none;">
+                    <div class="timer" id="practiceTimer">00:00:00</div>
+                    <div class="timer-label">练琴时长</div>
+                </div>
+                
+                <!-- 二维码扫描区域 -->
+                <div class="qr-scanner" id="qrScanner">
+                    <div class="qr-scanner-overlay">
+                        <video id="qrVideo"></video>
+                        <div class="qr-scanner-frame"></div>
+                    </div>
+                    <div class="qr-scanner-controls">
+                        <button class="btn btn-secondary" id="closeScanner">
+                            <i class="fas fa-times"></i> 关闭扫描
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 等待信息 -->
+                <div class="waiting-info" id="waitingInfo">
+                    <i class="fas fa-clock"></i>
+                    <span>您已加入排队队列，预计等待时间：</span>
+                    <span class="waiting-time" id="waitingTime">5分钟</span>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="action-buttons">
+                    <button class="btn btn-primary btn-action btn-scan" id="scanQrBtn">
+                        <i class="fas fa-qrcode"></i> 扫码打卡
+                    </button>
+                    <button class="btn btn-primary btn-action btn-checkin" id="checkinBtn">
+                        <i class="fas fa-sign-in-alt"></i> 开始练琴
+                    </button>
+                    <button class="btn btn-danger btn-action btn-checkout" id="checkoutBtn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> 结束练琴
+                    </button>
+                </div>
+                
+                <!-- 钢琴信息 -->
+                <div class="piano-info" id="pianoInfo" style="display: none;">
+                    <h4><i class="fas fa-piano"></i> 分配的钢琴信息</h4>
+                    <div class="piano-details">
+                        <div class="piano-detail-item">
+                            <div class="piano-detail-label">钢琴编号</div>
+                            <div class="piano-detail-value">P-005</div>
+                        </div>
+                        <div class="piano-detail-item">
+                            <div class="piano-detail-label">钢琴品牌</div>
+                            <div class="piano-detail-value">雅马哈 (Yamaha)</div>
+                        </div>
+                        <div class="piano-detail-item">
+                            <div class="piano-detail-label">型号</div>
+                            <div class="piano-detail-value">YDP-164</div>
+                        </div>
+                        <div class="piano-detail-item">
+                            <div class="piano-detail-label">位置</div>
+                            <div class="piano-detail-value">2楼 练习室3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 练琴提示 -->
+            <div class="practice-card">
+                <h4 class="mb-4"><i class="fas fa-lightbulb me-2 text-warning"></i>练琴小贴士</h4>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-clock me-2 text-primary"></i>合理安排时间</h5>
+                                <p class="card-text">每天保持30-60分钟的练习时间，比偶尔长时间练习效果更好。保持规律性是提高技能的关键。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-hand-paper me-2 text-success"></i>注意手部姿势</h5>
+                                <p class="card-text">保持正确的手部姿势，手腕放松，手指自然弯曲。避免长时间练习导致的疲劳和紧张。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-music me-2 text-danger"></i>分段练习</h5>
+                                <p class="card-text">将曲目分成小段落进行练习，掌握一个段落后再进行下一个，最后将它们连接起来。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-heartbeat me-2 text-info"></i>用心聆听</h5>
+                                <p class="card-text">练习时专注于聆听自己的演奏，注意音色、节奏和表现力，培养音乐感和表现力。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- QR Scanner JS -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const scanQrBtn = document.getElementById('scanQrBtn');
+            const checkinBtn = document.getElementById('checkinBtn');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const qrScanner = document.getElementById('qrScanner');
+            const closeScanner = document.getElementById('closeScanner');
+            const practiceStatus = document.getElementById('practiceStatus');
+            const timerContainer = document.getElementById('timerContainer');
+            const practiceTimer = document.getElementById('practiceTimer');
+            const pianoInfo = document.getElementById('pianoInfo');
+            const waitingInfo = document.getElementById('waitingInfo');
+            
+            let scanner = null;
+            let timerInterval = null;
+            let startTime = null;
+            let isPracticing = false;
+            
+            // 初始化二维码扫描器
+            function initScanner() {
+                scanner = new Html5Qrcode("qrVideo");
+                const config = { fps: 10, qrbox: 250 };
+                
+                scanner.start(
+                    { facingMode: "environment" },
+                    config,
+                    onScanSuccess,
+                    onScanFailure
+                );
+            }
+            
+            // 扫描成功回调
+            function onScanSuccess(decodedText, decodedResult) {
+                console.log(`扫描成功: ${decodedText}`, decodedResult);
+                scanner.stop();
+                qrScanner.style.display = 'none';
+                
+                // 模拟处理扫描结果
+                // 在实际应用中，这里应该发送请求到后端验证二维码
+                setTimeout(() => {
+                    // 显示等待信息
+                    waitingInfo.style.display = 'block';
+                    
+                    // 模拟5秒后分配钢琴
+                    setTimeout(() => {
+                        waitingInfo.style.display = 'none';
+                        startPractice();
+                    }, 5000);
+                }, 1000);
+            }
+            
+            // 扫描失败回调
+            function onScanFailure(error) {
+                console.warn(`扫描失败: ${error}`);
+            }
+            
+            // 开始练琴
+            function startPractice() {
+                isPracticing = true;
+                startTime = new Date();
+                
+                // 更新UI
+                practiceStatus.classList.remove('inactive');
+                practiceStatus.classList.add('active');
+                practiceStatus.innerHTML = `
+                    <div class="status-icon">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div class="status-text">正在练琴</div>
+                    <div class="status-desc">加油！坚持练习是成功的关键</div>
+                `;
+                
+                checkinBtn.style.display = 'none';
+                scanQrBtn.style.display = 'none';
+                checkoutBtn.style.display = 'inline-flex';
+                timerContainer.style.display = 'block';
+                pianoInfo.style.display = 'block';
+                
+                // 启动计时器
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+            
+            // 结束练琴
+            function endPractice() {
+                isPracticing = false;
+                clearInterval(timerInterval);
+                
+                // 计算练习时长
+                const endTime = new Date();
+                const practiceDuration = Math.floor((endTime - startTime) / 1000);
+                
+                // 更新UI
+                practiceStatus.classList.remove('active');
+                practiceStatus.classList.add('inactive');
+                practiceStatus.innerHTML = `
+                    <div class="status-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="status-text">练琴已完成</div>
+                    <div class="status-desc">今日练习时长: ${formatTime(practiceDuration)}</div>
+                `;
+                
+                checkinBtn.style.display = 'inline-flex';
+                scanQrBtn.style.display = 'inline-flex';
+                checkoutBtn.style.display = 'none';
+                pianoInfo.style.display = 'none';
+                
+                // 5秒后重置计时器显示
+                setTimeout(() => {
+                    if (!isPracticing) {
+                        timerContainer.style.display = 'none';
+                        practiceTimer.textContent = '00:00:00';
+                    }
+                }, 5000);
+            }
+            
+            // 更新计时器
+            function updateTimer() {
+                if (!startTime) return;
+                
+                const currentTime = new Date();
+                const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+                practiceTimer.textContent = formatTime(elapsedSeconds);
+            }
+            
+            // 格式化时间
+            function formatTime(totalSeconds) {
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                
+                return [
+                    hours.toString().padStart(2, '0'),
+                    minutes.toString().padStart(2, '0'),
+                    seconds.toString().padStart(2, '0')
+                ].join(':');
+            }
+            
+            // 事件监听
+            scanQrBtn.addEventListener('click', function() {
+                qrScanner.style.display = 'block';
+                initScanner();
+            });
+            
+            closeScanner.addEventListener('click', function() {
+                if (scanner) {
+                    scanner.stop();
+                    qrScanner.style.display = 'none';
+                }
+            });
+            
+            checkinBtn.addEventListener('click', function() {
+                // 模拟直接打卡（不扫码）
+                startPractice();
+            });
+            
+            checkoutBtn.addEventListener('click', function() {
+                endPractice();
+            });
+        });
+    </script>
+</body>
+</html> 

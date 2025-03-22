@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师仪表盘 - 苗韵琴行管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3a5a78;
+            --secondary-color: #f8f9fa;
+            --accent-color: #e3b04b;
+            --text-color: #333;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu a {
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+        
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            margin-right: 15px;
+            color: white;
+        }
+        
+        .bg-primary-soft {
+            background-color: rgba(58, 90, 120, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .bg-success-soft {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+        
+        .bg-warning-soft {
+            background-color: rgba(227, 176, 75, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .bg-info-soft {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+        }
+        
+        .bg-danger-soft {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .bg-purple-soft {
+            background-color: rgba(111, 66, 193, 0.1);
+            color: #6f42c1;
+        }
+        
+        .stat-card {
+            padding: 15px;
+        }
+        
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .stat-card .label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .badge-pill {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
+                display: none;
+            }
+            
+            .sidebar-menu a {
+                padding: 15px 0;
+                justify-content: center;
+            }
+            
+            .sidebar-menu i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block !important;
+            }
+        }
+        
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-toggle btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="sidebar">
+        <div class="sidebar-header d-flex align-items-center">
+            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像">
+            <span class="ms-2">
+                <div class="fw-bold">王老师</div>
+                <div class="small text-white-50">钢琴教师</div>
+            </span>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="#" class="active">
+                <i class="fas fa-home"></i>
+                <span>仪表盘</span>
+            </a>
+            <a href="teacher_students.html">
+                <i class="fas fa-user-graduate"></i>
+                <span>学生管理</span>
+            </a>
+            <a href="teacher_courses.html">
+                <i class="fas fa-book"></i>
+                <span>课程管理</span>
+            </a>
+            <a href="teacher_attendance.html">
+                <i class="fas fa-clipboard-check"></i>
+                <span>考勤管理</span>
+            </a>
+            <a href="teacher_sheet_music.html">
+                <i class="fas fa-music"></i>
+                <span>曲谱管理</span>
+            </a>
+            <a href="teacher_finance.html">
+                <i class="fas fa-yuan-sign"></i>
+                <span>财务管理</span>
+            </a>
+            <a href="teacher_profile.html">
+                <i class="fas fa-user-cog"></i>
+                <span>个人设置</span>
+            </a>
+            <a href="login.html">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>退出登录</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">教师仪表盘</h2>
+                <div>
+                    <span class="me-2">今日日期：2023年5月20日</span>
+                    <button class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-bell me-1"></i>
+                        <span class="badge bg-danger">3</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon bg-primary-soft">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div>
+                                <div class="value">42</div>
+                                <div class="label">学生总数</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon bg-success-soft">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <div class="value">8</div>
+                                <div class="label">今日课程</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon bg-warning-soft">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <div class="value">92%</div>
+                                <div class="label">出勤率</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon bg-info-soft">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <div>
+                                <div class="value">156</div>
+                                <div class="label">曲谱资源</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">今日课程安排</h5>
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus me-1"></i>添加课程
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>时间</th>
+                                            <th>学生</th>
+                                            <th>课程内容</th>
+                                            <th>教室</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>09:00-10:00</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/01cc3d5d3f5f51a8012187f4c73785.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>李明</span>
+                                                </div>
+                                            </td>
+                                            <td>钢琴基础课 - 入门练习</td>
+                                            <td>A101</td>
+                                            <td><span class="badge bg-success badge-pill">已完成</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>10:30-11:30</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>张华</span>
+                                                </div>
+                                            </td>
+                                            <td>钢琴进阶 - 肖邦练习曲</td>
+                                            <td>A102</td>
+                                            <td><span class="badge bg-success badge-pill">已完成</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>13:00-14:00</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/0152295d3f5f52a8012187f4f73d8a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>王芳</span>
+                                                </div>
+                                            </td>
+                                            <td>钢琴基础课 - 音阶练习</td>
+                                            <td>A101</td>
+                                            <td><span class="badge bg-primary badge-pill">进行中</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>14:30-15:30</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>刘强</span>
+                                                </div>
+                                            </td>
+                                            <td>钢琴进阶 - 贝多芬奏鸣曲</td>
+                                            <td>A103</td>
+                                            <td><span class="badge bg-warning badge-pill">待开始</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>16:00-17:00</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>赵丽</span>
+                                                </div>
+                                            </td>
+                                            <td>钢琴基础课 - 和弦练习</td>
+                                            <td>A102</td>
+                                            <td><span class="badge bg-warning badge-pill">待开始</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">学生学习进度</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="progressChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">考勤二维码</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="https://img.zcool.cn/community/01f9645e0b9600a801216518a5c7f1.jpg@1280w_1l_2o_100sh.jpg" alt="考勤二维码" class="img-fluid mb-3" style="max-width: 200px;">
+                            <p class="mb-2">今日考勤码</p>
+                            <p class="text-muted small">有效期至：2023-05-20 23:59:59</p>
+                            <button class="btn btn-primary">
+                                <i class="fas fa-sync-alt me-1"></i>刷新二维码
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">待办事项</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task1">
+                                    <label class="form-check-label" for="task1">
+                                        准备明天的教学计划
+                                    </label>
+                                </div>
+                                <span class="badge bg-warning ms-auto">今天</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task2">
+                                    <label class="form-check-label" for="task2">
+                                        上传新曲谱资源
+                                    </label>
+                                </div>
+                                <span class="badge bg-warning ms-auto">今天</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task3" checked>
+                                    <label class="form-check-label text-decoration-line-through" for="task3">
+                                        联系李明家长
+                                    </label>
+                                </div>
+                                <span class="badge bg-success ms-auto">已完成</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task4">
+                                    <label class="form-check-label" for="task4">
+                                        更新学生学习进度
+                                    </label>
+                                </div>
+                                <span class="badge bg-info ms-auto">明天</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task5">
+                                    <label class="form-check-label" for="task5">
+                                        准备月度教学总结
+                                    </label>
+                                </div>
+                                <span class="badge bg-info ms-auto">5月25日</span>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="添加新任务...">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">最近消息</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">李明家长</h6>
+                                        <small>3小时前</small>
+                                    </div>
+                                    <p class="mb-1">关于下周课程安排的问题...</p>
+                                    <small class="text-muted">点击查看详情</small>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">系统通知</h6>
+                                        <small>昨天</small>
+                                    </div>
+                                    <p class="mb-1">新版本更新：增加了曲谱管理功能</p>
+                                    <small class="text-muted">点击查看详情</small>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">张华家长</h6>
+                                        <small>2天前</small>
+                                    </div>
+                                    <p class="mb-1">感谢您对孩子的耐心指导...</p>
+                                    <small class="text-muted">点击查看详情</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 移动端侧边栏切换
+        document.querySelector('.mobile-toggle').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebar.style.width === '280px') {
+                sidebar.style.width = '0';
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '280px';
+                mainContent.style.marginLeft = '280px';
+            }
+        });
+        
+        // 学生学习进度图表
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        const progressChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['李明', '张华', '王芳', '刘强', '赵丽', '陈静', '杨光', '周梅'],
+                datasets: [{
+                    label: '学习进度 (%)',
+                    data: [85, 92, 78, 65, 88, 72, 80, 95],
+                    backgroundColor: [
+                        'rgba(58, 90, 120, 0.7)',
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(227, 176, 75, 0.7)',
+                        'rgba(23, 162, 184, 0.7)',
+                        'rgba(111, 66, 193, 0.7)',
+                        'rgba(220, 53, 69, 0.7)',
+                        'rgba(108, 117, 125, 0.7)',
+                        'rgba(253, 126, 20, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(58, 90, 120, 1)',
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(227, 176, 75, 1)',
+                        'rgba(23, 162, 184, 1)',
+                        'rgba(111, 66, 193, 1)',
+                        'rgba(220, 53, 69, 1)',
+                        'rgba(108, 117, 125, 1)',
+                        'rgba(253, 126, 20, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

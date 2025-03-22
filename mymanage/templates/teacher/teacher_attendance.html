@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考勤管理 - 苗韵琴行管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3a5a78;
+            --secondary-color: #f8f9fa;
+            --accent-color: #e3b04b;
+            --text-color: #333;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu a {
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .badge-pill {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .qr-code-container {
+            max-width: 300px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .qr-code-container img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .date-selector {
+            margin-bottom: 20px;
+        }
+        
+        .date-selector .btn-group {
+            width: 100%;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .date-selector .btn {
+            flex: 1;
+            background-color: white;
+            color: var(--text-color);
+            border: none;
+            padding: 10px 0;
+        }
+        
+        .date-selector .btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .attendance-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .attendance-stats .stat-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .attendance-stats .stat-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+        
+        .attendance-stats .stat-card .label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .calendar-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            padding: 5px 0;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        
+        .calendar-day.current {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .calendar-day.has-attendance {
+            position: relative;
+        }
+        
+        .calendar-day.has-attendance::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
+                display: none;
+            }
+            
+            .sidebar-menu a {
+                padding: 15px 0;
+                justify-content: center;
+            }
+            
+            .sidebar-menu i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block !important;
+            }
+        }
+        
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-toggle btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="sidebar">
+        <div class="sidebar-header d-flex align-items-center">
+            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像">
+            <span class="ms-2">
+                <div class="fw-bold">王老师</div>
+                <div class="small text-white-50">钢琴教师</div>
+            </span>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="teacher_dashboard.html">
+                <i class="fas fa-home"></i>
+                <span>仪表盘</span>
+            </a>
+            <a href="teacher_students.html">
+                <i class="fas fa-user-graduate"></i>
+                <span>学生管理</span>
+            </a>
+            <a href="teacher_courses.html">
+                <i class="fas fa-book"></i>
+                <span>课程管理</span>
+            </a>
+            <a href="teacher_attendance.html" class="active">
+                <i class="fas fa-clipboard-check"></i>
+                <span>考勤管理</span>
+            </a>
+            <a href="teacher_sheet_music.html">
+                <i class="fas fa-music"></i>
+                <span>曲谱管理</span>
+            </a>
+            <a href="teacher_finance.html">
+                <i class="fas fa-yuan-sign"></i>
+                <span>财务管理</span>
+            </a>
+            <a href="teacher_profile.html">
+                <i class="fas fa-user-cog"></i>
+                <span>个人设置</span>
+            </a>
+            <a href="../login.html">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>退出登录</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">考勤管理</h2>
+                <div>
+                    <span class="me-2">今日日期：2023年5月20日</span>
+                    <button class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-bell me-1"></i>
+                        <span class="badge bg-danger">3</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">今日考勤情况</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="date-selector mb-4">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn">上周</button>
+                                    <button type="button" class="btn">上周六</button>
+                                    <button type="button" class="btn">上周日</button>
+                                    <button type="button" class="btn">昨天</button>
+                                    <button type="button" class="btn active">今天</button>
+                                </div>
+                            </div>
+                            
+                            <div class="attendance-stats mb-4">
+                                <div class="stat-card">
+                                    <div class="small">学生总数</div>
+                                    <div class="value">42</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="small">已签到</div>
+                                    <div class="value">28</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="small">未签到</div>
+                                    <div class="value">14</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="small">出勤率</div>
+                                    <div class="value">66.7%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>学生</th>
+                                            <th>签到时间</th>
+                                            <th>签退时间</th>
+                                            <th>学习时长</th>
+                                            <th>考勤状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/01cc3d5d3f5f51a8012187f4c73785.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>李明</span>
+                                                </div>
+                                            </td>
+                                            <td>09:00</td>
+                                            <td>10:30</td>
+                                            <td>1.5小时</td>
+                                            <td><span class="badge bg-success badge-pill">已完成</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>张华</span>
+                                                </div>
+                                            </td>
+                                            <td>10:15</td>
+                                            <td>11:45</td>
+                                            <td>1.5小时</td>
+                                            <td><span class="badge bg-success badge-pill">已完成</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/0152295d3f5f52a8012187f4f73d8a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>王芳</span>
+                                                </div>
+                                            </td>
+                                            <td>13:00</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td><span class="badge bg-primary badge-pill">进行中</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>刘强</span>
+                                                </div>
+                                            </td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td><span class="badge bg-warning badge-pill">待签到</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
+                                                    <span>赵丽</span>
+                                                </div>
+                                            </td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td><span class="badge bg-warning badge-pill">待签到</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">考勤月历</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="calendar-container">
+                                <div class="calendar-header">
+                                    <button class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h5 class="mb-0">2023年5月</h5>
+                                    <button class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div class="calendar-grid">
+                                    <div class="calendar-day-header">一</div>
+                                    <div class="calendar-day-header">二</div>
+                                    <div class="calendar-day-header">三</div>
+                                    <div class="calendar-day-header">四</div>
+                                    <div class="calendar-day-header">五</div>
+                                    <div class="calendar-day-header">六</div>
+                                    <div class="calendar-day-header">日</div>
+                                    
+                                    <div class="calendar-day" style="visibility: hidden;"></div>
+                                    <div class="calendar-day">1</div>
+                                    <div class="calendar-day has-attendance">2</div>
+                                    <div class="calendar-day has-attendance">3</div>
+                                    <div class="calendar-day has-attendance">4</div>
+                                    <div class="calendar-day has-attendance">5</div>
+                                    <div class="calendar-day">6</div>
+                                    
+                                    <div class="calendar-day has-attendance">7</div>
+                                    <div class="calendar-day has-attendance">8</div>
+                                    <div class="calendar-day has-attendance">9</div>
+                                    <div class="calendar-day has-attendance">10</div>
+                                    <div class="calendar-day has-attendance">11</div>
+                                    <div class="calendar-day has-attendance">12</div>
+                                    <div class="calendar-day">13</div>
+                                    
+                                    <div class="calendar-day has-attendance">14</div>
+                                    <div class="calendar-day has-attendance">15</div>
+                                    <div class="calendar-day has-attendance">16</div>
+                                    <div class="calendar-day has-attendance">17</div>
+                                    <div class="calendar-day has-attendance">18</div>
+                                    <div class="calendar-day has-attendance">19</div>
+                                    <div class="calendar-day">20</div>
+                                    
+                                    <div class="calendar-day current">21</div>
+                                    <div class="calendar-day">22</div>
+                                    <div class="calendar-day">23</div>
+                                    <div class="calendar-day">24</div>
+                                    <div class="calendar-day">25</div>
+                                    <div class="calendar-day">26</div>
+                                    <div class="calendar-day">27</div>
+                                    
+                                    <div class="calendar-day">28</div>
+                                    <div class="calendar-day">29</div>
+                                    <div class="calendar-day">30</div>
+                                    <div class="calendar-day">31</div>
+                                    <div class="calendar-day" style="visibility: hidden;"></div>
+                                    <div class="calendar-day" style="visibility: hidden;"></div>
+                                    <div class="calendar-day" style="visibility: hidden;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 d-flex align-items-center small text-muted">
+                                <div class="me-3">
+                                    <span class="d-inline-block me-1" style="width: 10px; height: 10px; border-radius: 50%; background-color: var(--accent-color);"></span>
+                                    已有考勤记录
+                                </div>
+                                <div>
+                                    <span class="d-inline-block me-1" style="width: 10px; height: 10px; border-radius: 50%; background-color: var(--primary-color);"></span>
+                                    当前日期
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">考勤二维码</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="qr-code-container">
+                                <img src="https://img.zcool.cn/community/01f9645e0b9600a801216518a5c7f1.jpg@1280w_1l_2o_100sh.jpg" alt="考勤二维码" class="img-fluid mb-3">
+                                <div class="mb-3">今日考勤二维码</div>
+                                <div class="small text-muted mb-3">有效期至：2023-05-20 23:59:59</div>
+                                <button class="btn btn-primary w-100">
+                                    <i class="fas fa-sync-alt me-2"></i>刷新二维码
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">考勤统计</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="attendanceChart" height="200"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">考勤记录导出</h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">导出时间范围</label>
+                                    <select class="form-select mb-2">
+                                        <option>本周</option>
+                                        <option>上周</option>
+                                        <option>本月</option>
+                                        <option>上月</option>
+                                        <option>自定义</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">学生选择</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="allStudents" checked>
+                                        <label class="form-check-label" for="allStudents">
+                                            全部学生
+                                        </label>
+                                    </div>
+                                    <select class="form-select mt-2" multiple disabled style="height: 100px;">
+                                        <option>李明</option>
+                                        <option>张华</option>
+                                        <option>王芳</option>
+                                        <option>刘强</option>
+                                        <option>赵丽</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">导出格式</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exportFormat" id="formatExcel" checked>
+                                        <label class="form-check-label" for="formatExcel">
+                                            Excel
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exportFormat" id="formatPDF">
+                                        <label class="form-check-label" for="formatPDF">
+                                            PDF
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary w-100">
+                                    <i class="fas fa-download me-2"></i>导出考勤记录
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 移动端侧边栏切换
+        document.querySelector('.mobile-toggle').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebar.style.width === '280px') {
+                sidebar.style.width = '0';
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '280px';
+                mainContent.style.marginLeft = '280px';
+            }
+        });
+        
+        // 考勤统计图表
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        const attendanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['5/14', '5/15', '5/16', '5/17', '5/18', '5/19', '5/20'],
+                datasets: [{
+                    label: '出勤率 (%)',
+                    data: [85, 92, 78, 95, 88, 90, 66.7],
+                    backgroundColor: 'rgba(58, 90, 120, 0.2)',
+                    borderColor: 'rgba(58, 90, 120, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointBackgroundColor: 'rgba(58, 90, 120, 1)',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人设置 - 苗韵琴行管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3a5a78;
+            --secondary-color: #f8f9fa;
+            --accent-color: #e3b04b;
+            --text-color: #333;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu a {
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+        
+        .profile-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+        
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .profile-stat-item {
+            text-align: center;
+        }
+        
+        .profile-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .profile-stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .nav-pills .nav-link {
+            color: var(--text-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .form-label {
+            font-weight: 500;
+        }
+        
+        .security-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .security-item:last-child {
+            border-bottom: none;
+        }
+        
+        .security-item-icon {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(58, 90, 120, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            margin-right: 15px;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
+                display: none;
+            }
+            
+            .sidebar-menu a {
+                padding: 15px 0;
+                justify-content: center;
+            }
+            
+            .sidebar-menu i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block !important;
+            }
+            
+            .profile-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+        
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-toggle btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="sidebar">
+        <div class="sidebar-header d-flex align-items-center">
+            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像">
+            <span class="ms-2">
+                <div class="fw-bold">王老师</div>
+                <div class="small text-white-50">钢琴教师</div>
+            </span>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="teacher_dashboard.html">
+                <i class="fas fa-home"></i>
+                <span>仪表盘</span>
+            </a>
+            <a href="teacher_students.html">
+                <i class="fas fa-user-graduate"></i>
+                <span>学生管理</span>
+            </a>
+            <a href="teacher_courses.html">
+                <i class="fas fa-book"></i>
+                <span>课程管理</span>
+            </a>
+            <a href="teacher_attendance.html">
+                <i class="fas fa-clipboard-check"></i>
+                <span>考勤管理</span>
+            </a>
+            <a href="teacher_sheet_music.html">
+                <i class="fas fa-music"></i>
+                <span>曲谱管理</span>
+            </a>
+            <a href="teacher_finance.html">
+                <i class="fas fa-yuan-sign"></i>
+                <span>财务管理</span>
+            </a>
+            <a href="teacher_profile.html" class="active">
+                <i class="fas fa-user-cog"></i>
+                <span>个人设置</span>
+            </a>
+            <a href="../login.html">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>退出登录</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="profile-header text-center">
+                <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像" class="profile-avatar">
+                <h3 class="mb-2">王老师</h3>
+                <p class="mb-0">钢琴教师</p>
+                
+                <div class="profile-stats">
+                    <div class="profile-stat-item">
+                        <div class="profile-stat-value">42</div>
+                        <div class="profile-stat-label">学生数</div>
+                    </div>
+                    <div class="profile-stat-item">
+                        <div class="profile-stat-value">168</div>
+                        <div class="profile-stat-label">课时数</div>
+                    </div>
+                    <div class="profile-stat-item">
+                        <div class="profile-stat-value">4.8</div>
+                        <div class="profile-stat-label">评分</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <div class="nav flex-column nav-pills" role="tablist">
+                                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#profile-info">
+                                    <i class="fas fa-user me-2"></i>个人信息
+                                </button>
+                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#security">
+                                    <i class="fas fa-shield-alt me-2"></i>账户安全
+                                </button>
+                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#notification">
+                                    <i class="fas fa-bell me-2"></i>通知设置
+                                </button>
+                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#privacy">
+                                    <i class="fas fa-lock me-2"></i>隐私设置
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-9">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="profile-info">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">个人信息</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">姓名</label>
+                                                <input type="text" class="form-control" value="王老师">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">性别</label>
+                                                <select class="form-select">
+                                                    <option>男</option>
+                                                    <option>女</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">手机号码</label>
+                                                <input type="tel" class="form-control" value="13800138000">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">邮箱</label>
+                                                <input type="email" class="form-control" value="teacher@example.com">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">教学专长</label>
+                                            <select class="form-select" multiple>
+                                                <option selected>钢琴基础课</option>
+                                                <option selected>钢琴进阶课</option>
+                                                <option>流行钢琴课</option>
+                                                <option selected>古典钢琴课</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">个人简介</label>
+                                            <textarea class="form-control" rows="4">从事钢琴教学15年，擅长儿童钢琴启蒙教育和古典钢琴教学。曾获得多项钢琴比赛奖项，培养的学生多次在各类比赛中获奖。</textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">保存修改</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="security">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">账户安全</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="security-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="security-item-icon">
+                                                <i class="fas fa-key"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">登录密码</h6>
+                                                <p class="mb-0 text-muted">建议定期更换密码，确保账户安全</p>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-outline-primary">修改</button>
+                                    </div>
+                                    <div class="security-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="security-item-icon">
+                                                <i class="fas fa-mobile-alt"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">手机验证</h6>
+                                                <p class="mb-0 text-muted">已绑定：138****8000</p>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-outline-primary">修改</button>
+                                    </div>
+                                    <div class="security-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="security-item-icon">
+                                                <i class="fas fa-envelope"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">邮箱验证</h6>
+                                                <p class="mb-0 text-muted">已绑定：tea****@example.com</p>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-outline-primary">修改</button>
+                                    </div>
+                                    <div class="security-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="security-item-icon">
+                                                <i class="fas fa-shield-alt"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">两步验证</h6>
+                                                <p class="mb-0 text-muted">未开启</p>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-outline-primary">开启</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="notification">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">通知设置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-4">
+                                        <h6 class="mb-3">系统通知</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" checked>
+                                            <label class="form-check-label">课程提醒</label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" checked>
+                                            <label class="form-check-label">考勤提醒</label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" checked>
+                                            <label class="form-check-label">学费提醒</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="mb-3">通知方式</h6>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" checked>
+                                            <label class="form-check-label">站内消息</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" checked>
+                                            <label class="form-check-label">短信通知</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox">
+                                            <label class="form-check-label">邮件通知</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">保存设置</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="privacy">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">隐私设置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-4">
+                                        <h6 class="mb-3">个人信息可见性</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">手机号码</label>
+                                            <select class="form-select">
+                                                <option>仅自己可见</option>
+                                                <option selected>仅学生可见</option>
+                                                <option>所有人可见</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">邮箱地址</label>
+                                            <select class="form-select">
+                                                <option selected>仅自己可见</option>
+                                                <option>仅学生可见</option>
+                                                <option>所有人可见</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">个人简介</label>
+                                            <select class="form-select">
+                                                <option>仅自己可见</option>
+                                                <option>仅学生可见</option>
+                                                <option selected>所有人可见</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">保存设置</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 移动端侧边栏切换
+        document.querySelector('.mobile-toggle').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebar.style.width === '280px') {
+                sidebar.style.width = '0';
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '280px';
+                mainContent.style.marginLeft = '280px';
+            }
+        });
+    </script>
+</body>
+</html> 
