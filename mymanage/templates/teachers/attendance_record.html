@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}考勤记录{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+        border-radius: 8px 8px 0 0;
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    .attendance-status {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    .present {
+        background-color: #4CAF50;
+    }
+    .absent {
+        background-color: #f44336;
+    }
+    .late {
+        background-color: #ff9800;
+    }
+    .table th {
+        background-color: #f8f9fa;
+    }
+    .filter-form {
+        margin-bottom: 20px;
+    }
+    .filter-form .form-group {
+        margin-right: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'teachers:dashboard' %}">教师面板</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'teachers:attendance_management' %}">考勤管理</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">考勤记录</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3>考勤记录</h3>
+            <div>
+                <a href="{% url 'teachers:attendance_management' %}" class="btn btn-primary">返回考勤管理</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- 筛选表单 -->
+            <form class="filter-form d-flex flex-wrap align-items-end">
+                <div class="form-group">
+                    <label for="course_filter">课程</label>
+                    <select class="form-select" id="course_filter" name="course">
+                        <option value="">所有课程</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}" {% if course_id == course.id %}selected{% endif %}>{{ course.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="date_from">开始日期</label>
+                    <input type="date" class="form-control" id="date_from" name="date_from">
+                </div>
+                <div class="form-group">
+                    <label for="date_to">结束日期</label>
+                    <input type="date" class="form-control" id="date_to" name="date_to">
+                </div>
+                <div class="form-group">
+                    <label for="status_filter">状态</label>
+                    <select class="form-select" id="status_filter" name="status">
+                        <option value="">所有状态</option>
+                        <option value="present">出勤</option>
+                        <option value="absent">缺勤</option>
+                        <option value="late">迟到</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">筛选</button>
+                    <button type="button" class="btn btn-outline-secondary" id="reset_filter">重置</button>
+                </div>
+            </form>
+
+            <!-- 考勤统计 -->
+            <div class="attendance-stats mb-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">总记录</h5>
+                                <h3>{{ attendance_stats.total|default:0 }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">出勤</h5>
+                                <h3>{{ attendance_stats.present|default:0 }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">缺勤</h5>
+                                <h3>{{ attendance_stats.absent|default:0 }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">迟到</h5>
+                                <h3>{{ attendance_stats.late|default:0 }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 考勤记录表格 -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>考勤列表</h5>
+                <div>
+                    <span class="attendance-status present"></span> 出勤
+                    <span class="attendance-status absent ms-2"></span> 缺勤
+                    <span class="attendance-status late ms-2"></span> 迟到
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>课程</th>
+                            <th>学生</th>
+                            <th>时间段</th>
+                            <th>状态</th>
+                            <th>备注</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attendance in attendances %}
+                        <tr>
+                            <td>{{ attendance.date }}</td>
+                            <td>{{ attendance.schedule.course.name }}</td>
+                            <td>{{ attendance.student.name }}</td>
+                            <td>{{ attendance.schedule.start_time }} - {{ attendance.schedule.end_time }}</td>
+                            <td>
+                                {% if attendance.status == 'present' %}
+                                <span class="attendance-status present"></span> 出勤
+                                {% elif attendance.status == 'absent' %}
+                                <span class="attendance-status absent"></span> 缺勤
+                                {% elif attendance.status == 'late' %}
+                                <span class="attendance-status late"></span> 迟到
+                                {% endif %}
+                            </td>
+                            <td>{{ attendance.notes|default:"-" }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary edit-attendance" data-id="{{ attendance.id }}" data-status="{{ attendance.status }}" data-notes="{{ attendance.notes }}">编辑</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">暂无考勤记录</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分页 -->
+            {% if attendances.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if attendances.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ attendances.previous_page_number }}{% if course_id %}&course={{ course_id }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-hidden="true">&laquo;</span>
+                    </li>
+                    {% endif %}
+                    
+                    {% for i in attendances.paginator.page_range %}
+                        {% if attendances.number == i %}
+                        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i }}{% if course_id %}&course={{ course_id }}{% endif %}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if attendances.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ attendances.next_page_number }}{% if course_id %}&course={{ course_id }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-hidden="true">&raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 编辑考勤模态框 -->
+    <div class="modal fade" id="editAttendanceModal" tabindex="-1" aria-labelledby="editAttendanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editAttendanceModalLabel">编辑考勤状态</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editAttendanceForm" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" id="attendance_id" name="attendance_id">
+                        
+                        <div class="mb-3">
+                            <label for="status" class="form-label">考勤状态</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="present">出勤</option>
+                                <option value="absent">缺勤</option>
+                                <option value="late">迟到</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">备注</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" autocomplete="off"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveAttendance">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // 重置筛选按钮
+        $('#reset_filter').click(function() {
+            $('#course_filter').val('');
+            $('#date_from').val('');
+            $('#date_to').val('');
+            $('#status_filter').val('');
+            $('form.filter-form').submit();
+        });
+        
+        // 编辑考勤
+        $('.edit-attendance').click(function() {
+            var id = $(this).data('id');
+            var status = $(this).data('status');
+            var notes = $(this).data('notes');
+            
+            $('#attendance_id').val(id);
+            $('#status').val(status);
+            $('#notes').val(notes);
+            
+            $('#editAttendanceModal').modal('show');
+        });
+        
+        // 保存考勤
+        $('#saveAttendance').click(function() {
+            $('#editAttendanceForm').submit();
+        });
+    });
+</script>
+{% endblock %} 

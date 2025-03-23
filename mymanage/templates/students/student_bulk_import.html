@@ -1,0 +1,184 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}批量导入学生{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">批量导入学生</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'index' %}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'students:list' %}">学生列表</a></li>
+        <li class="breadcrumb-item active">批量导入</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-file-import me-1"></i> 上传数据文件
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4 text-center">
+                            <img src="{% static 'images/excel-import.svg' %}" alt="Excel导入" class="img-fluid mb-3" style="max-height: 120px;">
+                            <h5>请选择要导入的Excel或CSV文件</h5>
+                            <p class="text-muted">支持.xlsx, .xls 和 .csv 格式</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="id_file" name="file" accept=".xlsx,.xls,.csv" required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-upload me-2"></i> 上传并导入
+                                </button>
+                            </div>
+                            {% if form.file.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.file.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle"></i> 导入说明</h5>
+                            <p>批量导入将根据Excel或CSV文件中的数据创建学生账户和学生信息。</p>
+                            <ul>
+                                <li>每个学生将自动创建对应的用户账户</li>
+                                <li>用户名将以"student_学号"的格式创建</li>
+                                <li>初始密码将设置为学生的学号</li>
+                                <li>导入完成后，学生可以使用系统自动创建的账户登录</li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table me-1"></i> 模板格式
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">必填字段</h5>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            学号
+                            <span class="badge bg-primary rounded-pill">必填</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            姓名
+                            <span class="badge bg-primary rounded-pill">必填</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            性别
+                            <span class="badge bg-primary rounded-pill">必填</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            家长姓名
+                            <span class="badge bg-primary rounded-pill">必填</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            家长电话
+                            <span class="badge bg-primary rounded-pill">必填</span>
+                        </li>
+                    </ul>
+                    
+                    <h5 class="card-title">可选字段</h5>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            出生日期
+                            <span class="badge bg-secondary rounded-pill">可选</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            地址
+                            <span class="badge bg-secondary rounded-pill">可选</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% static 'templates/student_import_template.xlsx' %}" class="btn btn-success" download>
+                            <i class="fas fa-download me-2"></i> 下载导入模板
+                        </a>
+                        <a href="{% url 'students:list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> 返回学生列表
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-question-circle me-1"></i> 常见问题
+        </div>
+        <div class="card-body">
+            <div class="accordion" id="faqAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            如何准备导入文件？
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p>您可以下载我们提供的Excel模板，按照模板格式填写学生信息，或者按照以下步骤准备CSV文件：</p>
+                            <ol>
+                                <li>创建一个新的Excel或CSV文件</li>
+                                <li>在第一行添加字段名：学号、姓名、性别、家长姓名、家长电话、出生日期（可选）、地址（可选）</li>
+                                <li>从第二行开始，每行填写一个学生的信息</li>
+                                <li>性别字段请填写"M"表示男，"F"表示女</li>
+                                <li>出生日期请使用YYYY-MM-DD格式</li>
+                                <li>保存文件并上传</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            导入过程中出现错误怎么办？
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p>如果导入过程中出现错误，系统会显示具体的错误信息。常见错误包括：</p>
+                            <ul>
+                                <li>文件格式不正确：请确保使用Excel (.xlsx, .xls)或CSV格式</li>
+                                <li>缺少必要字段：确保Excel文件包含所有必填字段</li>
+                                <li>学号重复：学号必须是唯一的，如果已存在相同学号的学生，导入将失败</li>
+                                <li>数据格式错误：例如日期格式不正确，电话号码格式有误等</li>
+                            </ul>
+                            <p>修正这些问题后，重新尝试导入。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingThree">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            导入后如何管理学生账户？
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <p>批量导入成功后：</p>
+                            <ul>
+                                <li>系统会为每个学生创建用户账户，用户名格式为"student_学号"</li>
+                                <li>初始密码设置为学生的学号</li>
+                                <li>您可以在用户管理页面查看和编辑这些账户</li>
+                                <li>建议提醒学生首次登录后修改密码</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

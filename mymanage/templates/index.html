@@ -6,10 +6,12 @@
     <title>苗韵琴行 - 专业钢琴教育</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- 加载Django静态文件标签并正确引用CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <style>
         .hero-section {
-            background-image: linear-gradient(rgba(58, 90, 120, 0.8), rgba(58, 90, 120, 0.8)), url('https://img.51miz.com/Element/00/88/13/39/c1f2b1e3_E881339_a4a3d5d9.jpg');
+            background-image: linear-gradient(rgba(58, 90, 120, 0.8), rgba(58, 90, 120, 0.8)), url('/static/img/piano_background.jpg');
             background-size: cover;
             background-position: center;
         }
@@ -34,7 +36,7 @@
             <a class="navbar-brand" href="#">
                 <i class="fas fa-music me-2"></i>苗韵琴行
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切换导航">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -52,7 +54,7 @@
                         <a class="nav-link" href="#contact">联系方式</a>
                     </li>
                 </ul>
-                <a href="login.html" class="btn btn-secondary">
+                <a href="{% url 'login' %}" class="btn btn-secondary">
                     <i class="fas fa-sign-in-alt me-1"></i>登录
                 </a>
             </div>
@@ -150,7 +152,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 mb-4 mb-lg-0">
-                    <img src="https://img.51miz.com/Element/00/92/59/73/b1e2e2e3_E925973_b1e2e2e3.jpg" alt="苗韵琴行" class="about-img">
+                    <img src="/static/img/about_piano.jpg" alt="苗韵琴行" class="about-img">
                 </div>
                 <div class="col-lg-6">
                     <h2 class="section-title">关于苗韵琴行</h2>
@@ -180,15 +182,15 @@
                             <ul class="list-unstyled contact-info">
                                 <li class="mb-3">
                                     <i class="fas fa-map-marker-alt me-2"></i>
-                                    地址：北京市海淀区中关村大街1号
+                                    地址：天津市西青区宾水西道399号
                                 </li>
                                 <li class="mb-3">
                                     <i class="fas fa-phone me-2"></i>
-                                    电话：010-12345678
+                                    电话：15308585539
                                 </li>
                                 <li class="mb-3">
                                     <i class="fas fa-envelope me-2"></i>
-                                    邮箱：info@miaoyunpiano.com
+                                    邮箱：505340458@qq.com
                                 </li>
                                 <li class="mb-3">
                                     <i class="fas fa-clock me-2"></i>
@@ -197,10 +199,10 @@
                             </ul>
                             <h4 class="mt-4">关注我们</h4>
                             <div class="social-icons mt-3">
-                                <a href="#" class="me-3 text-dark fs-4"><i class="fab fa-weixin"></i></a>
-                                <a href="#" class="me-3 text-dark fs-4"><i class="fab fa-weibo"></i></a>
-                                <a href="#" class="me-3 text-dark fs-4"><i class="fab fa-qq"></i></a>
-                                <a href="#" class="text-dark fs-4"><i class="fab fa-tiktok"></i></a>
+                                <a href="#" class="me-3 text-dark fs-4" aria-label="关注我们的微信"><i class="fab fa-weixin"></i></a>
+                                <a href="#" class="me-3 text-dark fs-4" aria-label="关注我们的微博"><i class="fab fa-weibo"></i></a>
+                                <a href="#" class="me-3 text-dark fs-4" aria-label="关注我们的QQ"><i class="fab fa-qq"></i></a>
+                                <a href="#" class="text-dark fs-4" aria-label="关注我们的抖音"><i class="fab fa-tiktok"></i></a>
                             </div>
                         </div>
                     </div>
@@ -211,16 +213,16 @@
                             <h3 class="card-title">留言咨询</h3>
                             <form>
                                 <div class="mb-3">
-                                    <input type="text" class="form-control" placeholder="您的姓名">
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="您的姓名" autocomplete="name">
                                 </div>
                                 <div class="mb-3">
-                                    <input type="email" class="form-control" placeholder="您的邮箱">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="您的邮箱" autocomplete="email">
                                 </div>
                                 <div class="mb-3">
-                                    <input type="tel" class="form-control" placeholder="您的电话">
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="您的电话" autocomplete="tel">
                                 </div>
                                 <div class="mb-3">
-                                    <textarea class="form-control" rows="4" placeholder="您的留言"></textarea>
+                                    <textarea class="form-control" id="message" name="message" rows="4" placeholder="您的留言"></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-primary">提交留言</button>
                             </form>
@@ -262,8 +264,8 @@
                     <h5 class="text-white">订阅我们</h5>
                     <p class="text-white-50">订阅我们的电子邮件，获取最新课程和活动信息</p>
                     <div class="input-group mb-3">
-                        <input type="email" class="form-control" placeholder="您的邮箱地址">
-                        <button class="btn btn-secondary" type="button">订阅</button>
+                        <input type="email" class="form-control" id="subscribe-email" name="subscribe-email" placeholder="您的邮箱地址">
+                        <button class="btn btn-secondary" type="button" aria-label="提交订阅">订阅</button>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,412 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}学生详情 - {{ student.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">学生详情</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'index' %}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'students:list' %}">学生列表</a></li>
+        <li class="breadcrumb-item active">{{ student.name }}</li>
+    </ol>
+    
+    <div class="row">
+        <!-- 学生基本信息卡片 -->
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div><i class="fas fa-user-graduate me-1"></i> 学生信息</div>
+                    {% if user.user_type == 'admin' or user.user_type == 'teacher' %}
+                    <a href="{% url 'students:edit' pk=student.pk %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-edit"></i> 编辑
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar-circle mb-3">
+                            <span class="avatar-text">{{ student.name|slice:":1" }}</span>
+                        </div>
+                        <h3>{{ student.name }}</h3>
+                        <p class="text-muted">学号: {{ student.student_id }}</p>
+                        {% if student.is_active %}
+                        <span class="badge bg-success">活跃</span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark">不活跃</span>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">性别:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext">{{ student.get_gender_display }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">出生日期:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext">
+                                {{ student.birth_date|date:"Y-m-d" }}
+                                {% if student.birth_date %}
+                                <span class="text-muted">({{ student.birth_date|timesince }} 前)</span>
+                                {% else %}
+                                <span class="text-muted">未设置</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">家长姓名:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext">{{ student.parent_name }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">家长电话:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext">
+                                <a href="tel:{{ student.parent_phone }}">{{ student.parent_phone }}</a>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">地址:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext">
+                                {{ student.address|default:"未设置" }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">入学日期:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext">
+                                {{ student.join_date|date:"Y-m-d" }}
+                                <span class="text-muted">({{ student.join_date|timesince }} 前)</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 考勤统计卡片 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-calendar-check me-1"></i> 考勤统计
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="bg-success text-white rounded p-2 mb-2">
+                                <h3 class="mb-0">{{ attendance_stats.present }}</h3>
+                            </div>
+                            <div class="small text-muted">出勤</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-danger text-white rounded p-2 mb-2">
+                                <h3 class="mb-0">{{ attendance_stats.absent }}</h3>
+                            </div>
+                            <div class="small text-muted">缺勤</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-warning text-white rounded p-2 mb-2">
+                                <h3 class="mb-0">{{ attendance_stats.late }}</h3>
+                            </div>
+                            <div class="small text-muted">迟到</div>
+                        </div>
+                    </div>
+                    
+                    {% if recent_attendances %}
+                    <hr>
+                    <h6>最近考勤记录</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>课程</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attendance in recent_attendances %}
+                                <tr>
+                                    <td>{{ attendance.date|date:"m-d" }}</td>
+                                    <td>{{ attendance.course.name|truncatechars:10 }}</td>
+                                    <td>
+                                        {% if attendance.status == 'present' %}
+                                        <span class="badge bg-success">出勤</span>
+                                        {% elif attendance.status == 'absent' %}
+                                        <span class="badge bg-danger">缺勤</span>
+                                        {% elif attendance.status == 'late' %}
+                                        <span class="badge bg-warning text-dark">迟到</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-8">
+            <!-- 课程信息卡片 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-book me-1"></i> 已选课程
+                </div>
+                <div class="card-body">
+                    {% if enrollments %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>课程名称</th>
+                                    <th>教师</th>
+                                    <th>选课日期</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for enrollment in enrollments %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'courses:detail' pk=enrollment.course.id %}">
+                                            {{ enrollment.course.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ enrollment.course.teacher.name }}</td>
+                                    <td>{{ enrollment.enrollment_date|date:"Y-m-d" }}</td>
+                                    <td>
+                                        {% if enrollment.status == 'active' %}
+                                        <span class="badge bg-success">活跃</span>
+                                        {% elif enrollment.status == 'completed' %}
+                                        <span class="badge bg-info">已完成</span>
+                                        {% elif enrollment.status == 'dropped' %}
+                                        <span class="badge bg-danger">已退课</span>
+                                        {% elif enrollment.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">待确认</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center p-3">
+                        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                        <p>该学生尚未选修任何课程</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 最近成绩卡片 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-line me-1"></i> 最近成绩
+                </div>
+                <div class="card-body">
+                    {% if recent_scores %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>考试</th>
+                                    <th>课程</th>
+                                    <th>日期</th>
+                                    <th>成绩</th>
+                                    <th>排名</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for score in recent_scores %}
+                                <tr>
+                                    <td>{{ score.exam.name }}</td>
+                                    <td>{{ score.exam.course.name }}</td>
+                                    <td>{{ score.exam.exam_date|date:"Y-m-d" }}</td>
+                                    <td>
+                                        {% if score.score >= 85 %}
+                                        <span class="text-success fw-bold">{{ score.score }}</span>
+                                        {% elif score.score >= 60 %}
+                                        <span class="text-primary">{{ score.score }}</span>
+                                        {% else %}
+                                        <span class="text-danger">{{ score.score }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ score.rank }} / {{ score.exam.score_set.count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center p-3">
+                        <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                        <p>该学生尚无成绩记录</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 学生笔记卡片 -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div><i class="fas fa-sticky-note me-1"></i> 学生笔记</div>
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#addNoteCollapse">
+                        <i class="fas fa-plus"></i> 添加笔记
+                    </button>
+                </div>
+                
+                <!-- 添加笔记表单 -->
+                <div class="collapse" id="addNoteCollapse">
+                    <div class="card-body border-bottom">
+                        <form method="post" action="{% url 'students:detail' pk=student.pk %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_title" class="form-label">标题</label>
+                                <input type="text" class="form-control" id="id_title" name="title" required autocomplete="name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_content" class="form-label">内容</label>
+                                <textarea class="form-control" id="id_content" name="content" rows="3" required autocomplete="off"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">保存笔记</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    {% if notes %}
+                    <div class="timeline">
+                        {% for note in notes %}
+                        <div class="timeline-item">
+                            <div class="timeline-item-marker">
+                                <div class="timeline-item-marker-text">{{ note.created_at|date:"m-d" }}</div>
+                                <div class="timeline-item-marker-indicator bg-primary"></div>
+                            </div>
+                            <div class="timeline-item-content">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="fw-bold">{{ note.title }}</span>
+                                        <div class="small text-muted">
+                                            由 {{ note.created_by.get_full_name|default:note.created_by.username }} 
+                                            于 {{ note.created_at|date:"Y-m-d H:i" }} 创建
+                                        </div>
+                                    </div>
+                                    {% if user.user_type == 'admin' or note.created_by == user %}
+                                    <form method="post" action="{% url 'students:delete_note' student_pk=student.pk note_pk=note.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                onclick="return confirm('确定要删除这条笔记吗？');">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                                <p class="mb-0">{{ note.content|linebreaks }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center p-3">
+                        <i class="fas fa-sticky-note fa-3x text-muted mb-3"></i>
+                        <p>暂无笔记记录</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 自定义CSS -->
+<style>
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        background-color: #007bff;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    
+    .avatar-text {
+        color: white;
+        font-size: 40px;
+        font-weight: bold;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 1rem;
+        margin: 0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 2rem;
+        padding-bottom: 2rem;
+    }
+    
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 1px;
+        background-color: #e5e5e5;
+    }
+    
+    .timeline-item:last-child::before {
+        height: 1rem;
+    }
+    
+    .timeline-item-marker {
+        position: absolute;
+        left: -0.75rem;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .timeline-item-marker-text {
+        font-size: 0.75rem;
+        color: #a7aeb8;
+        margin-bottom: 0.25rem;
+    }
+    
+    .timeline-item-marker-indicator {
+        height: 1.5rem;
+        width: 1.5rem;
+        border-radius: 100%;
+        background-color: #fff;
+        border: 1px solid #e5e5e5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %} 

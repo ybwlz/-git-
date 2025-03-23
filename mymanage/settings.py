@@ -69,8 +69,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'miaoyun_db',
-        'USER': 'root',
-        'PASSWORD': 'password',
+        'USER': 'admin',
+        'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -106,6 +106,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mymanage', 'static'),
 ]
+# 添加静态文件收集目录配置
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files
 MEDIA_URL = '/media/'
@@ -117,3 +119,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # 登录URL
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
+
+# 自定义用户模型
+AUTH_USER_MODEL = 'users.User'

@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}课程详情 - {{ course.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+        border-radius: 8px 8px 0 0;
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    .course-info {
+        margin-bottom: 20px;
+    }
+    .course-info h4 {
+        margin-bottom: 5px;
+        color: #333;
+    }
+    .course-info p {
+        margin-bottom: 3px;
+        color: #666;
+    }
+    .tab-content {
+        padding: 20px 0;
+    }
+    .student-list, .schedule-list {
+        margin-top: 15px;
+    }
+    .table th {
+        background-color: #f8f9fa;
+    }
+    .student-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        transition: all 0.3s;
+    }
+    .student-item:hover {
+        background-color: #e9ecef;
+    }
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 15px;
+    }
+    .badge-schedule {
+        font-size: 85%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'teachers:dashboard' %}">教师面板</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'teachers:course_list' %}">课程列表</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ course.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3>课程详情</h3>
+            <div>
+                <a href="#" class="btn btn-sm btn-outline-primary">编辑课程</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="course-info">
+                <h4>{{ course.name }}</h4>
+                <p><strong>课程代码：</strong>{{ course.course_code }}</p>
+                <p><strong>描述：</strong>{{ course.description }}</p>
+                <p><strong>级别：</strong>{{ course.get_level_display }}</p>
+                <p><strong>开始日期：</strong>{{ course.start_date }}</p>
+                <p><strong>结束日期：</strong>{{ course.end_date }}</p>
+                <p><strong>最大学生数：</strong>{{ course.max_students }}</p>
+                <p><strong>当前学生数：</strong>{{ students|length }}</p>
+                <p><strong>学费：</strong>¥{{ course.tuition_fee }}</p>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="courseTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab" aria-controls="students" aria-selected="true">学生列表</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="schedules-tab" data-bs-toggle="tab" data-bs-target="#schedules" type="button" role="tab" aria-controls="schedules" aria-selected="false">课程安排</button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="courseTabContent">
+        <div class="tab-pane fade show active" id="students" role="tabpanel" aria-labelledby="students-tab">
+            <div class="student-list">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>学生列表 ({{ students|length }})</h5>
+                    <div>
+                        <a href="#" class="btn btn-sm btn-outline-success">添加学生</a>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    {% for student in students %}
+                    <div class="col-md-6 mb-3">
+                        <div class="student-item">
+                            {% if student.avatar %}
+                            <img src="{{ student.avatar.url }}" class="student-avatar" alt="{{ student.name }}">
+                            {% else %}
+                            <img src="{% static 'images/default-avatar.png' %}" class="student-avatar" alt="{{ student.name }}">
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">{{ student.name }}</h6>
+                                <small class="text-muted">{{ student.student_id }}</small>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{% url 'teachers:student_detail' student.id %}" class="btn btn-sm btn-link">详情</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <p class="text-center">该课程暂无学生</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-pane fade" id="schedules" role="tabpanel" aria-labelledby="schedules-tab">
+            <div class="schedule-list">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>课程安排</h5>
+                    <div>
+                        <a href="#" class="btn btn-sm btn-outline-success">添加课程安排</a>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>开始时间</th>
+                                <th>结束时间</th>
+                                <th>教室</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for schedule in schedules %}
+                            <tr>
+                                <td>{{ schedule.date }}</td>
+                                <td>{{ schedule.start_time }}</td>
+                                <td>{{ schedule.end_time }}</td>
+                                <td>{{ schedule.classroom }}</td>
+                                <td>
+                                    {% if schedule.date < today %}
+                                    <span class="badge bg-secondary badge-schedule">已结束</span>
+                                    {% elif schedule.date == today %}
+                                    <span class="badge bg-success badge-schedule">今日</span>
+                                    {% else %}
+                                    <span class="badge bg-primary badge-schedule">未来</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if schedule.date == today %}
+                                    <a href="#" class="btn btn-sm btn-primary generate-qrcode" data-schedule-id="{{ schedule.id }}">生成考勤码</a>
+                                    {% endif %}
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">编辑</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">暂无课程安排</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 考勤二维码模态框 -->
+    <div class="modal fade" id="qrcodeModal" tabindex="-1" aria-labelledby="qrcodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrcodeModalLabel">考勤二维码</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="qrcodeImage" class="mb-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                    <p class="text-muted">请让学生扫描此二维码进行考勤签到</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // 初始化标签页
+        var triggerTabList = [].slice.call(document.querySelectorAll('#courseTab button'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
+        })
+        
+        // 生成二维码
+        $('.generate-qrcode').on('click', function(e) {
+            e.preventDefault();
+            
+            const scheduleId = $(this).data('schedule-id');
+            $('#qrcodeImage').html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div>');
+            $('#qrcodeModal').modal('show');
+            
+            // 发送AJAX请求获取二维码
+            $.ajax({
+                url: `{% url 'teachers:generate_qrcode' 0 %}`.replace('0', scheduleId),
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    $('#qrcodeImage').html(`<img src="data:image/png;base64,${data.qrcode}" class="img-fluid" alt="考勤二维码">`);
+                },
+                error: function(xhr, status, error) {
+                    $('#qrcodeImage').html(`<div class="alert alert-danger">生成二维码失败: ${error}</div>`);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 
