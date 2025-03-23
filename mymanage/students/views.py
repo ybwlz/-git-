@@ -594,3 +594,77 @@ def create_student_profile(user, student_id=None):
     )
     
     return student
+
+@login_required
+def student_practice(request):
+    """
+    学生练习页面视图
+    """
+    # 只有学生可以查看练习页面
+    if request.user.user_type != 'student':
+        messages.error(request, '此页面只对学生开放')
+        return redirect('index')
+    
+    try:
+        student = Student.objects.get(user=request.user)
+    except Student.DoesNotExist:
+        messages.error(request, '找不到学生资料')
+        return redirect('index')
+    
+    # 在这里添加练习相关的逻辑
+    
+    context = {
+        'student': student,
+    }
+    
+    return render(request, 'students/student_practice.html', context)
+
+@login_required
+def student_exam(request):
+    """
+    学生考勤记录视图
+    """
+    # 只有学生可以查看自己的考勤记录
+    if request.user.user_type != 'student':
+        messages.error(request, '此页面只对学生开放')
+        return redirect('index')
+    
+    try:
+        student = Student.objects.get(user=request.user)
+    except Student.DoesNotExist:
+        messages.error(request, '找不到学生资料')
+        return redirect('index')
+    
+    # 获取学生的考勤记录
+    attendances = AttendanceRecord.objects.filter(student=student).order_by('-check_in_time')
+    
+    context = {
+        'student': student,
+        'attendances': attendances,
+    }
+    
+    return render(request, 'students/student_attendance.html', context)
+
+@login_required
+def student_grades(request):
+    """
+    学生成绩/曲谱视图
+    """
+    # 只有学生可以查看自己的成绩/曲谱
+    if request.user.user_type != 'student':
+        messages.error(request, '此页面只对学生开放')
+        return redirect('index')
+    
+    try:
+        student = Student.objects.get(user=request.user)
+    except Student.DoesNotExist:
+        messages.error(request, '找不到学生资料')
+        return redirect('index')
+    
+    # 获取学生的曲谱列表（这里需要根据您的数据模型来调整）
+    
+    context = {
+        'student': student,
+    }
+    
+    return render(request, 'students/sheet_music.html', context)

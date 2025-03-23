@@ -211,22 +211,22 @@
         </div>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link active" href="student_profile.html">
+                <a class="nav-link active" href="{% url 'students:profile' %}">
                     <i class="fas fa-user"></i> 个人主页
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="student_practice.html">
+                <a class="nav-link" href="{% url 'students:practice' %}">
                     <i class="fas fa-music"></i> 今日练琴
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="student_attendance.html">
+                <a class="nav-link" href="{% url 'students:exam' %}">
                     <i class="fas fa-calendar-check"></i> 考勤记录
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="sheet_music.html">
+                <a class="nav-link" href="{% url 'students:grades' %}">
                     <i class="fas fa-file-alt"></i> 在线曲谱
                 </a>
             </li>
@@ -264,7 +264,7 @@
                                     <span class="ms-1">王小明</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="student_profile.html"><i class="fas fa-user me-2"></i>个人资料</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'students:profile' %}"><i class="fas fa-user me-2"></i>个人资料</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>账号设置</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a href="{% url 'logout' %}" class="dropdown-item">

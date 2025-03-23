@@ -19,6 +19,15 @@ urlpatterns = [
     # 学生个人资料
     path('profile/', views.student_profile, name='profile'),
     
+    # 学生练习页面
+    path('practice/', views.student_practice, name='practice'),
+    
+    # 学生考勤记录
+    path('exam/', views.student_exam, name='exam'),
+    
+    # 学生成绩/曲谱
+    path('grades/', views.student_grades, name='grades'),
+    
     # 批量导入学生
     path('bulk-import/', views.student_bulk_import, name='bulk_import'),
 ]
