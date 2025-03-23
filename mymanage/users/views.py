@@ -98,7 +98,11 @@ class UserAuthView:
         if request.method == 'POST':
             form = UserRegistrationForm(request.POST)
             if form.is_valid():
-                user = form.save()
+                user = form.save(commit=False)
+                # 为email设置一个默认值以满足Django的要求
+                if not user.email:
+                    user.email = f"{user.username}@example.com"
+                user.save()
                 messages.success(request, '注册成功！请使用您的凭据登录。')
                 return redirect('users:login')
             else:

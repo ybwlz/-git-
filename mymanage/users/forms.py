@@ -65,15 +65,6 @@ class UserRegistrationForm(UserCreationForm):
         label=_("用户名"),
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '请输入用户名'})
     )
-    email = forms.EmailField(
-        label=_("邮箱"),
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': '请输入邮箱'})
-    )
-    phone = forms.CharField(
-        label=_("手机号码"),
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '请输入手机号码'}),
-        required=False
-    )
     password1 = forms.CharField(
         label=_("密码"),
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '请输入密码'})
@@ -91,16 +82,7 @@ class UserRegistrationForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'phone', 'password1', 'password2', 'user_type')
-    
-    def clean_phone(self):
-        """验证手机号码格式"""
-        phone = self.cleaned_data.get('phone')
-        if phone and not phone.isdigit():
-            raise ValidationError(_("手机号码必须是数字"))
-        if phone and len(phone) != 11:
-            raise ValidationError(_("手机号码必须是11位"))
-        return phone
+        fields = ('username', 'password1', 'password2', 'user_type')
 
 
 class UserProfileForm(forms.ModelForm):
