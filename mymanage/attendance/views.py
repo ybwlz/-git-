@@ -1,452 +1,358 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Q
-from datetime import datetime, timedelta
+import datetime
 import json
 
 from .models import QRCode, AttendanceSession, AttendanceRecord, WaitingQueue
-from .forms import QRCodeForm, AttendanceSessionForm, StudentCheckInForm, StudentCheckOutForm
-from mymanage.courses.models import Course, Piano
+from mymanage.courses.models import Course, CourseSchedule, Piano
 from mymanage.students.models import Student
+from mymanage.users.decorators import teacher_required
 
 
 @login_required
-def record_attendance(request):
-    """
-    考勤记录页面，根据用户类型显示不同的页面
-    """
-    user = request.user
-    
-    # 教师用户
-    if hasattr(user, 'teacher_profile'):
-        # 获取当前教师的所有课程
-        courses = Course.objects.filter(teacher=user.teacher_profile)
-        
-        if request.method == 'POST':
-            form = AttendanceSessionForm(request.POST, user=user)
-            if form.is_valid():
-                session = form.save(user=user)
-                messages.success(request, f'已创建考勤会话: {session.course.name}')
-                return redirect('attendance:session_detail', pk=session.id)
-        else:
-            form = AttendanceSessionForm(user=user)
-        
-        # 获取该教师的所有考勤会话，按时间倒序
-        sessions = AttendanceSession.objects.filter(
-            course__teacher=user.teacher_profile
+def attendance_dashboard(request):
+    """考勤仪表板（根据用户角色显示不同内容）"""
+    if hasattr(request.user, 'teacher_profile'):
+        # 教师仪表板
+        active_sessions = AttendanceSession.objects.filter(
+            status='active', 
+            created_by=request.user
         ).order_by('-start_time')
         
-        # 今日考勤会话
-        today = timezone.now().date()
-        today_sessions = sessions.filter(start_time__date=today)
+        records_today = AttendanceRecord.objects.filter(
+            session__created_by=request.user,
+            check_in_time__date=timezone.now().date()
+        ).count()
         
-        return render(request, 'attendance/teacher_attendance.html', {
-            'form': form,
-            'sessions': sessions,
-            'today_sessions': today_sessions,
-            'courses': courses,
-        })
-    
-    # 学生用户
-    elif hasattr(user, 'student_profile'):
-        student = user.student_profile
+        context = {
+            'active_sessions': active_sessions,
+            'records_today': records_today,
+            'user_type': 'teacher'
+        }
+    elif hasattr(request.user, 'student_profile'):
+        # 学生仪表板
+        student = request.user.student_profile
         
-        # 获取学生所有考勤记录
-        records = AttendanceRecord.objects.filter(
-            student=student
-        ).order_by('-check_in_time')
+        active_record = AttendanceRecord.objects.filter(
+            student=student,
+            status='checked_in'
+        ).first()
         
-        # 获取学生当前活跃的考勤记录
-        active_record = records.filter(status='checked_in').first()
-        
-        # 获取学生是否在等待队列中
-        in_queue = WaitingQueue.objects.filter(
+        waiting = WaitingQueue.objects.filter(
             student=student,
             is_active=True
-        ).exists()
+        ).first()
         
-        # 学生打卡统计
-        today = timezone.now().date()
-        today_record = records.filter(check_in_time__date=today).first()
+        recent_records = AttendanceRecord.objects.filter(
+            student=student
+        ).order_by('-check_in_time')[:5]
         
-        last_week = today - timedelta(days=7)
-        week_records = records.filter(check_in_time__date__gte=last_week)
-        
-        # 统计学习时间
-        total_duration = timedelta()
-        for record in records.exclude(duration=None):
-            total_duration += record.duration or timedelta()
-        
-        weekly_duration = timedelta()
-        for record in week_records.exclude(duration=None):
-            weekly_duration += record.duration or timedelta()
-        
-        return render(request, 'attendance/student_attendance.html', {
-            'student': student,
-            'records': records[:10],  # 最近10条记录
+        context = {
             'active_record': active_record,
-            'in_queue': in_queue,
-            'today_record': today_record,
-            'total_duration': total_duration,
-            'weekly_duration': weekly_duration,
-        })
-    
-    # 管理员用户
+            'waiting': waiting,
+            'recent_records': recent_records,
+            'user_type': 'student'
+        }
     else:
-        # 获取所有考勤会话
-        sessions = AttendanceSession.objects.all().order_by('-start_time')
+        # 管理员或其他
+        active_sessions = AttendanceSession.objects.filter(status='active').order_by('-start_time')
+        records_today = AttendanceRecord.objects.filter(
+            check_in_time__date=timezone.now().date()
+        ).count()
         
-        # 今日会话
-        today = timezone.now().date()
-        today_sessions = sessions.filter(start_time__date=today)
-        
-        # 活跃会话
-        active_sessions = sessions.filter(status='active')
-        
-        # 考勤统计
-        today_records = AttendanceRecord.objects.filter(check_in_time__date=today)
-        
-        return render(request, 'attendance/admin_attendance.html', {
-            'sessions': sessions[:20],  # 最近20条会话
-            'today_sessions': today_sessions,
+        context = {
             'active_sessions': active_sessions,
-            'today_records_count': today_records.count(),
-        })
+            'records_today': records_today,
+            'user_type': 'admin'
+        }
+    
+    return render(request, 'attendance/dashboard.html', context)
+
+
+@teacher_required
+def create_session(request):
+    """创建考勤会话"""
+    if request.method == 'POST':
+        course_id = request.POST.get('course')
+        schedule_id = request.POST.get('schedule')
+        
+        # 检查是否已存在活跃会话
+        existing_session = AttendanceSession.objects.filter(
+            course_id=course_id,
+            status='active'
+        ).first()
+        
+        if existing_session:
+            messages.warning(request, f'课程 {existing_session.course.name} 已有活跃的考勤会话')
+            return redirect('attendance_session_detail', session_id=existing_session.id)
+        
+        # 创建QR码
+        course = get_object_or_404(Course, id=course_id)
+        schedule = get_object_or_404(CourseSchedule, id=schedule_id)
+        
+        # 设置二维码过期时间（6小时）
+        expires_at = timezone.now() + datetime.timedelta(hours=6)
+        
+        qrcode = QRCode.objects.create(
+            course=course,
+            expires_at=expires_at
+        )
+        
+        # 创建考勤会话
+        session = AttendanceSession.objects.create(
+            course=course,
+            schedule=schedule,
+            qrcode=qrcode,
+            created_by=request.user,
+            status='active'
+        )
+        
+        messages.success(request, f'已成功创建 {course.name} 的考勤会话')
+        return redirect('attendance_session_detail', session_id=session.id)
+    
+    # GET请求，显示创建表单
+    courses = Course.objects.filter(teacher__user=request.user)
+    schedules = CourseSchedule.objects.filter(course__teacher__user=request.user)
+    
+    context = {
+        'courses': courses,
+        'schedules': schedules
+    }
+    
+    return render(request, 'attendance/create_session.html', context)
 
 
 @login_required
-def session_detail(request, pk):
-    """
-    考勤会话详情页面
-    """
-    session = get_object_or_404(AttendanceSession, pk=pk)
+def session_detail(request, session_id):
+    """考勤会话详情"""
+    session = get_object_or_404(AttendanceSession, id=session_id)
     
-    # 获取会话的所有考勤记录
-    records = AttendanceRecord.objects.filter(session=session)
+    # 检查权限（只有相关教师和管理员可以查看）
+    if not (request.user.is_superuser or request.user.is_admin_user or 
+            (hasattr(request.user, 'teacher_profile') and session.created_by == request.user)):
+        messages.error(request, '您没有权限查看此考勤会话')
+        return redirect('attendance_dashboard')
     
-    # 获取等待队列
-    waiting_queue = WaitingQueue.objects.filter(
-        session=session,
-        is_active=True
-    ).order_by('join_time')
-    
-    # 获取可用钢琴
-    available_pianos = Piano.objects.filter(is_occupied=False)
+    records = AttendanceRecord.objects.filter(session=session).order_by('-check_in_time')
+    waiting_queue = WaitingQueue.objects.filter(session=session, is_active=True).order_by('join_time')
     
     context = {
         'session': session,
         'records': records,
         'waiting_queue': waiting_queue,
-        'available_pianos': available_pianos,
+        'qrcode_url': session.qrcode.qr_code_image.url if session.qrcode and session.qrcode.qr_code_image else None
     }
-    
-    # 如果是教师，可以关闭会话
-    if request.user.is_staff or (hasattr(request.user, 'teacher_profile') and 
-                                session.course.teacher == request.user.teacher_profile):
-        if request.method == 'POST' and 'close_session' in request.POST:
-            session.close_session()
-            messages.success(request, f'会话 {session.course.name} 已关闭')
-            return redirect('attendance:record')
     
     return render(request, 'attendance/session_detail.html', context)
 
 
-@login_required
-def generate_qrcode(request, course_id):
-    """
-    生成二维码页面
-    """
-    course = get_object_or_404(Course, pk=course_id)
+@teacher_required
+def close_session(request, session_id):
+    """关闭考勤会话"""
+    session = get_object_or_404(AttendanceSession, id=session_id)
     
-    # 检查权限：只有教师本人或管理员可以生成二维码
-    if not request.user.is_staff and (not hasattr(request.user, 'teacher_profile') or 
-                                       course.teacher != request.user.teacher_profile):
-        messages.error(request, '您没有权限执行此操作')
-        return redirect('attendance:record')
+    # 只有创建者可以关闭会话
+    if session.created_by != request.user and not request.user.is_superuser:
+        messages.error(request, '您没有权限关闭此考勤会话')
+        return redirect('attendance_session_detail', session_id=session.id)
     
     if request.method == 'POST':
-        form = QRCodeForm(request.POST)
-        if form.is_valid():
-            qrcode = form.save(commit=False)
-            qrcode.course = course
-            qrcode.save()
+        session.close_session()
+        messages.success(request, f'已成功关闭 {session.course.name} 的考勤会话')
+        return redirect('attendance_dashboard')
+    
+    return render(request, 'attendance/close_session_confirm.html', {'session': session})
+
+
+@login_required
+def scan_qrcode(request):
+    """扫描二维码"""
+    if request.method == 'POST' and hasattr(request.user, 'student_profile'):
+        try:
+            data = json.loads(request.body)
+            qrcode_uuid = data.get('qrcode_uuid')
             
-            messages.success(request, f'已生成 {course.name} 的二维码')
+            # 查找二维码
+            qrcode = get_object_or_404(QRCode, uuid=qrcode_uuid)
             
-            # 查找或创建考勤会话
-            today = timezone.now().date()
-            session = AttendanceSession.objects.filter(
-                course=course,
-                start_time__date=today,
-                status='active'
-            ).first()
+            # 检查二维码是否有效
+            if not qrcode.is_valid():
+                return JsonResponse({
+                    'success': False,
+                    'message': '二维码已过期'
+                })
             
+            # 检查是否有活跃会话
+            session = AttendanceSession.objects.filter(qrcode=qrcode, status='active').first()
             if not session:
-                # 查找今天的课程安排
-                schedule = course.schedules.filter(
-                    weekday=today.weekday()
-                ).first()
+                return JsonResponse({
+                    'success': False,
+                    'message': '找不到活跃的考勤会话'
+                })
+            
+            student = request.user.student_profile
+            
+            # 检查学生是否已在队列中或已签到
+            if AttendanceRecord.objects.filter(student=student, session=session, status='checked_in').exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': '您已经签到并正在练习'
+                })
+            
+            if WaitingQueue.objects.filter(student=student, session=session, is_active=True).exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': '您已在等待队列中'
+                })
+            
+            # 检查是否有可用钢琴
+            available_piano = Piano.objects.filter(is_active=True, is_occupied=False).order_by('number').first()
+            
+            if available_piano:
+                # 有可用钢琴，直接签到
+                available_piano.is_occupied = True
+                available_piano.save()
                 
-                if schedule:
-                    session = AttendanceSession.objects.create(
-                        course=course,
-                        schedule=schedule,
-                        created_by=request.user,
-                        qrcode=qrcode
-                    )
+                AttendanceRecord.objects.create(
+                    session=session,
+                    student=student,
+                    piano=available_piano,
+                    status='checked_in'
+                )
+                
+                return JsonResponse({
+                    'success': True, 
+                    'status': 'assigned',
+                    'message': f'已为您分配钢琴 {available_piano.number} 号',
+                    'piano': available_piano.number
+                })
             else:
-                session.qrcode = qrcode
-                session.save()
+                # 没有可用钢琴，加入等待队列
+                waiting_queue_count = WaitingQueue.objects.filter(
+                    session=session,
+                    is_active=True
+                ).count()
                 
-            if session:
-                return redirect('attendance:session_detail', pk=session.id)
-            return redirect('attendance:qrcode_detail', pk=qrcode.id)
-    else:
-        form = QRCodeForm(initial={'course': course})
-    
-    return render(request, 'attendance/generate_qrcode.html', {
-        'form': form,
-        'course': course,
-    })
-
-
-@login_required
-def qrcode_detail(request, pk):
-    """
-    二维码详情页面
-    """
-    qrcode = get_object_or_404(QRCode, pk=pk)
-    
-    # 检查权限：只有教师本人或管理员可以查看二维码
-    if not request.user.is_staff and (not hasattr(request.user, 'teacher_profile') or 
-                                       qrcode.course.teacher != request.user.teacher_profile):
-        messages.error(request, '您没有权限执行此操作')
-        return redirect('attendance:record')
-    
-    return render(request, 'attendance/qrcode_detail.html', {
-        'qrcode': qrcode,
-    })
-
-
-@login_required
-def student_check_in(request):
-    """
-    学生签到API
-    """
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': '方法不允许'})
-    
-    if not hasattr(request.user, 'student_profile'):
-        return JsonResponse({'status': 'error', 'message': '只有学生用户可以签到'})
-    
-    student = request.user.student_profile
-    
-    # 检查学生是否已经签到但未签退
-    active_record = AttendanceRecord.objects.filter(
-        student=student,
-        status='checked_in'
-    ).first()
-    
-    if active_record:
-        return JsonResponse({
-            'status': 'error', 
-            'message': '您已经签到，请先签退',
-            'record_id': active_record.id
-        })
-    
-    # 检查学生是否已在等待队列中
-    in_queue = WaitingQueue.objects.filter(
-        student=student,
-        is_active=True
-    ).exists()
-    
-    if in_queue:
-        return JsonResponse({'status': 'error', 'message': '您已在等待队列中'})
-    
-    form = StudentCheckInForm(request.POST)
-    if not form.is_valid():
-        return JsonResponse({'status': 'error', 'message': form.errors.as_text()})
-    
-    uuid = form.cleaned_data['qrcode_uuid']
-    qrcode = QRCode.objects.get(uuid=uuid)
-    session = qrcode.session
-    
-    # 检查学生是否已经报名该课程
-    enrolled = student.enrollments.filter(course=session.course, status='active').exists()
-    if not enrolled:
-        return JsonResponse({'status': 'error', 'message': '您未报名该课程'})
-    
-    # 查找可用钢琴
-    available_piano = Piano.objects.filter(is_occupied=False).first()
-    
-    if available_piano:
-        # 有可用钢琴，直接分配并创建考勤记录
-        available_piano.is_occupied = True
-        available_piano.save()
+                # 计算预计等待时间（每人30分钟）
+                wait_time = waiting_queue_count * 30
+                
+                WaitingQueue.objects.create(
+                    session=session,
+                    student=student,
+                    estimated_wait_time=wait_time
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'status': 'waiting',
+                    'message': f'您已加入等待队列，当前排队位置：{waiting_queue_count + 1}，预计等待时间：{wait_time}分钟',
+                    'position': waiting_queue_count + 1,
+                    'estimated_wait_time': wait_time
+                })
         
-        record = AttendanceRecord.objects.create(
-            session=session,
-            student=student,
-            piano=available_piano
-        )
-        
-        return JsonResponse({
-            'status': 'success',
-            'message': f'签到成功！已分配钢琴{available_piano.piano_number}号',
-            'record_id': record.id,
-            'piano': available_piano.piano_number
-        })
-    else:
-        # 没有可用钢琴，加入等待队列
-        # 计算预计等待时间：每人15分钟
-        queue_count = WaitingQueue.objects.filter(
-            session=session,
-            is_active=True
-        ).count()
-        
-        estimated_time = queue_count * 15  # 每人预计15分钟
-        
-        # 创建等待记录
-        waiting = WaitingQueue.objects.create(
-            session=session,
-            student=student,
-            estimated_wait_time=estimated_time
-        )
-        
-        return JsonResponse({
-            'status': 'waiting',
-            'message': '当前没有可用钢琴，已加入等待队列',
-            'position': queue_count + 1,
-            'estimated_time': estimated_time
-        })
-
-
-@login_required
-def student_check_out(request):
-    """
-    学生签退API
-    """
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': '方法不允许'})
-    
-    if not hasattr(request.user, 'student_profile'):
-        return JsonResponse({'status': 'error', 'message': '只有学生用户可以签退'})
-    
-    student = request.user.student_profile
-    
-    form = StudentCheckOutForm(request.POST)
-    if not form.is_valid():
-        return JsonResponse({'status': 'error', 'message': form.errors.as_text()})
-    
-    record_id = form.cleaned_data['record_id']
-    record = AttendanceRecord.objects.get(id=record_id)
-    
-    # 检查权限：只有学生本人可以签退
-    if record.student != student:
-        return JsonResponse({'status': 'error', 'message': '您没有权限执行此操作'})
-    
-    # 执行签退
-    success = record.check_out()
-    
-    if success:
-        duration = record.duration
-        hours = duration.total_seconds() // 3600
-        minutes = (duration.total_seconds() % 3600) // 60
-        
-        return JsonResponse({
-            'status': 'success',
-            'message': f'签退成功！学习时长: {int(hours)}小时{int(minutes)}分钟',
-            'duration': str(duration)
-        })
-    else:
-        return JsonResponse({'status': 'error', 'message': '签退失败，该记录可能已签退'})
-
-
-@login_required
-def attendance_statistics(request):
-    """
-    考勤统计页面
-    """
-    user = request.user
-    
-    if hasattr(user, 'teacher_profile'):
-        teacher = user.teacher_profile
-        courses = Course.objects.filter(teacher=teacher)
-        
-        # 获取所有学生的考勤记录
-        course_stats = []
-        for course in courses:
-            records = AttendanceRecord.objects.filter(session__course=course)
-            total_duration = timedelta()
-            for record in records.exclude(duration=None):
-                total_duration += record.duration or timedelta()
-            
-            students_count = course.enrollments.filter(status='active').count()
-            
-            course_stats.append({
-                'course': course,
-                'total_records': records.count(),
-                'total_duration': total_duration,
-                'students_count': students_count
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'错误：{str(e)}'
             })
-            
-        return render(request, 'attendance/teacher_statistics.html', {
-            'teacher': teacher,
-            'course_stats': course_stats
-        })
     
-    elif hasattr(user, 'student_profile'):
-        student = user.student_profile
-        
-        # 获取学生的所有考勤记录
-        records = AttendanceRecord.objects.filter(student=student)
-        
-        # 计算总学习时间
-        total_duration = timedelta()
-        for record in records.exclude(duration=None):
-            total_duration += record.duration or timedelta()
-        
-        # 按月统计学习时间
-        monthly_stats = {}
-        for record in records.exclude(duration=None):
-            month_key = record.check_in_time.strftime('%Y-%m')
-            if month_key not in monthly_stats:
-                monthly_stats[month_key] = {
-                    'month': record.check_in_time.strftime('%Y年%m月'),
-                    'duration': timedelta()
-                }
-            monthly_stats[month_key]['duration'] += record.duration or timedelta()
-        
-        # 转换为列表并排序
-        monthly_stats = [v for k, v in sorted(monthly_stats.items(), reverse=True)]
-        
-        return render(request, 'attendance/student_statistics.html', {
-            'student': student,
-            'total_records': records.count(),
-            'total_duration': total_duration,
-            'monthly_stats': monthly_stats
-        })
+    return JsonResponse({'success': False, 'message': '无效的请求'})
+
+
+@login_required
+def student_attendance_history(request):
+    """学生考勤历史"""
+    if not hasattr(request.user, 'student_profile'):
+        messages.error(request, '只有学生可以查看自己的考勤历史')
+        return redirect('index')
     
-    # 管理员用户
-    else:
-        # 所有课程统计
-        courses = Course.objects.all()
+    student = request.user.student_profile
+    
+    # 获取过滤参数
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    
+    records = AttendanceRecord.objects.filter(student=student)
+    
+    if month and year:
+        records = records.filter(
+            check_in_time__month=month,
+            check_in_time__year=year
+        )
+    
+    # 按日期分组
+    attendance_by_date = {}
+    for record in records:
+        date = record.check_in_time.date()
+        if date not in attendance_by_date:
+            attendance_by_date[date] = []
+        attendance_by_date[date].append(record)
+    
+    context = {
+        'attendance_by_date': attendance_by_date,
+        'student': student
+    }
+    
+    return render(request, 'attendance/student_history.html', context)
+
+
+@teacher_required
+def teacher_attendance_stats(request):
+    """教师考勤统计"""
+    teacher = request.user.teacher_profile
+    
+    # 获取过滤参数
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    course_id = request.GET.get('course')
+    
+    # 查询相关课程
+    courses = Course.objects.filter(teacher=teacher)
+    
+    # 创建查询条件
+    query_params = {'session__course__teacher': teacher}
+    
+    if month and year:
+        query_params['check_in_time__month'] = month
+        query_params['check_in_time__year'] = year
+    
+    if course_id:
+        query_params['session__course_id'] = course_id
+    
+    # 查询考勤记录
+    records = AttendanceRecord.objects.filter(**query_params)
+    
+    # 统计数据
+    total_records = records.count()
+    total_duration = sum((r.duration.total_seconds() if r.duration else 0) for r in records)
+    total_duration_hours = total_duration / 3600
+    
+    # 按学生分组
+    records_by_student = {}
+    for record in records:
+        if record.student_id not in records_by_student:
+            records_by_student[record.student_id] = {
+                'student': record.student,
+                'count': 0,
+                'total_duration': 0
+            }
         
-        # 所有学生统计
-        students = Student.objects.all()
-        
-        # 考勤统计
-        all_records = AttendanceRecord.objects.all()
-        total_duration = timedelta()
-        for record in all_records.exclude(duration=None):
-            total_duration += record.duration or timedelta()
-        
-        return render(request, 'attendance/admin_statistics.html', {
-            'courses_count': courses.count(),
-            'students_count': students.count(),
-            'records_count': all_records.count(),
-            'total_duration': total_duration
-        })
+        records_by_student[record.student_id]['count'] += 1
+        records_by_student[record.student_id]['total_duration'] += record.duration.total_seconds() if record.duration else 0
+    
+    # 计算每个学生的总时长（小时）
+    for student_id in records_by_student:
+        records_by_student[student_id]['total_duration_hours'] = records_by_student[student_id]['total_duration'] / 3600
+    
+    context = {
+        'courses': courses,
+        'selected_course_id': course_id,
+        'total_records': total_records,
+        'total_duration_hours': total_duration_hours,
+        'records_by_student': records_by_student.values()
+    }
+    
+    return render(request, 'attendance/teacher_stats.html', context)

@@ -1,23 +1,21 @@
 from django.urls import path
 from . import views
 
-app_name = 'attendance'
-
 urlpatterns = [
-    # 考勤记录主页
-    path('record/', views.record_attendance, name='record'),
+    # 仪表板
+    path('', views.attendance_dashboard, name='attendance_dashboard'),
     
-    # 考勤会话详情
-    path('session/<int:pk>/', views.session_detail, name='session_detail'),
+    # 考勤会话管理
+    path('session/create/', views.create_session, name='create_attendance_session'),
+    path('session/<int:session_id>/', views.session_detail, name='attendance_session_detail'),
+    path('session/<int:session_id>/close/', views.close_session, name='close_attendance_session'),
     
-    # 二维码生成和详情
-    path('qrcode/<int:course_id>/', views.generate_qrcode, name='qrcode'),
-    path('qrcode/detail/<int:pk>/', views.qrcode_detail, name='qrcode_detail'),
+    # 二维码扫描API
+    path('api/scan-qrcode/', views.scan_qrcode, name='scan_qrcode'),
     
-    # 学生签到签退API
-    path('check-in/', views.student_check_in, name='check_in'),
-    path('check-out/', views.student_check_out, name='check_out'),
+    # 学生考勤历史
+    path('history/student/', views.student_attendance_history, name='student_attendance_history'),
     
-    # 考勤统计
-    path('statistics/', views.attendance_statistics, name='statistics'),
+    # 教师考勤统计
+    path('stats/teacher/', views.teacher_attendance_stats, name='teacher_attendance_stats'),
 ]

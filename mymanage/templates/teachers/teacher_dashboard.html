@@ -8,237 +8,96 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
     <style>
         :root {
-            --primary-color: #3a5a78;
-            --secondary-color: #f8f9fa;
-            --accent-color: #e3b04b;
-            --text-color: #333;
-            --sidebar-width: 280px;
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
         }
         
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background-color: #f5f7fa;
-            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
         }
         
         .sidebar {
-            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
             height: 100vh;
             position: fixed;
-            top: 0;
-            left: 0;
-            background-color: var(--primary-color);
-            color: white;
-            padding-top: 20px;
-            transition: all 0.3s;
-            z-index: 1000;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
         }
         
-        .sidebar-header {
-            padding: 0 20px 20px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .sidebar-header img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-        
-        .sidebar-menu a {
-            padding: 12px 20px;
-            color: rgba(255, 255, 255, 0.8);
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            text-decoration: none;
-            transition: all 0.3s;
         }
         
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 4px solid var(--accent-color);
-        }
-        
-        .sidebar-menu i {
-            margin-right: 10px;
-            width: 20px;
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
             text-align: center;
         }
         
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            transition: all 0.3s;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-weight: 600;
-        }
-        
-        .card-icon {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            margin-right: 15px;
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
             color: white;
+            transform: translateX(5px);
         }
         
-        .bg-primary-soft {
-            background-color: rgba(58, 90, 120, 0.1);
-            color: var(--primary-color);
-        }
-        
-        .bg-success-soft {
-            background-color: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-        }
-        
-        .bg-warning-soft {
-            background-color: rgba(227, 176, 75, 0.1);
-            color: var(--accent-color);
-        }
-        
-        .bg-info-soft {
-            background-color: rgba(23, 162, 184, 0.1);
-            color: #17a2b8;
-        }
-        
-        .bg-danger-soft {
-            background-color: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-        }
-        
-        .bg-purple-soft {
-            background-color: rgba(111, 66, 193, 0.1);
-            color: #6f42c1;
-        }
-        
-        .stat-card {
-            padding: 15px;
-        }
-        
-        .stat-card .value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-        
-        .stat-card .label {
-            color: #6c757d;
-            font-size: 14px;
-        }
-        
-        .table-responsive {
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .table {
-            margin-bottom: 0;
-        }
-        
-        .table th {
-            border-top: none;
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
             font-weight: 600;
-            background-color: rgba(0, 0, 0, 0.02);
         }
         
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
             object-fit: cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
         }
         
-        .badge-pill {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-weight: 500;
+        .sidebar h5 {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
         
-        .chart-container {
-            height: 300px;
-        }
-        
-        @media (max-width: 992px) {
+        @media (max-width: 768px) {
             .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
-            
-            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
-                display: none;
-            }
-            
-            .sidebar-menu a {
-                padding: 15px 0;
-                justify-content: center;
-            }
-            
-            .sidebar-menu i {
-                margin-right: 0;
-                font-size: 18px;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 0;
+                width: 100%;
+                height: auto;
+                position: relative;
             }
             
             .main-content {
                 margin-left: 0;
             }
             
-            .mobile-toggle {
-                display: block !important;
+            .sidebar .nav-link:hover {
+                transform: none;
             }
-        }
-        
-        .mobile-toggle {
-            display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 8px 12px;
         }
     </style>
 </head>
@@ -247,49 +106,55 @@
         <i class="fas fa-bars"></i>
     </button>
     
-    <div class="sidebar">
-        <div class="sidebar-header d-flex align-items-center">
-            <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="me-2">
-            <span class="ms-1">
-                <div class="fw-bold">{{ request.user.teacher_profile.name|default:"王老师" }}</div>
-                <div class="small text-white-50">钢琴教师</div>
-            </span>
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            {% if teacher.avatar %}
+                <img src="{{ teacher.avatar.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ teacher.name|default:"苗韵琴行" }}</h5>
+            {% if teacher.job_title %}
+                <p class="text-light mb-0"><small>{{ teacher.job_title }}</small></p>
+            {% endif %}
         </div>
-        
-        <div class="sidebar-menu">
-            <a href="/teachers/dashboard/" class="active">
-                <i class="fas fa-home"></i>
-                <span>仪表盘</span>
-            </a>
-            <a href="/teachers/students/">
-                <i class="fas fa-user-graduate"></i>
-                <span>学生管理</span>
-            </a>
-            <a href="/teachers/courses/">
-                <i class="fas fa-book"></i>
-                <span>课程管理</span>
-            </a>
-            <a href="/teachers/attendance/">
-                <i class="fas fa-clipboard-check"></i>
-                <span>考勤管理</span>
-            </a>
-            <a href="/teachers/finance/">
-                <i class="fas fa-yuan-sign"></i>
-                <span>财务管理</span>
-            </a>
-            <a href="/teachers/sheet-music/">
-                <i class="fas fa-music"></i>
-                <span>曲谱管理</span>
-            </a>
-            <a href="/teachers/profile/">
-                <i class="fas fa-user-cog"></i>
-                <span>个人设置</span>
-            </a>
-            <a href="/logout/">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>退出登录</span>
-            </a>
-        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'teachers:dashboard' %}">
+                    <i class="fas fa-home"></i> 控制面板
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:students' %}">
+                    <i class="fas fa-users"></i> 学生管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:attendance' %}">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:sheet_music' %}">
+                    <i class="fas fa-music"></i> 曲谱管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:finance' %}">
+                    <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
     </div>
     
     <div class="main-content">
@@ -298,10 +163,10 @@
                 <h2 class="mb-0">教师仪表盘</h2>
                 <div>
                     <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
-                    <button class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-bell me-1"></i>
-                        <span class="badge bg-danger">{{ unread_notifications_count|default:"0" }}</span>
-                    </button>
+                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime">00:00:00</span>
+                    </div>
                 </div>
             </div>
             
@@ -313,7 +178,7 @@
                                 <i class="fas fa-user-graduate"></i>
                             </div>
                             <div>
-                                <div class="value">{{ student_count|default:"0" }}</div>
+                                <div class="value">{{ students_count|default:"0" }}</div>
                                 <div class="label">学生总数</div>
                             </div>
                         </div>
@@ -327,8 +192,8 @@
                                 <i class="fas fa-calendar-check"></i>
                             </div>
                             <div>
-                                <div class="value">{{ today_lessons_count|default:"0" }}</div>
-                                <div class="label">今日课程</div>
+                                <div class="value">{{ courses_count|default:"0" }}</div>
+                                <div class="label">课程总数</div>
                             </div>
                         </div>
                     </div>
@@ -341,14 +206,8 @@
                                 <i class="fas fa-clock"></i>
                             </div>
                             <div>
-                                <div class="value">
-                                    {% if attendance_stats.total > 0 %}
-                                        {% widthratio attendance_stats.present|default:0 attendance_stats.total 100 %}%
-                                    {% else %}
-                                        0%
-                                    {% endif %}
-                                </div>
-                                <div class="label">出勤率</div>
+                                <div class="value">{{ attendance_today|default:"0" }}</div>
+                                <div class="label">今日考勤</div>
                             </div>
                         </div>
                     </div>
@@ -358,11 +217,11 @@
                     <div class="card stat-card">
                         <div class="d-flex align-items-center">
                             <div class="card-icon bg-info-soft">
-                                <i class="fas fa-music"></i>
+                                <i class="fas fa-money-bill"></i>
                             </div>
                             <div>
-                                <div class="value">{{ sheet_music_count|default:"0" }}</div>
-                                <div class="label">曲谱资源</div>
+                                <div class="value">¥{{ payments_this_month|default:"0" }}</div>
+                                <div class="label">本月收入</div>
                             </div>
                         </div>
                     </div>
@@ -374,7 +233,7 @@
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">今日课程安排</h5>
-                            <a href="/teachers/courses/" class="btn btn-sm btn-primary">
+                            <a href="{% url 'teachers:courses' %}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-book me-1"></i>课程管理
                             </a>
                         </div>
@@ -398,29 +257,51 @@
                                                 <td>{{ course.start_time|time:"H:i" }}-{{ course.end_time|time:"H:i" }}</td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        {% if course.student.user.avatar %}
-                                                        <img src="{{ course.student.user.avatar.url }}" class="avatar me-2" alt="学生头像">
+                                                        {% with students=course.course.students.all %}
+                                                        {% if students %}
+                                                            {% with student=students.first %}
+                                                            {% if student.avatar %}
+                                                            <img src="{{ student.avatar.url }}" class="avatar me-2" alt="学生头像" style="width:32px;height:32px;border-radius:50%;">
+                                                            {% else %}
+                                                            <div class="avatar me-2 bg-primary d-flex align-items-center justify-content-center text-white" style="width:32px;height:32px;border-radius:50%;">{{ student.name|slice:":1" }}</div>
+                                                            {% endif %}
+                                                            <span>{{ student.name }}</span>
+                                                            {% endwith %}
                                                         {% else %}
-                                                        <div class="avatar me-2 bg-primary d-flex align-items-center justify-content-center text-white">{{ course.student.name|slice:":1" }}</div>
+                                                            <div class="avatar me-2 bg-secondary d-flex align-items-center justify-content-center text-white" style="width:32px;height:32px;border-radius:50%;">?</div>
+                                                            <span>未分配学生</span>
                                                         {% endif %}
-                                                        <span>{{ course.student.name }}</span>
+                                                        {% endwith %}
                                                     </div>
                                                 </td>
-                                                <td>{{ course.title }}</td>
-                                                <td>{{ course.room }}</td>
+                                                <td>{{ course.course.name }}</td>
+                                                <td>{{ course.room|default:"未指定" }}</td>
                                                 <td>
-                                                    {% if course.status == 'completed' %}
-                                                    <span class="badge bg-success badge-pill">已完成</span>
-                                                    {% elif course.status == 'in_progress' %}
-                                                    <span class="badge bg-primary badge-pill">进行中</span>
-                                                    {% else %}
-                                                    <span class="badge bg-warning badge-pill">待开始</span>
-                                                    {% endif %}
+                                                    {% now "H:i" as current_time_str %}
+                                                    {% with start_time=course.start_time|time:"H:i" end_time=course.end_time|time:"H:i" %}
+                                                        {% if end_time < current_time_str %}
+                                                        <span class="badge bg-success badge-pill">已完成</span>
+                                                        {% elif start_time <= current_time_str and end_time >= current_time_str %}
+                                                        <span class="badge bg-primary badge-pill">进行中</span>
+                                                        {% else %}
+                                                        <span class="badge bg-warning badge-pill">待开始</span>
+                                                        {% endif %}
+                                                    {% endwith %}
                                                 </td>
                                                 <td>
-                                                    <a href="{% url 'teachers:student_detail' course.student.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
+                                                    {% with students=course.course.students.all %}
+                                                    {% if students %}
+                                                        {% with student=students.first %}
+                                                        <a href="{% url 'teachers:student_detail' student.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        {% endwith %}
+                                                    {% else %}
+                                                        <button class="btn btn-sm btn-outline-secondary me-1" disabled>
+                                                            <i class="fas fa-eye-slash"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                    {% endwith %}
                                                 </td>
                                             </tr>
                                             {% endfor %}
@@ -462,7 +343,7 @@
                                 <p class="text-muted">暂无考勤码</p>
                             </div>
                             {% endif %}
-                            <a href="/teachers/attendance/" class="btn btn-primary">
+                            <a href="{% url 'teachers:generate_qrcode' %}" class="btn btn-primary">
                                 <i class="fas fa-sync-alt me-1"></i>生成考勤码
                             </a>
                         </div>
@@ -470,55 +351,60 @@
                     
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">待办事项</h5>
+                            <h5 class="mb-0">最近考勤会话</h5>
                         </div>
                         <div class="card-body">
-                            {% for task in todo_tasks %}
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="task{{ task.id }}" {% if task.completed %}checked{% endif %}>
-                                    <label class="form-check-label {% if task.completed %}text-decoration-line-through{% endif %}" for="task{{ task.id }}">
-                                        {{ task.title }}
-                                    </label>
+                            {% if recent_sessions %}
+                                {% for session in recent_sessions %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">{{ session.course.name }}</h6>
+                                        <small class="text-muted">{{ session.start_time|date:"Y-m-d H:i" }} - {{ session.end_time|date:"H:i" }}</small>
+                                    </div>
+                                    <span class="badge 
+                                        {% if session.end_time < current_time %}bg-secondary
+                                        {% elif session.start_time <= current_time and session.end_time >= current_time %}bg-success
+                                        {% else %}bg-primary{% endif %}">
+                                        {% if session.end_time < current_time %}已结束
+                                        {% elif session.start_time <= current_time and session.end_time >= current_time %}进行中
+                                        {% else %}待开始{% endif %}
+                                    </span>
                                 </div>
-                                <span class="badge {% if task.completed %}bg-success{% else %}bg-warning{% endif %} ms-auto">{{ task.due_date|date:"Y-m-d" }}</span>
-                            </div>
-                            {% empty %}
-                            <p class="text-muted text-center">暂无待办事项</p>
-                            {% endfor %}
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted text-center">暂无考勤会话记录</p>
+                            {% endif %}
                             
-                            <div class="mt-3">
-                                <form method="post" action="{% url 'teachers:add_todo' %}" class="input-group">
-                                    {% csrf_token %}
-                                    <input type="text" name="title" class="form-control" placeholder="添加新任务..." required>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </form>
+                            <div class="mt-3 text-center">
+                                <a href="{% url 'teachers:attendance' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-list me-1"></i>查看全部
+                                </a>
                             </div>
                         </div>
                     </div>
                     
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">最近消息</h5>
+                            <h5 class="mb-0">财务概览</h5>
                         </div>
-                        <div class="card-body p-0">
-                            <div class="list-group list-group-flush">
-                                {% for message in recent_messages %}
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1">{{ message.sender }}</h6>
-                                        <small>{{ message.created_at|timesince }}前</small>
-                                    </div>
-                                    <p class="mb-1">{{ message.content }}</p>
-                                    <small class="text-muted">点击查看详情</small>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>本月收入:</span>
+                                <span class="text-success">¥{{ payments_this_month|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>待缴学费:</span>
+                                <span class="text-danger">¥{{ pending_payments|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>本年收入:</span>
+                                <span>¥{{ yearly_income|default:"0" }}</span>
+                            </div>
+                            
+                            <div class="mt-3 text-center">
+                                <a href="{% url 'teachers:finance' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-chart-line me-1"></i>财务详情
                                 </a>
-                                {% empty %}
-                                <div class="list-group-item text-center text-muted">
-                                    暂无消息
-                                </div>
-                                {% endfor %}
                             </div>
                         </div>
                     </div>
@@ -529,6 +415,29 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    <!-- 使用json_script标签安全地传递数据到JavaScript -->
+    {% if student_levels %}
+        {{ student_levels|json_script:"student-levels-data" }}
+    {% else %}
+        <script id="student-levels-data" type="application/json">
+            {
+                "levels": [
+                    {"name": "1级", "count": 0},
+                    {"name": "2级", "count": 0},
+                    {"name": "3级", "count": 0},
+                    {"name": "4级", "count": 0},
+                    {"name": "5级", "count": 0},
+                    {"name": "6级", "count": 0},
+                    {"name": "7级", "count": 0},
+                    {"name": "8级", "count": 0},
+                    {"name": "9级", "count": 0},
+                    {"name": "10级", "count": 0}
+                ]
+            }
+        </script>
+    {% endif %}
+
     <script>
         // 移动端侧边栏切换
         document.querySelector('.mobile-toggle').addEventListener('click', function() {
@@ -543,69 +452,100 @@
                 mainContent.style.marginLeft = '280px';
             }
         });
-        
-        // 学生学习进度图表
+
+        // 学生进度图表
         document.addEventListener('DOMContentLoaded', function() {
-            try {
-                const ctx = document.getElementById('progressChart').getContext('2d');
-                let studentNames = [];
-                let studentProgress = [];
-                
-                // 尝试从后端数据解析，如果失败则使用默认数据
-                try {
-                    studentNames = JSON.parse('{{ student_names|escapejs }}');
-                    studentProgress = JSON.parse('{{ student_progress|escapejs }}');
-                } catch (e) {
-                    console.log('使用默认数据', e);
-                    studentNames = ['李明', '张华', '王芳', '刘强', '赵丽', '陈静', '杨光', '周梅'];
-                    studentProgress = [85, 92, 78, 65, 88, 72, 80, 95];
-                }
-                
-                const progressChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: studentNames,
-                        datasets: [{
-                            label: '学习进度 (%)',
-                            data: studentProgress,
-                            backgroundColor: [
-                                'rgba(58, 90, 120, 0.7)',
-                                'rgba(40, 167, 69, 0.7)',
-                                'rgba(227, 176, 75, 0.7)',
-                                'rgba(23, 162, 184, 0.7)',
-                                'rgba(111, 66, 193, 0.7)',
-                                'rgba(220, 53, 69, 0.7)',
-                                'rgba(108, 117, 125, 0.7)',
-                                'rgba(253, 126, 20, 0.7)'
-                            ],
-                            borderColor: [
-                                'rgba(58, 90, 120, 1)',
-                                'rgba(40, 167, 69, 1)',
-                                'rgba(227, 176, 75, 1)',
-                                'rgba(23, 162, 184, 1)',
-                                'rgba(111, 66, 193, 1)',
-                                'rgba(220, 53, 69, 1)',
-                                'rgba(108, 117, 125, 1)',
-                                'rgba(253, 126, 20, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 100
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            // 从json_script中获取数据
+            const levelsData = JSON.parse(document.getElementById('student-levels-data').textContent);
+            const levelNames = [];
+            const levelCounts = [];
+            
+            // 处理数据
+            if (levelsData.levels) {
+                // 处理默认数据格式
+                levelsData.levels.forEach(level => {
+                    levelNames.push(level.name);
+                    levelCounts.push(level.count);
+                });
+            } else {
+                // 处理从Django传来的数据
+                levelsData.forEach(level => {
+                    levelNames.push(level.name);
+                    levelCounts.push(level.count);
+                });
+            }
+            
+            const progressChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: levelNames,
+                    datasets: [{
+                        label: '学生数量',
+                        data: levelCounts,
+                        backgroundColor: [
+                            'rgba(108, 92, 231, 0.2)',
+                            'rgba(162, 155, 254, 0.2)',
+                            'rgba(253, 121, 168, 0.2)',
+                            'rgba(85, 239, 196, 0.2)',
+                            'rgba(129, 236, 236, 0.2)',
+                            'rgba(116, 185, 255, 0.2)',
+                            'rgba(250, 177, 160, 0.2)',
+                            'rgba(255, 234, 167, 0.2)',
+                            'rgba(255, 118, 117, 0.2)',
+                            'rgba(200, 214, 229, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(108, 92, 231, 1)',
+                            'rgba(162, 155, 254, 1)',
+                            'rgba(253, 121, 168, 1)',
+                            'rgba(85, 239, 196, 1)',
+                            'rgba(129, 236, 236, 1)',
+                            'rgba(116, 185, 255, 1)',
+                            'rgba(250, 177, 160, 1)',
+                            'rgba(255, 234, 167, 1)',
+                            'rgba(255, 118, 117, 1)',
+                            'rgba(200, 214, 229, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
                             }
                         }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: '各级别学生分布'
+                        }
                     }
-                });
-            } catch (error) {
-                console.error('图表初始化失败:', error);
-            }
+                }
+            });
         });
+
+        // 添加系统时间显示功能
+        function updateSystemTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 初始化并每秒更新一次
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
     </script>
 </body>
 </html> 

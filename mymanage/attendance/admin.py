@@ -4,38 +4,31 @@ from .models import QRCode, AttendanceSession, AttendanceRecord, WaitingQueue
 
 @admin.register(QRCode)
 class QRCodeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'course', 'created_at', 'expires_at', 'is_valid')
-    list_filter = ('course', 'created_at')
-    search_fields = ('course__name', 'course__code')
-    readonly_fields = ('uuid',)
+    list_display = ('course', 'created_at', 'expires_at', 'is_valid')
+    list_filter = ('course', 'created_at', 'expires_at')
+    search_fields = ('course__name',)
+    readonly_fields = ('uuid', 'created_at')
 
 
 @admin.register(AttendanceSession)
 class AttendanceSessionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'course', 'start_time', 'end_time', 'status', 'created_by')
-    list_filter = ('course', 'status', 'start_time')
-    search_fields = ('course__name',)
+    list_display = ('course', 'start_time', 'end_time', 'status', 'created_by')
+    list_filter = ('status', 'course', 'start_time')
+    search_fields = ('course__name', 'created_by__username')
     readonly_fields = ('start_time',)
-
-
-class PianoInline(admin.TabularInline):
-    model = AttendanceRecord
-    extra = 0
-    fields = ('student', 'piano', 'status', 'check_in_time', 'check_out_time', 'duration')
-    readonly_fields = ('check_in_time', 'check_out_time', 'duration')
 
 
 @admin.register(AttendanceRecord)
 class AttendanceRecordAdmin(admin.ModelAdmin):
-    list_display = ('id', 'session', 'student', 'piano', 'status', 'check_in_time', 'check_out_time', 'duration')
-    list_filter = ('session__course', 'status', 'check_in_time')
-    search_fields = ('student__name', 'student__student_id', 'session__course__name')
+    list_display = ('student', 'session', 'piano', 'check_in_time', 'check_out_time', 'status', 'duration')
+    list_filter = ('status', 'check_in_time', 'session')
+    search_fields = ('student__name', 'piano__number', 'notes')
     readonly_fields = ('check_in_time', 'duration')
 
 
 @admin.register(WaitingQueue)
 class WaitingQueueAdmin(admin.ModelAdmin):
-    list_display = ('id', 'session', 'student', 'join_time', 'estimated_wait_time', 'is_active')
-    list_filter = ('session__course', 'is_active', 'join_time')
-    search_fields = ('student__name', 'student__student_id', 'session__course__name')
+    list_display = ('student', 'session', 'join_time', 'estimated_wait_time', 'is_active')
+    list_filter = ('is_active', 'join_time', 'session')
+    search_fields = ('student__name',)
     readonly_fields = ('join_time',)

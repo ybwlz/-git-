@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考勤二维码 - 苗韵琴行管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+    <style>
+        .qr-code-container {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .qr-code-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .qr-info {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .qr-info-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .qr-info-item i {
+            margin-right: 10px;
+            color: #6c5ce7;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .qr-expires {
+            font-size: 14px;
+            color: #e74c3c;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        
+        .btn-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h4 class="mb-0">考勤二维码</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="qr-code-container">
+                            {% if qrcode.qr_code_image %}
+                                <img src="{{ qrcode.qr_code_image.url }}" alt="考勤二维码" class="img-fluid">
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    二维码图片未找到
+                                </div>
+                            {% endif %}
+                            
+                            <div class="qr-info">
+                                <div class="qr-info-item">
+                                    <i class="fas fa-chalkboard"></i>
+                                    <span>课程: {{ qrcode.course.name }}</span>
+                                </div>
+                                
+                                <div class="qr-info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>开始时间: {{ session.start_time|date:"Y-m-d H:i" }}</span>
+                                </div>
+                                
+                                <div class="qr-info-item">
+                                    <i class="fas fa-hourglass-end"></i>
+                                    <span>结束时间: {{ session.end_time|date:"Y-m-d H:i" }}</span>
+                                </div>
+                                
+                                <div class="qr-info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>当前签到人数: {{ session.records.count }} 人</span>
+                                </div>
+                                
+                                <div class="qr-expires">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    二维码将在 {{ qrcode.expires_at|date:"Y-m-d H:i" }} 过期
+                                </div>
+                            </div>
+                            
+                            <div class="btn-actions">
+                                <a href="{% url 'teachers:attendance' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> 返回
+                                </a>
+                                <a href="{% url 'teachers:session_detail' session.id %}" class="btn btn-primary">
+                                    <i class="fas fa-eye me-1"></i> 查看考勤详情
+                                </a>
+                                <button id="downloadQRBtn" class="btn btn-success">
+                                    <i class="fas fa-download me-1"></i> 下载二维码
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('downloadQRBtn').addEventListener('click', function() {
+            {% if qrcode.qr_code_image %}
+                // 创建一个临时的a标签用于下载
+                const link = document.createElement('a');
+                link.href = "{{ qrcode.qr_code_image.url }}";
+                link.download = "考勤二维码_{{ qrcode.course.name }}_{{ session.start_time|date:'Ymd_Hi' }}.png";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            {% else %}
+                alert('二维码图片未找到，无法下载');
+            {% endif %}
+        });
+    </script>
+</body>
+</html> 

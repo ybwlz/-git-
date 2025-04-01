@@ -44,21 +44,25 @@
         }
         
         .register-container {
-            max-width: 600px;
+            max-width: 450px;
             width: 100%;
             padding: 0 15px;
+            height: 600px; /* 固定容器高度与login页面一致 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .register-form {
             background-color: rgba(255, 255, 255, 0.95);
             border-radius: 10px;
-            padding: 30px;
+            padding: 25px 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
         .register-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         .register-header h2 {
@@ -112,13 +116,13 @@
         .role-selector {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .role-option {
             flex: 1;
             text-align: center;
-            padding: 15px 10px;
+            padding: 12px 10px;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
@@ -132,9 +136,9 @@
         }
         
         .role-option i {
-            font-size: 24px;
+            font-size: 22px;
             color: var(--primary-color);
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             display: block;
         }
         
@@ -158,7 +162,8 @@
         }
         
         .alert {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            padding: 0.5rem 1rem;
         }
         
         .errorlist {
@@ -167,6 +172,19 @@
             list-style: none;
             font-size: 80%;
             margin-top: 0.25rem;
+        }
+        
+        .form-text {
+            font-size: 75%;
+            margin-top: 3px;
+        }
+        
+        .mb-3 {
+            margin-bottom: 0.8rem !important;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem !important;
         }
     </style>
 </head>
@@ -215,7 +233,7 @@
                         <span class="input-group-text">
                             <i class="fas fa-user"></i>
                         </span>
-                        <input type="text" name="username" class="form-control" placeholder="用户名" required>
+                        {{ form.username }}
                     </div>
                     {% if form.username.errors %}
                     <ul class="errorlist">
@@ -231,7 +249,7 @@
                         <span class="input-group-text">
                             <i class="fas fa-lock"></i>
                         </span>
-                        <input type="password" name="password1" class="form-control" placeholder="密码" required>
+                        {{ form.password1 }}
                     </div>
                     {% if form.password1.errors %}
                     <ul class="errorlist">
@@ -240,15 +258,15 @@
                         {% endfor %}
                     </ul>
                     {% endif %}
-                    <small class="form-text text-muted">密码必须至少包含8个字符，且不能是纯数字</small>
+                    <small class="form-text text-muted">{{ form.password1.help_text }}</small>
                 </div>
                 
-                <div class="mb-4">
+                <div class="mb-3">
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="fas fa-lock"></i>
                         </span>
-                        <input type="password" name="password2" class="form-control" placeholder="确认密码" required>
+                        {{ form.password2 }}
                     </div>
                     {% if form.password2.errors %}
                     <ul class="errorlist">
@@ -259,33 +277,33 @@
                     {% endif %}
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-register">立即注册</button>
+                <button type="submit" class="btn btn-primary btn-register">注册</button>
                 <div class="text-center mt-3">
                     <p>已有账号？<a href="{% url 'login' %}">立即登录</a></p>
                 </div>
             </form>
         </div>
-        <div class="back-to-home mt-4 text-center">
-            <a href="/"><i class="fas fa-arrow-left me-1"></i> 返回首页</a>
-        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 角色选择功能
+        // 用户类型选择
         function selectRole(role) {
+            // 移除所有选项的active类
             document.querySelectorAll('.role-option').forEach(option => {
                 option.classList.remove('active');
             });
             
-            document.querySelector(`.role-option[onclick="selectRole('${role}')"]`).classList.add('active');
+            // 为当前选择的选项添加active类
+            if (role === 'teacher') {
+                document.querySelectorAll('.role-option')[0].classList.add('active');
+            } else {
+                document.querySelectorAll('.role-option')[1].classList.add('active');
+            }
             
-            // 设置隐藏字段的值
+            // 更新隐藏输入字段
             document.getElementById('user_type_input').value = role;
         }
-        
-        // 初始化设置学生为默认角色
-        selectRole('student');
     </script>
 </body>
 </html> 

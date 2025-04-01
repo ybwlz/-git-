@@ -1,34 +1,22 @@
 from django.urls import path
 from . import views
-from django.forms import forms
-
-app_name = 'courses'
 
 urlpatterns = [
-    # 课程管理
-    path('list/', views.course_list, name='list'),
-    path('detail/<int:pk>/', views.course_detail, name='detail'),
-    path('create/', views.course_create, name='create'),
-    path('update/<int:pk>/', views.course_update, name='update'),
-    
-    # 课程安排管理
-    path('schedule/create/<int:course_id>/', views.course_schedule_create, name='schedule_create'),
-    path('schedule/update/<int:pk>/', views.course_schedule_update, name='schedule_update'),
-    
-    # 课程报名管理
-    path('enrollment/create/', views.enrollment_create, name='enrollment_create'),
-    path('enrollment/create/<int:course_id>/', views.enrollment_create, name='enrollment_create_for_course'),
-    path('enrollment/update/<int:pk>/', views.enrollment_update, name='enrollment_update'),
-    path('my-courses/', views.my_courses, name='my_courses'),
+    # 钢琴管理
+    path('pianos/', views.piano_list, name='piano_list'),
+    path('pianos/<int:piano_id>/', views.piano_detail, name='piano_detail'),
+    path('pianos/manage/', views.piano_manage, name='piano_create'),
+    path('pianos/manage/<int:piano_id>/', views.piano_manage, name='piano_edit'),
     
     # 曲谱管理
-    path('sheet-music/list/', views.sheet_music_list, name='sheet_music_list'),
-    path('sheet-music/detail/<int:pk>/', views.sheet_music_detail, name='sheet_music_detail'),
-    path('sheet-music/create/', views.sheet_music_create, name='sheet_music_create'),
-    path('sheet-music/update/<int:pk>/', views.sheet_music_update, name='sheet_music_update'),
+    path('sheet-music/', views.sheet_music_list, name='sheet_music_list'),
+    path('sheet-music/<int:sheet_id>/', views.sheet_music_detail, name='sheet_music_detail'),
+    path('sheet-music/manage/', views.sheet_music_manage, name='sheet_music_create'),
+    path('sheet-music/manage/<int:sheet_id>/', views.sheet_music_manage, name='sheet_music_edit'),
+    path('sheet-music/delete/<int:sheet_id>/', views.delete_sheet_music, name='sheet_music_delete'),
     
-    # 钢琴管理
-    path('piano/list/', views.piano_list, name='piano_list'),
-    path('piano/update/<int:pk>/', views.piano_update, name='piano_update'),
-    path('piano/initialize/', views.initialize_pianos, name='initialize_pianos'),
+    # 自动排课与练习队列API
+    path('api/scheduler/status/', views.auto_scheduler_status, name='auto_scheduler_status'),
+    path('api/scheduler/join-queue/', views.join_practice_queue, name='join_practice_queue'),
+    path('api/scheduler/check-out/', views.check_out, name='check_out'),
 ]

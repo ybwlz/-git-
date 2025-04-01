@@ -7,77 +7,81 @@
     <title>学生管理 - 苗韵琴行管理系统</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
     <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
     <style>
         :root {
-            --primary-color: #3a5a78;
-            --secondary-color: #f8f9fa;
-            --accent-color: #e3b04b;
-            --text-color: #333;
-            --sidebar-width: 280px;
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
         }
         
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background-color: #f5f7fa;
-            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
         }
         
         .sidebar {
-            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
             height: 100vh;
             position: fixed;
-            top: 0;
-            left: 0;
-            background-color: var(--primary-color);
-            color: white;
-            padding-top: 20px;
-            transition: all 0.3s;
-            z-index: 1000;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
         }
         
-        .sidebar-header {
-            padding: 0 20px 20px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .sidebar-header img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-        
-        .sidebar-menu a {
-            padding: 12px 20px;
-            color: rgba(255, 255, 255, 0.8);
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            text-decoration: none;
-            transition: all 0.3s;
         }
         
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 4px solid var(--accent-color);
-        }
-        
-        .sidebar-menu i {
-            margin-right: 10px;
-            width: 20px;
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
             text-align: center;
         }
         
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
         .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            transition: all 0.3s;
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar h5 {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
         
         .card {
@@ -93,12 +97,6 @@
             transform: translateY(-5px);
         }
         
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-weight: 600;
-        }
-        
         .avatar {
             width: 40px;
             height: 40px;
@@ -106,91 +104,67 @@
             object-fit: cover;
         }
         
-        .table-responsive {
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .table {
-            margin-bottom: 0;
-        }
-        
-        .table th {
-            border-top: none;
-            font-weight: 600;
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-        
-        .badge-pill {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-        
         .search-container {
             position: relative;
-            max-width: 300px;
         }
         
-        .search-container .form-control {
-            padding-left: 40px;
-            border-radius: 50px;
-        }
-        
-        .search-container .search-icon {
+        .search-icon {
             position: absolute;
             left: 15px;
-            top: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             color: #6c757d;
         }
         
-        .student-filter {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        .search-container input {
+            padding-left: 40px;
+            border-radius: 30px;
         }
         
-        .student-progress {
-            height: 6px;
-            border-radius: 3px;
+        .student-card {
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
         }
         
-        @media (max-width: 992px) {
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .student-avatar {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .student-level {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 0.8rem;
+        }
+        
+        @media (max-width: 768px) {
             .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
-            
-            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
-                display: none;
-            }
-            
-            .sidebar-menu a {
-                padding: 15px 0;
-                justify-content: center;
-            }
-            
-            .sidebar-menu i {
-                margin-right: 0;
-                font-size: 18px;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 0;
+                width: 100%;
+                height: auto;
+                position: relative;
             }
             
             .main-content {
                 margin-left: 0;
             }
             
-            .mobile-toggle {
-                display: block !important;
+            .sidebar .nav-link:hover {
+                transform: none;
             }
         }
         
@@ -206,6 +180,12 @@
             border-radius: 5px;
             padding: 8px 12px;
         }
+        
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
@@ -213,49 +193,52 @@
         <i class="fas fa-bars"></i>
     </button>
     
-    <div class="sidebar">
-        <div class="sidebar-header d-flex align-items-center">
-            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像">
-            <span class="ms-2">
-                <div class="fw-bold">王老师</div>
-                <div class="small text-white-50">钢琴教师</div>
-            </span>
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            {% if teacher.avatar %}
+                <img src="{{ teacher.avatar.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ teacher.name|default:"苗韵琴行" }}</h5>
         </div>
-        
-        <div class="sidebar-menu">
-            <a href="/teachers/dashboard/">
-                <i class="fas fa-home"></i>
-                <span>仪表盘</span>
-            </a>
-            <a href="/teachers/students/" class="active">
-                <i class="fas fa-user-graduate"></i>
-                <span>学生管理</span>
-            </a>
-            <a href="/teachers/courses/">
-                <i class="fas fa-book"></i>
-                <span>课程管理</span>
-            </a>
-            <a href="/teachers/attendance/">
-                <i class="fas fa-clipboard-check"></i>
-                <span>考勤管理</span>
-            </a>
-            <a href="/teachers/sheet-music/">
-                <i class="fas fa-music"></i>
-                <span>曲谱管理</span>
-            </a>
-            <a href="/teachers/finance/">
-                <i class="fas fa-yuan-sign"></i>
-                <span>财务管理</span>
-            </a>
-            <a href="/teachers/profile/">
-                <i class="fas fa-user-cog"></i>
-                <span>个人设置</span>
-            </a>
-            <a href="/logout/">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>退出登录</span>
-            </a>
-        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:dashboard' %}">
+                    <i class="fas fa-home"></i> 控制面板
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'teachers:students' %}">
+                    <i class="fas fa-users"></i> 学生管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:attendance' %}">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:sheet_music' %}">
+                    <i class="fas fa-music"></i> 曲谱管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:finance' %}">
+                    <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
     </div>
     
     <div class="main-content">
@@ -263,52 +246,29 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">学生管理</h2>
                 <div>
-                    <span class="me-2">今日日期：2023年5月20日</span>
-                    <button class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-bell me-1"></i>
-                        <span class="badge bg-danger">3</span>
-                    </button>
+                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
+                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime">00:00:00</span>
+                    </div>
                 </div>
             </div>
             
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <div class="search-container">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="text" class="form-control" placeholder="搜索学生..." autocomplete="name">
+                    <form method="get" action="{% url 'teachers:students' %}">
+                        <div class="row align-items-center">
+                            <div class="col-md-9">
+                                <div class="search-container">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" name="search" class="form-control" placeholder="搜索学生姓名、联系方式..." value="{{ request.GET.search|default:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100">搜索</button>
                             </div>
                         </div>
-                        <div class="col-md-8">
-                            <div class="student-filter justify-content-md-end">
-                                <select class="form-select form-select-sm" style="width: auto;">
-                                    <option selected>所有年龄段</option>
-                                    <option>5-8岁</option>
-                                    <option>9-12岁</option>
-                                    <option>13-16岁</option>
-                                    <option>17岁以上</option>
-                                </select>
-                                <select class="form-select form-select-sm" style="width: auto;">
-                                    <option selected>所有课程</option>
-                                    <option>钢琴基础</option>
-                                    <option>钢琴进阶</option>
-                                    <option>流行钢琴</option>
-                                    <option>古典钢琴</option>
-                                </select>
-                                <select class="form-select form-select-sm" style="width: auto;">
-                                    <option selected>所有学习阶段</option>
-                                    <option>入门</option>
-                                    <option>初级</option>
-                                    <option>中级</option>
-                                    <option>高级</option>
-                                </select>
-                                <button class="btn btn-sm btn-primary">
-                                    <i class="fas fa-filter me-1"></i>筛选
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
             
@@ -320,7 +280,7 @@
                                 <i class="fas fa-user-graduate"></i>
                             </div>
                             <h5 class="card-title">总学生数</h5>
-                            <p class="card-text fs-2 fw-bold">42</p>
+                            <p class="card-text fs-2 fw-bold">{{ total_students }}</p>
                         </div>
                     </div>
                 </div>
@@ -331,7 +291,7 @@
                                 <i class="fas fa-user-plus"></i>
                             </div>
                             <h5 class="card-title">本月新增</h5>
-                            <p class="card-text fs-2 fw-bold">8</p>
+                            <p class="card-text fs-2 fw-bold">{{ new_students_this_month }}</p>
                         </div>
                     </div>
                 </div>
@@ -339,10 +299,10 @@
                     <div class="card text-center h-100">
                         <div class="card-body d-flex flex-column justify-content-center">
                             <div class="display-4 mb-3 text-warning">
-                                <i class="fas fa-chart-line"></i>
+                                <i class="fas fa-star"></i>
                             </div>
                             <h5 class="card-title">平均出勤率</h5>
-                            <p class="card-text fs-2 fw-bold">92%</p>
+                            <p class="card-text fs-2 fw-bold">{{ attendance_rate|floatformat:1 }}%</p>
                         </div>
                     </div>
                 </div>
@@ -352,247 +312,229 @@
                             <div class="display-4 mb-3 text-info">
                                 <i class="fas fa-clock"></i>
                             </div>
-                            <h5 class="card-title">平均学习时长</h5>
-                            <p class="card-text fs-2 fw-bold">5.2h</p>
+                            <h5 class="card-title">今日练琴人数</h5>
+                            <p class="card-text fs-2 fw-bold">{{ today_attendance }}</p>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">学生列表</h5>
-                    <button class="btn btn-primary">
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
                         <i class="fas fa-plus me-1"></i>添加学生
                     </button>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover align-middle mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">#</th>
-                                    <th>学生信息</th>
-                                    <th>课程</th>
+                                    <th>学生</th>
+                                    <th>级别</th>
+                                    <th>联系方式</th>
+                                    <th>最近练琴</th>
+                                    <th>练琴总时长</th>
                                     <th>学习进度</th>
-                                    <th>考勤情况</th>
-                                    <th>最近上课</th>
                                     <th>操作</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://img.zcool.cn/community/01cc3d5d3f5f51a8012187f4c73785.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
-                                            <div>
-                                                <div class="fw-bold">李明</div>
-                                                <div class="small text-muted">8岁 · 电话: 138****1234</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>钢琴基础课</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="flex-grow-1 me-2">
-                                                <div class="progress student-progress">
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 85%"></div>
+                                {% if students %}
+                                    {% for student in students %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if student.avatar %}
+                                                        <img src="{{ student.avatar.url }}" class="avatar me-2" alt="{{ student.name }}">
+                                                    {% else %}
+                                                        <div class="avatar me-2 bg-primary d-flex align-items-center justify-content-center text-white">
+                                                            {{ student.name|slice:":1" }}
+                                                        </div>
+                                                    {% endif %}
+                                                    <div>
+                                                        <h6 class="mb-0">{{ student.name }}</h6>
+                                                        <small class="text-muted">{{ student.get_gender_display }}</small>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <span>85%</span>
-                                        </div>
-                                    </td>
-                                    <td><span class="badge bg-success badge-pill">优秀</span></td>
-                                    <td>2023-05-18</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
-                                                <i class="fas fa-phone"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
-                                            <div>
-                                                <div class="fw-bold">张华</div>
-                                                <div class="small text-muted">10岁 · 电话: 139****5678</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>钢琴进阶课</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="flex-grow-1 me-2">
-                                                <div class="progress student-progress">
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 92%"></div>
+                                            </td>
+                                            <td>{{ student.level }}级</td>
+                                            <td>{{ student.phone|default:"未设置" }}</td>
+                                            <td>
+                                                {% if student.last_practice %}
+                                                    {{ student.last_practice|date:"Y-m-d" }}
+                                                {% else %}
+                                                    从未练琴
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ student.total_practice_time|default:0 }}小时</td>
+                                            <td>
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ student.progress|default:0 }}%;" aria-valuenow="{{ student.progress|default:0 }}" aria-valuemin="0" aria-valuemax="100"></div>
                                                 </div>
-                                            </div>
-                                            <span>92%</span>
-                                        </div>
-                                    </td>
-                                    <td><span class="badge bg-success badge-pill">优秀</span></td>
-                                    <td>2023-05-19</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
-                                                <i class="fas fa-phone"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://img.zcool.cn/community/0152295d3f5f52a8012187f4f73d8a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
-                                            <div>
-                                                <div class="fw-bold">王芳</div>
-                                                <div class="small text-muted">9岁 · 电话: 136****4567</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>钢琴基础课</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="flex-grow-1 me-2">
-                                                <div class="progress student-progress">
-                                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 78%"></div>
-                                                </div>
-                                            </div>
-                                            <span>78%</span>
-                                        </div>
-                                    </td>
-                                    <td><span class="badge bg-warning badge-pill">良好</span></td>
-                                    <td>2023-05-20</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
-                                                <i class="fas fa-phone"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
-                                            <div>
-                                                <div class="fw-bold">刘强</div>
-                                                <div class="small text-muted">12岁 · 电话: 135****7890</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>钢琴进阶课</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="flex-grow-1 me-2">
-                                                <div class="progress student-progress">
-                                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 65%"></div>
-                                                </div>
-                                            </div>
-                                            <span>65%</span>
-                                        </div>
-                                    </td>
-                                    <td><span class="badge bg-danger badge-pill">需关注</span></td>
-                                    <td>2023-05-17</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
-                                                <i class="fas fa-phone"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像">
-                                            <div>
-                                                <div class="fw-bold">赵丽</div>
-                                                <div class="small text-muted">11岁 · 电话: 131****3456</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>钢琴基础课</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="flex-grow-1 me-2">
-                                                <div class="progress student-progress">
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 88%"></div>
-                                                </div>
-                                            </div>
-                                            <span>88%</span>
-                                        </div>
-                                    </td>
-                                    <td><span class="badge bg-success badge-pill">优秀</span></td>
-                                    <td>2023-05-19</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" title="查看详情">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-info" title="编辑信息">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-warning" title="联系家长">
-                                                <i class="fas fa-phone"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'teachers:student_detail' student.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'teachers:edit_student' student.id %}" class="btn btn-sm btn-outline-secondary me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ student.id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4">
+                                            暂无学生信息。点击"添加学生"按钮添加新学生。
+                                        </td>
+                                    </tr>
+                                {% endif %}
                             </tbody>
                         </table>
                     </div>
                 </div>
+                
+                {% if is_paginated %}
                 <div class="card-footer">
                     <nav aria-label="学生列表分页">
                         <ul class="pagination justify-content-center mb-0">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一页</a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">下一页</a>
-                            </li>
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                                </li>
+                            {% endif %}
+                            
+                            {% for i in paginator.page_range %}
+                                {% if page_obj.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ i }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                                </li>
+                            {% endif %}
                         </ul>
                     </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加学生模态框 -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">添加学生</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'teachers:add_student' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">姓名</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">性别</label>
+                                <select name="gender" class="form-select" required>
+                                    <option value="male">男</option>
+                                    <option value="female">女</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">联系电话</label>
+                                <input type="tel" name="phone" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">家长电话</label>
+                                <input type="tel" name="parent_phone" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">钢琴等级</label>
+                                <select name="level" class="form-select" required>
+                                    {% for level in piano_levels %}
+                                        <option value="{{ level.id }}">{{ level.get_level_display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">生日</label>
+                                <input type="date" name="birthday" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">头像</label>
+                            <input type="file" name="avatar" class="form-control" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">备注</label>
+                            <textarea name="notes" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary">添加</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- 删除确认模态框 -->
+    {% for student in students %}
+    <div class="modal fade" id="deleteModal{{ student.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除学生"{{ student.name }}"吗？此操作不可恢复。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <form method="post" action="{% url 'teachers:delete_student' student.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">确认删除</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/skin/default/layer.js' %}"></script>
@@ -610,6 +552,30 @@
                 mainContent.style.marginLeft = '280px';
             }
         });
+        
+        // 显示成功消息
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    layer.msg('{{ message }}', {icon: 1, time: 2000});
+                {% else %}
+                    layer.msg('{{ message }}', {icon: 2, time: 2000});
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
+        // 添加系统时间显示功能
+        function updateSystemTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 初始化并每秒更新一次
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
     </script>
 </body>
 </html> 

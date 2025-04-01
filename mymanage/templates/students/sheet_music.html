@@ -194,12 +194,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'students:exam' %}">
+                        <a class="nav-link" href="{% url 'students:attendance' %}">
                             <i class="fas fa-calendar-check"></i> 考勤记录
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'students:grades' %}">
+                        <a class="nav-link active" href="{% url 'students:sheet_music' %}">
                             <i class="fas fa-file-alt"></i> 在线曲谱
                         </a>
                     </li>
@@ -216,215 +216,167 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><i class="fas fa-file-alt"></i> 在线曲谱</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-heart"></i> 收藏夹
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-history"></i> 最近浏览
-                            </button>
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                {% if student.user.avatar %}
+                                <img src="{{ student.user.avatar.url }}" class="rounded-circle" width="30" height="30">
+                                {% else %}
+                                <img src="{% static 'img/default-avatar.jpg' %}" class="rounded-circle" width="30" height="30">
+                                {% endif %}
+                                <span class="ms-1">{{ student.name }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'students:profile' %}"><i class="fas fa-user me-2"></i>个人资料</a></li>
+                                <li><a class="dropdown-item" href="{% url 'students:profile' %}"><i class="fas fa-cog me-2"></i>账号设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
 
                 <!-- 搜索和筛选 -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" class="form-control" placeholder="搜索曲谱..." autocomplete="name">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="row">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form method="get" action="{% url 'students:sheet_music' %}" class="row g-3">
                             <div class="col-md-6">
-                                <select class="form-select filter-dropdown">
-                                    <option selected>难度等级</option>
-                                    <option>初级</option>
-                                    <option>中级</option>
-                                    <option>高级</option>
-                                </select>
+                                <div class="search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" name="search_query" class="form-control" placeholder="搜索曲谱..." value="{{ form.search_query.value|default:'' }}">
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <select class="form-select filter-dropdown">
-                                    <option selected>曲风分类</option>
-                                    <option>古典</option>
-                                    <option>流行</option>
-                                    <option>爵士</option>
-                                    <option>民谣</option>
-                                </select>
+                            <div class="col-md-3 col-6">
+                                <div class="filter-dropdown">
+                                    <select name="difficulty" class="form-select">
+                                        {% for value, text in form.difficulty.field.choices %}
+                                        <option value="{{ value }}" {% if form.difficulty.value == value %}selected{% endif %}>{{ text }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
-                        </div>
+                            <div class="col-md-3 col-6">
+                                <div class="filter-dropdown">
+                                    <select name="genre" class="form-select">
+                                        {% for value, text in form.genre.field.choices %}
+                                        <option value="{{ value }}" {% if form.genre.value == value %}selected{% endif %}>{{ text }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-1"></i> 搜索
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
                 <!-- 曲谱列表 -->
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
-                    <!-- 曲谱1 -->
-                    <div class="col">
-                        <div class="card sheet-card">
-                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="月光奏鸣曲">
-                            <span class="difficulty intermediate">中级</span>
-                            <div class="card-body">
-                                <h5 class="card-title">月光奏鸣曲</h5>
-                                <p class="card-text">贝多芬</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">上传时间: 2023-09-15</small>
+                <div class="row">
+                    {% if sheet_music_list %}
+                        {% for sheet in sheet_music_list %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card sheet-card">
+                                {% if sheet.cover_image %}
+                                <img src="{{ sheet.cover_image.url }}" class="card-img-top" alt="{{ sheet.title }}">
+                                {% else %}
+                                <img src="{% static 'img/default-sheet.jpg' %}" class="card-img-top" alt="{{ sheet.title }}">
+                                {% endif %}
+                                <span class="difficulty {{ sheet.difficulty }}">
+                                    {% if sheet.difficulty == 'beginner' %}
+                                        初级
+                                    {% elif sheet.difficulty == 'intermediate' %}
+                                        中级
+                                    {% elif sheet.difficulty == 'advanced' %}
+                                        高级
+                                    {% endif %}
+                                </span>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ sheet.title }}</h5>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <i class="fas fa-user"></i> {{ sheet.composer }}
+                                        </small>
+                                    </p>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <i class="fas fa-music"></i> 
+                                            {% if sheet.genre == 'classical' %}
+                                                古典
+                                            {% elif sheet.genre == 'pop' %}
+                                                流行
+                                            {% elif sheet.genre == 'jazz' %}
+                                                爵士
+                                            {% elif sheet.genre == 'folk' %}
+                                                民谣
+                                            {% endif %}
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="card-footer d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">上传于 {{ sheet.upload_time|date:"Y年m月d日" }}</small>
                                     <div>
-                                        <span class="badge bg-primary">古典</span>
+                                        <a href="{% url 'students:sheet_music_detail' sheet.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> 查看
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger favorite-btn" data-sheet-id="{{ sheet.id }}" data-is-favorite="{% if sheet.id in favorites %}true{% else %}false{% endif %}">
+                                            <i class="{% if sheet.id in favorites %}fas{% else %}far{% endif %} fa-heart"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <div class="d-grid">
-                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sheetModal">
-                                        <i class="fas fa-eye"></i> 查看曲谱
-                                    </button>
-                                </div>
-                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- 曲谱2 -->
-                    <div class="col">
-                        <div class="card sheet-card">
-                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="致爱丽丝">
-                            <span class="difficulty beginner">初级</span>
-                            <div class="card-body">
-                                <h5 class="card-title">致爱丽丝</h5>
-                                <p class="card-text">贝多芬</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">上传时间: 2023-09-10</small>
-                                    <div>
-                                        <span class="badge bg-primary">古典</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-grid">
-                                    <button class="btn btn-primary">
-                                        <i class="fas fa-eye"></i> 查看曲谱
-                                    </button>
-                                </div>
-                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-music fs-1 text-muted mb-3"></i>
+                            <h4>暂无符合条件的曲谱</h4>
+                            <p class="text-muted">尝试调整搜索条件或联系老师添加新曲谱</p>
                         </div>
-                    </div>
-                    
-                    <!-- 曲谱3 -->
-                    <div class="col">
-                        <div class="card sheet-card">
-                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="梦中的婚礼">
-                            <span class="difficulty beginner">初级</span>
-                            <div class="card-body">
-                                <h5 class="card-title">梦中的婚礼</h5>
-                                <p class="card-text">Richard Clayderman</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">上传时间: 2023-09-05</small>
-                                    <div>
-                                        <span class="badge bg-info">流行</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-grid">
-                                    <button class="btn btn-primary">
-                                        <i class="fas fa-eye"></i> 查看曲谱
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 曲谱4 -->
-                    <div class="col">
-                        <div class="card sheet-card">
-                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="肖邦夜曲">
-                            <span class="difficulty advanced">高级</span>
-                            <div class="card-body">
-                                <h5 class="card-title">夜曲 Op.9 No.2</h5>
-                                <p class="card-text">肖邦</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">上传时间: 2023-08-28</small>
-                                    <div>
-                                        <span class="badge bg-primary">古典</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-grid">
-                                    <button class="btn btn-primary">
-                                        <i class="fas fa-eye"></i> 查看曲谱
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 曲谱5 -->
-                    <div class="col">
-                        <div class="card sheet-card">
-                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="卡农">
-                            <span class="difficulty intermediate">中级</span>
-                            <div class="card-body">
-                                <h5 class="card-title">卡农</h5>
-                                <p class="card-text">帕赫贝尔</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">上传时间: 2023-08-20</small>
-                                    <div>
-                                        <span class="badge bg-primary">古典</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-grid">
-                                    <button class="btn btn-primary">
-                                        <i class="fas fa-eye"></i> 查看曲谱
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 曲谱6 -->
-                    <div class="col">
-                        <div class="card sheet-card">
-                            <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" class="card-img-top" alt="天空之城">
-                            <span class="difficulty intermediate">中级</span>
-                            <div class="card-body">
-                                <h5 class="card-title">天空之城</h5>
-                                <p class="card-text">久石让</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">上传时间: 2023-08-15</small>
-                                    <div>
-                                        <span class="badge bg-info">流行</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-grid">
-                                    <button class="btn btn-primary">
-                                        <i class="fas fa-eye"></i> 查看曲谱
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
-
+                
                 <!-- 分页 -->
-                <nav aria-label="曲谱分页">
+                {% if sheet_music_list.has_other_pages %}
+                <nav aria-label="Page navigation" class="my-4">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一页</a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        {% if sheet_music_list.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="#">下一页</a>
+                            <a class="page-link" href="?page={{ sheet_music_list.previous_page_number }}{% if form.search_query.value %}&search_query={{ form.search_query.value }}{% endif %}{% if form.difficulty.value %}&difficulty={{ form.difficulty.value }}{% endif %}{% if form.genre.value %}&genre={{ form.genre.value }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
                         </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% for i in sheet_music_list.paginator.page_range %}
+                            {% if sheet_music_list.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}{% if form.search_query.value %}&search_query={{ form.search_query.value }}{% endif %}{% if form.difficulty.value %}&difficulty={{ form.difficulty.value }}{% endif %}{% if form.genre.value %}&genre={{ form.genre.value }}{% endif %}">{{ i }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if sheet_music_list.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ sheet_music_list.next_page_number }}{% if form.search_query.value %}&search_query={{ form.search_query.value }}{% endif %}{% if form.difficulty.value %}&difficulty={{ form.difficulty.value }}{% endif %}{% if form.genre.value %}&genre={{ form.genre.value }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                        {% endif %}
                     </ul>
                 </nav>
+                {% endif %}
             </main>
         </div>
     </div>
@@ -434,37 +386,37 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="sheetModalLabel">月光奏鸣曲 - 贝多芬</h5>
+                    <h5 class="modal-title" id="sheetModalLabel">曲谱详情</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="sheet-viewer">
                         <div class="sheet-controls">
-                            <button class="btn btn-outline-secondary">
+                            <button class="btn btn-outline-secondary zoom-out">
                                 <i class="fas fa-minus"></i>
                             </button>
-                            <button class="btn btn-outline-secondary">
+                            <button class="btn btn-outline-secondary zoom-reset">
                                 <i class="fas fa-search"></i> 100%
                             </button>
-                            <button class="btn btn-outline-secondary">
+                            <button class="btn btn-outline-secondary zoom-in">
                                 <i class="fas fa-plus"></i>
                             </button>
-                            <button class="btn btn-outline-secondary">
+                            <button class="btn btn-outline-secondary fullscreen">
                                 <i class="fas fa-expand"></i>
                             </button>
                         </div>
-                        <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" alt="月光奏鸣曲曲谱第1页">
-                        <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" alt="月光奏鸣曲曲谱第2页">
-                        <img src="https://img.51miz.com/Element/00/88/13/39/7b2a9c8e_E881339_a4ac1b9d.jpg" alt="月光奏鸣曲曲谱第3页">
+                        <div id="sheet-images" class="text-center">
+                            <!-- 曲谱图片将通过JavaScript动态加载 -->
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary">
+                    <a href="#" id="download-link" class="btn btn-primary" download>
                         <i class="fas fa-download"></i> 下载曲谱
-                    </button>
-                    <button type="button" class="btn btn-danger">
-                        <i class="fas fa-heart"></i> 收藏
+                    </a>
+                    <button type="button" class="btn btn-danger toggle-favorite">
+                        <i class="far fa-heart"></i> 收藏
                     </button>
                 </div>
             </div>
@@ -474,5 +426,169 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = '{{ csrf_token }}';
+            
+            // 收藏按钮点击事件
+            const favoriteBtns = document.querySelectorAll('.favorite-btn');
+            favoriteBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const sheetId = this.getAttribute('data-sheet-id');
+                    const isFavorite = this.getAttribute('data-is-favorite') === 'true';
+                    const iconElement = this.querySelector('i');
+                    
+                    // 发送请求收藏/取消收藏
+                    fetch(`{% url 'students:toggle_favorite' 0 %}`.replace('0', sheetId), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 更新按钮状态和图标
+                            this.setAttribute('data-is-favorite', data.is_favorite);
+                            
+                            if (data.is_favorite) {
+                                iconElement.classList.remove('far');
+                                iconElement.classList.add('fas');
+                            } else {
+                                iconElement.classList.remove('fas');
+                                iconElement.classList.add('far');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            });
+            
+            // 曲谱详情模态框功能
+            const sheetModal = document.getElementById('sheetModal');
+            if (sheetModal) {
+                sheetModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const sheetId = button.getAttribute('data-sheet-id');
+                    const modalTitle = sheetModal.querySelector('.modal-title');
+                    const sheetImages = document.getElementById('sheet-images');
+                    const downloadLink = document.getElementById('download-link');
+                    const toggleFavorite = sheetModal.querySelector('.toggle-favorite');
+                    
+                    // 清空之前的图片
+                    sheetImages.innerHTML = '';
+                    
+                    // 加载曲谱详情
+                    fetch(`{% url 'students:sheet_music_detail_api' 0 %}`.replace('0', sheetId))
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // 设置标题
+                                modalTitle.textContent = `${data.sheet.title} - ${data.sheet.composer}`;
+                                
+                                // 加载图片
+                                data.sheet.pages.forEach(page => {
+                                    const img = document.createElement('img');
+                                    img.src = page.image_url;
+                                    img.alt = `${data.sheet.title} 第${page.page_number}页`;
+                                    img.className = 'img-fluid mb-3';
+                                    sheetImages.appendChild(img);
+                                });
+                                
+                                // 设置下载链接
+                                downloadLink.href = data.sheet.pdf_url;
+                                
+                                // 设置收藏状态
+                                const favoriteIcon = toggleFavorite.querySelector('i') || toggleFavorite.appendChild(document.createElement('i'));
+                                if (data.is_favorite) {
+                                    favoriteIcon.className = 'fas fa-heart';
+                                } else {
+                                    favoriteIcon.className = 'far fa-heart';
+                                }
+                                
+                                // 设置收藏按钮点击事件
+                                toggleFavorite.onclick = function() {
+                                    fetch(`{% url 'students:toggle_favorite' 0 %}`.replace('0', sheetId), {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRFToken': csrfToken,
+                                            'Content-Type': 'application/json'
+                                        }
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            if (data.is_favorite) {
+                                                favoriteIcon.className = 'fas fa-heart';
+                                            } else {
+                                                favoriteIcon.className = 'far fa-heart';
+                                            }
+                                            
+                                            // 同步更新列表中的收藏状态
+                                            const listBtn = document.querySelector(`.favorite-btn[data-sheet-id="${sheetId}"]`);
+                                            if (listBtn) {
+                                                listBtn.setAttribute('data-is-favorite', data.is_favorite);
+                                                const listIcon = listBtn.querySelector('i');
+                                                if (data.is_favorite) {
+                                                    listIcon.classList.remove('far');
+                                                    listIcon.classList.add('fas');
+                                                } else {
+                                                    listIcon.classList.remove('fas');
+                                                    listIcon.classList.add('far');
+                                                }
+                                            }
+                                        }
+                                    });
+                                };
+                            }
+                        });
+                });
+                
+                // 缩放功能
+                const zoomIn = sheetModal.querySelector('.zoom-in');
+                const zoomOut = sheetModal.querySelector('.zoom-out');
+                const zoomReset = sheetModal.querySelector('.zoom-reset');
+                const fullscreen = sheetModal.querySelector('.fullscreen');
+                
+                let currentZoom = 100;
+                
+                zoomIn.addEventListener('click', function() {
+                    currentZoom += 10;
+                    applyZoom();
+                });
+                
+                zoomOut.addEventListener('click', function() {
+                    currentZoom = Math.max(50, currentZoom - 10);
+                    applyZoom();
+                });
+                
+                zoomReset.addEventListener('click', function() {
+                    currentZoom = 100;
+                    applyZoom();
+                });
+                
+                fullscreen.addEventListener('click', function() {
+                    const viewer = sheetModal.querySelector('.sheet-viewer');
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    } else {
+                        viewer.requestFullscreen();
+                    }
+                });
+                
+                function applyZoom() {
+                    const images = sheetModal.querySelectorAll('#sheet-images img');
+                    images.forEach(img => {
+                        img.style.width = `${currentZoom}%`;
+                    });
+                    zoomReset.querySelector('i').nextSibling.textContent = ` ${currentZoom}%`;
+                }
+            }
+        });
+    </script>
 </body>
 </html> 

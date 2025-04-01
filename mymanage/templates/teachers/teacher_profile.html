@@ -7,76 +7,82 @@
     <title>个人设置 - 苗韵琴行管理系统</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
     <style>
         :root {
-            --primary-color: #3a5a78;
-            --secondary-color: #f8f9fa;
-            --accent-color: #e3b04b;
-            --text-color: #333;
-            --sidebar-width: 280px;
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
         }
         
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
             color: var(--text-color);
         }
         
         .sidebar {
-            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
             height: 100vh;
             position: fixed;
-            top: 0;
-            left: 0;
-            background-color: var(--primary-color);
-            color: white;
-            padding-top: 20px;
-            transition: all 0.3s;
-            z-index: 1000;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
         }
         
-        .sidebar-header {
-            padding: 0 20px 20px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .sidebar-header img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-        
-        .sidebar-menu a {
-            padding: 12px 20px;
-            color: rgba(255, 255, 255, 0.8);
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            text-decoration: none;
-            transition: all 0.3s;
         }
         
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 4px solid var(--accent-color);
-        }
-        
-        .sidebar-menu i {
-            margin-right: 10px;
-            width: 20px;
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
             text-align: center;
         }
         
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
         .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            transition: all 0.3s;
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar h5 {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
         
         .card {
@@ -113,6 +119,7 @@
             border: 4px solid white;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             margin-bottom: 15px;
+            object-fit: cover;
         }
         
         .profile-stats {
@@ -177,47 +184,19 @@
             margin-right: 15px;
         }
         
-        @media (max-width: 992px) {
+        @media (max-width: 768px) {
             .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
-            
-            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
-                display: none;
-            }
-            
-            .sidebar-menu a {
-                padding: 15px 0;
-                justify-content: center;
-            }
-            
-            .sidebar-menu i {
-                margin-right: 0;
-                font-size: 18px;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 0;
+                width: 100%;
+                height: auto;
+                position: relative;
             }
             
             .main-content {
                 margin-left: 0;
             }
             
-            .mobile-toggle {
-                display: block !important;
-            }
-            
-            .profile-stats {
-                flex-direction: column;
-                gap: 15px;
+            .sidebar .nav-link:hover {
+                transform: none;
             }
         }
         
@@ -240,49 +219,52 @@
         <i class="fas fa-bars"></i>
     </button>
     
-    <div class="sidebar">
-        <div class="sidebar-header d-flex align-items-center">
-            <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="me-2">
-            <span class="ms-1">
-                <div class="fw-bold">{{ request.user.teacher_profile.name|default:"王老师" }}</div>
-                <div class="small text-white-50">钢琴教师</div>
-            </span>
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            {% if teacher.avatar %}
+                <img src="{{ teacher.avatar.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ teacher.name|default:"苗韵琴行" }}</h5>
         </div>
-        
-        <div class="sidebar-menu">
-            <a href="{% url 'teachers:dashboard' %}">
-                <i class="fas fa-home"></i>
-                <span>仪表盘</span>
-            </a>
-            <a href="{% url 'teachers:student_list' %}">
-                <i class="fas fa-user-graduate"></i>
-                <span>学生管理</span>
-            </a>
-            <a href="{% url 'teachers:course_list' %}">
-                <i class="fas fa-book"></i>
-                <span>课程管理</span>
-            </a>
-            <a href="{% url 'teachers:attendance_management' %}">
-                <i class="fas fa-clipboard-check"></i>
-                <span>考勤管理</span>
-            </a>
-            <a href="{% url 'teachers:finance_management' %}">
-                <i class="fas fa-yuan-sign"></i>
-                <span>财务管理</span>
-            </a>
-            <a href="{% url 'teachers:sheet_music_management' %}">
-                <i class="fas fa-music"></i>
-                <span>曲谱管理</span>
-            </a>
-            <a href="{% url 'teachers:profile' %}" class="active">
-                <i class="fas fa-user-cog"></i>
-                <span>个人设置</span>
-            </a>
-            <a href="{% url 'logout' %}">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>退出登录</span>
-            </a>
-        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:dashboard' %}">
+                    <i class="fas fa-home"></i> 控制面板
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:students' %}">
+                    <i class="fas fa-users"></i> 学生管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:attendance' %}">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:sheet_music' %}">
+                    <i class="fas fa-music"></i> 曲谱管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:finance' %}">
+                    <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
     </div>
     
     <div class="main-content">
@@ -291,16 +273,20 @@
                 <h2 class="mb-0">个人设置</h2>
                 <div>
                     <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
-                    <button class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-bell me-1"></i>
-                        <span class="badge bg-danger">{{ unread_notifications_count|default:"0" }}</span>
-                    </button>
+                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime">00:00:00</span>
+                    </div>
                 </div>
             </div>
             
             <div class="profile-header text-center">
-                <img src="{{ request.user.teacher_profile.avatar.url|default:'#' }}" alt="教师头像" class="profile-avatar">
-                <h3 class="mb-2">{{ request.user.teacher_profile.name|default:"王老师" }}</h3>
+                {% if teacher_profile.avatar %}
+                    <img src="{{ teacher_profile.avatar.url }}" alt="{{ teacher_profile.name }}" class="profile-avatar">
+                {% else %}
+                    <img src="{% static 'img/default_avatar.jpg' %}" alt="默认头像" class="profile-avatar">
+                {% endif %}
+                <h3 class="mb-2">{{ teacher_profile.name }}</h3>
                 <p class="mb-0">钢琴教师</p>
                 
                 <div class="profile-stats">
@@ -351,41 +337,46 @@
                                 <div class="card-body">
                                     <form method="post" action="{% url 'teachers:update_profile' %}" enctype="multipart/form-data">
                                         {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_profile">
                                         <div class="row mb-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">姓名</label>
-                                                <input type="text" name="name" class="form-control" value="{{ request.user.teacher_profile.name|default:'王老师' }}" autocomplete="name">
+                                                <input type="text" name="name" class="form-control" value="{{ teacher_profile.name }}" required>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">性别</label>
                                                 <select class="form-select" name="gender">
-                                                    <option value="男" {% if request.user.teacher_profile.gender == '男' %}selected{% endif %}>男</option>
-                                                    <option value="女" {% if request.user.teacher_profile.gender == '女' %}selected{% endif %}>女</option>
+                                                    <option value="男" {% if teacher_profile.gender == '男' %}selected{% endif %}>男</option>
+                                                    <option value="女" {% if teacher_profile.gender == '女' %}selected{% endif %}>女</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">手机号码</label>
-                                                <input type="tel" name="phone" class="form-control" value="{{ request.user.teacher_profile.phone|default:'13800138000' }}" autocomplete="tel">
+                                                <input type="tel" name="phone" class="form-control" value="{{ teacher_profile.phone }}" required>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">邮箱</label>
-                                                <input type="email" name="email" class="form-control" value="{{ request.user.email|default:'teacher@example.com' }}" autocomplete="email">
+                                                <input type="email" name="email" class="form-control" value="{{ request.user.email }}" required>
                                             </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">头像</label>
+                                            <input type="file" name="avatar" class="form-control" accept="image/*">
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">教学专长</label>
                                             <select class="form-select" name="specialties" multiple>
-                                                <option value="钢琴基础课" {% if '钢琴基础课' in specialties %}selected{% endif %}>钢琴基础课</option>
-                                                <option value="钢琴进阶课" {% if '钢琴进阶课' in specialties %}selected{% endif %}>钢琴进阶课</option>
-                                                <option value="流行钢琴课" {% if '流行钢琴课' in specialties %}selected{% endif %}>流行钢琴课</option>
-                                                <option value="古典钢琴课" {% if '古典钢琴课' in specialties %}selected{% endif %}>古典钢琴课</option>
+                                                <option value="钢琴基础课" {% if '钢琴基础课' in teacher_profile.specialties %}selected{% endif %}>钢琴基础课</option>
+                                                <option value="钢琴进阶课" {% if '钢琴进阶课' in teacher_profile.specialties %}selected{% endif %}>钢琴进阶课</option>
+                                                <option value="流行钢琴课" {% if '流行钢琴课' in teacher_profile.specialties %}selected{% endif %}>流行钢琴课</option>
+                                                <option value="古典钢琴课" {% if '古典钢琴课' in teacher_profile.specialties %}selected{% endif %}>古典钢琴课</option>
                                             </select>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">个人简介</label>
-                                            <textarea class="form-control" name="bio" rows="4" autocomplete="off">{{ request.user.teacher_profile.bio|default:'从事钢琴教学15年，擅长儿童钢琴启蒙教育和古典钢琴教学。曾获得多项钢琴比赛奖项，培养的学生多次在各类比赛中获奖。' }}</textarea>
+                                            <textarea class="form-control" name="bio" rows="4">{{ teacher_profile.bio }}</textarea>
                                         </div>
                                         <button type="submit" class="btn btn-primary">保存修改</button>
                                     </form>
@@ -418,7 +409,7 @@
                                             </div>
                                             <div>
                                                 <h6 class="mb-1">手机验证</h6>
-                                                <p class="mb-0 text-muted">已绑定：{{ request.user.teacher_profile.phone|default:'138****8000'|slice:":3" }}****{{ request.user.teacher_profile.phone|default:'13800138000'|slice:"-4:" }}</p>
+                                                <p class="mb-0 text-muted">已绑定：{{ teacher_profile.phone|slice:":3" }}****{{ teacher_profile.phone|slice:"-4:" }}</p>
                                             </div>
                                         </div>
                                         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePhoneModal">修改</button>
@@ -430,7 +421,7 @@
                                             </div>
                                             <div>
                                                 <h6 class="mb-1">邮箱验证</h6>
-                                                <p class="mb-0 text-muted">已绑定：{{ request.user.email|default:'teacher@example.com'|slice:":3" }}****@{{ request.user.email|default:'teacher@example.com'|cut:'@'|slice:"-10:" }}</p>
+                                                <p class="mb-0 text-muted">已绑定：{{ request.user.email|slice:":3" }}****@{{ request.user.email|cut:'@'|slice:"-10:" }}</p>
                                             </div>
                                         </div>
                                         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">修改</button>
@@ -457,8 +448,9 @@
                                     <h5 class="mb-0">通知设置</h5>
                                 </div>
                                 <div class="card-body">
-                                    <form method="post" action="{% url 'teachers:update_notifications' %}">
+                                    <form method="post" action="{% url 'teachers:profile' %}">
                                         {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_notifications">
                                         <div class="mb-4">
                                             <h6 class="mb-3">系统通知</h6>
                                             <div class="form-check form-switch mb-2">
@@ -503,8 +495,9 @@
                                     <h5 class="mb-0">隐私设置</h5>
                                 </div>
                                 <div class="card-body">
-                                    <form method="post" action="{% url 'teachers:update_privacy' %}">
+                                    <form method="post" action="{% url 'teachers:profile' %}">
                                         {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_privacy">
                                         <div class="mb-4">
                                             <h6 class="mb-3">个人信息可见性</h6>
                                             <div class="mb-3">
@@ -523,13 +516,17 @@
                                                     <option value="all" {% if privacy_settings.email_visibility == 'all' %}selected{% endif %}>所有人可见</option>
                                                 </select>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">个人简介</label>
-                                                <select class="form-select" name="bio_visibility">
-                                                    <option value="self" {% if privacy_settings.bio_visibility == 'self' %}selected{% endif %}>仅自己可见</option>
-                                                    <option value="students" {% if privacy_settings.bio_visibility == 'students' %}selected{% endif %}>仅学生可见</option>
-                                                    <option value="all" {% if privacy_settings.bio_visibility == 'all' %}selected{% endif %}>所有人可见</option>
-                                                </select>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <h6 class="mb-3">其他设置</h6>
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" name="show_online_status" {% if privacy_settings.show_online_status %}checked{% endif %}>
+                                                <label class="form-check-label">显示在线状态</label>
+                                            </div>
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" name="show_last_login" {% if privacy_settings.show_last_login %}checked{% endif %}>
+                                                <label class="form-check-label">显示最近登录时间</label>
                                             </div>
                                         </div>
                                         
@@ -544,7 +541,42 @@
         </div>
     </div>
     
+    <!-- 修改密码模态框 -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">修改密码</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'teachers:profile' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="change_password">
+                        <div class="mb-3">
+                            <label class="form-label">当前密码</label>
+                            <input type="password" name="old_password" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">新密码</label>
+                            <input type="password" name="new_password" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">确认新密码</label>
+                            <input type="password" name="confirm_password" class="form-control" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary">确认修改</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/skin/default/layer.js' %}"></script>
     <script>
         // 移动端侧边栏切换
         document.querySelector('.mobile-toggle').addEventListener('click', function() {
@@ -559,6 +591,26 @@
                 mainContent.style.marginLeft = '280px';
             }
         });
+        
+        // 添加表单验证代码
+        {% if messages %}
+            {% for message in messages %}
+                layer.msg('{{ message }}', {icon: {% if message.tags == 'success' %}1{% else %}2{% endif %}, time: 2000});
+            {% endfor %}
+        {% endif %}
+        
+        // 添加系统时间显示功能
+        function updateSystemTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 初始化并每秒更新一次
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
     </script>
 </body>
 </html> 

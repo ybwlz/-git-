@@ -7,77 +7,97 @@
     <title>财务管理 - 苗韵琴行管理系统</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
     <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
     <style>
         :root {
-            --primary-color: #3a5a78;
-            --secondary-color: #f8f9fa;
-            --accent-color: #e3b04b;
-            --text-color: #333;
-            --sidebar-width: 280px;
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
         }
         
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background-color: #f5f7fa;
-            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
         }
         
         .sidebar {
-            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
             height: 100vh;
             position: fixed;
-            top: 0;
-            left: 0;
-            background-color: var(--primary-color);
-            color: white;
-            padding-top: 20px;
-            transition: all 0.3s;
-            z-index: 1000;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
         }
         
-        .sidebar-header {
-            padding: 0 20px 20px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .sidebar-header img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-        
-        .sidebar-menu a {
-            padding: 12px 20px;
-            color: rgba(255, 255, 255, 0.8);
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            text-decoration: none;
-            transition: all 0.3s;
         }
         
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 4px solid var(--accent-color);
-        }
-        
-        .sidebar-menu i {
-            margin-right: 10px;
-            width: 20px;
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
             text-align: center;
         }
         
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
         .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            transition: all 0.3s;
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar h5 {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar .nav-link:hover {
+                transform: none;
+            }
         }
         
         .card {
@@ -218,49 +238,52 @@
         <i class="fas fa-bars"></i>
     </button>
     
-    <div class="sidebar">
-        <div class="sidebar-header d-flex align-items-center">
-            <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="me-2">
-            <span class="ms-1">
-                <div class="fw-bold">{{ request.user.teacher_profile.name|default:"王老师" }}</div>
-                <div class="small text-white-50">钢琴教师</div>
-            </span>
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            {% if teacher.avatar %}
+                <img src="{{ teacher.avatar.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ teacher.name|default:"苗韵琴行" }}</h5>
         </div>
-        
-        <div class="sidebar-menu">
-            <a href="{% url 'teachers:dashboard' %}">
-                <i class="fas fa-home"></i>
-                <span>仪表盘</span>
-            </a>
-            <a href="{% url 'teachers:student_list' %}">
-                <i class="fas fa-user-graduate"></i>
-                <span>学生管理</span>
-            </a>
-            <a href="{% url 'teachers:course_list' %}">
-                <i class="fas fa-book"></i>
-                <span>课程管理</span>
-            </a>
-            <a href="{% url 'teachers:attendance_management' %}">
-                <i class="fas fa-clipboard-check"></i>
-                <span>考勤管理</span>
-            </a>
-            <a href="{% url 'teachers:sheet_music_management' %}">
-                <i class="fas fa-music"></i>
-                <span>曲谱管理</span>
-            </a>
-            <a href="{% url 'teachers:finance_management' %}" class="active">
-                <i class="fas fa-yuan-sign"></i>
-                <span>财务管理</span>
-            </a>
-            <a href="{% url 'teachers:profile' %}">
-                <i class="fas fa-user-cog"></i>
-                <span>个人设置</span>
-            </a>
-            <a href="{% url 'logout' %}">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>退出登录</span>
-            </a>
-        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:dashboard' %}">
+                    <i class="fas fa-home"></i> 控制面板
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:students' %}">
+                    <i class="fas fa-users"></i> 学生管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:attendance' %}">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:sheet_music' %}">
+                    <i class="fas fa-music"></i> 曲谱管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'teachers:finance' %}">
+                    <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
     </div>
     
     <div class="main-content">
@@ -269,319 +292,181 @@
                 <h2 class="mb-0">财务管理</h2>
                 <div>
                     <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
-                    <button class="btn btn-sm btn-outline-primary me-2">
-                        <i class="fas fa-bell me-1"></i>
-                        <span class="badge bg-danger">{{ unread_notifications_count|default:"0" }}</span>
-                    </button>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
-                        <i class="fas fa-plus me-2"></i>添加收支记录
-                    </button>
+                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime">00:00:00</span>
+                    </div>
                 </div>
             </div>
             
-            <div class="finance-stats mb-4">
-                <div class="stat-card">
-                    <div class="icon text-primary">
-                        <i class="fas fa-money-bill-wave"></i>
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="display-4 mb-3 text-primary">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <h5 class="card-title">本月收入</h5>
+                            <p class="card-text fs-2 fw-bold">¥{{ month_income|floatformat:2 }}</p>
+                        </div>
                     </div>
-                    <div class="value">¥25,800</div>
-                    <div class="label">本月收入</div>
                 </div>
-                <div class="stat-card">
-                    <div class="icon text-success">
-                        <i class="fas fa-chart-line"></i>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="display-4 mb-3 text-success">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h5 class="card-title">年度收入</h5>
+                            <p class="card-text fs-2 fw-bold">¥{{ year_income|floatformat:2 }}</p>
+                        </div>
                     </div>
-                    <div class="value">¥158,600</div>
-                    <div class="label">年度收入</div>
                 </div>
-                <div class="stat-card">
-                    <div class="icon text-warning">
-                        <i class="fas fa-clock"></i>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="display-4 mb-3 text-warning">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <h5 class="card-title">待收款项</h5>
+                            <p class="card-text fs-2 fw-bold">¥{{ pending_payments|floatformat:2 }}</p>
+                        </div>
                     </div>
-                    <div class="value">¥3,200</div>
-                    <div class="label">待收学费</div>
                 </div>
-                <div class="stat-card">
-                    <div class="icon text-info">
-                        <i class="fas fa-user-graduate"></i>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="display-4 mb-3 text-danger">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <h5 class="card-title">逾期金额</h5>
+                            <p class="card-text fs-2 fw-bold">¥{{ overdue_payments|floatformat:2 }}</p>
+                        </div>
                     </div>
-                    <div class="value">42</div>
-                    <div class="label">缴费学生数</div>
                 </div>
             </div>
             
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">收入趋势</h5>
+            <div class="row mb-4">
+                <div class="col-md-7 mb-4 mb-md-0">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">收入统计</h5>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="timeRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{ selected_period|default:"当月" }}
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="timeRangeDropdown">
+                                    <li><a class="dropdown-item" href="?period=month">当月</a></li>
+                                    <li><a class="dropdown-item" href="?period=quarter">本季度</a></li>
+                                    <li><a class="dropdown-item" href="?period=year">本年</a></li>
+                                </ul>
+                            </div>
                         </div>
                         <div class="card-body">
                             <canvas id="incomeChart" height="300"></canvas>
                         </div>
                     </div>
-                    
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">收支记录</h5>
-                            <div class="finance-filter">
-                                <select class="form-select form-select-sm">
-                                    <option selected>所有类型</option>
-                                    <option>学费收入</option>
-                                    <option>其他收入</option>
-                                    <option>支出</option>
-                                </select>
-                                <select class="form-select form-select-sm">
-                                    <option selected>本月</option>
-                                    <option>上月</option>
-                                    <option>近三个月</option>
-                                    <option>今年</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover transaction-table">
-                                    <thead>
-                                        <tr>
-                                            <th>日期</th>
-                                            <th>学生</th>
-                                            <th>类型</th>
-                                            <th>金额</th>
-                                            <th>状态</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>2023-05-20</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="https://img.zcool.cn/community/01cc3d5d3f5f51a8012187f4c73785.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像" style="width: 32px; height: 32px; border-radius: 50%;">
-                                                    <span>李明</span>
-                                                </div>
-                                            </td>
-                                            <td>学费收入</td>
-                                            <td class="text-success">+¥1,200</td>
-                                            <td>
-                                                <span class="transaction-status status-paid"></span>
-                                                已支付
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>2023-05-19</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像" style="width: 32px; height: 32px; border-radius: 50%;">
-                                                    <span>张华</span>
-                                                </div>
-                                            </td>
-                                            <td>学费收入</td>
-                                            <td class="text-success">+¥1,500</td>
-                                            <td>
-                                                <span class="transaction-status status-paid"></span>
-                                                已支付
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>2023-05-18</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="https://img.zcool.cn/community/0152295d3f5f52a8012187f4f73d8a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像" style="width: 32px; height: 32px; border-radius: 50%;">
-                                                    <span>王芳</span>
-                                                </div>
-                                            </td>
-                                            <td>学费收入</td>
-                                            <td class="text-success">+¥1,200</td>
-                                            <td>
-                                                <span class="transaction-status status-pending"></span>
-                                                待支付
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>2023-05-17</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像" style="width: 32px; height: 32px; border-radius: 50%;">
-                                                    <span>刘强</span>
-                                                </div>
-                                            </td>
-                                            <td>学费收入</td>
-                                            <td class="text-success">+¥1,500</td>
-                                            <td>
-                                                <span class="transaction-status status-overdue"></span>
-                                                已逾期
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>2023-05-16</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="https://img.zcool.cn/community/01a7625d3f5f52a8012187f4d5ab7a.jpg@1280w_1l_2o_100sh.jpg" class="avatar me-2" alt="学生头像" style="width: 32px; height: 32px; border-radius: 50%;">
-                                                    <span>赵丽</span>
-                                                </div>
-                                            </td>
-                                            <td>学费收入</td>
-                                            <td class="text-success">+¥1,200</td>
-                                            <td>
-                                                <span class="transaction-status status-paid"></span>
-                                                已支付
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <nav aria-label="收支记录分页">
-                                <ul class="pagination justify-content-center mb-0">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一页</a>
-                                    </li>
-                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">下一页</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
                 </div>
-                
-                <div class="col-lg-4">
-                    <div class="card mb-4">
+                <div class="col-md-5">
+                    <div class="card h-100">
                         <div class="card-header">
-                            <h5 class="mb-0">收入分布</h5>
+                            <h5 class="mb-0">收入分类</h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="incomeDistributionChart" height="300"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">待缴费提醒</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="list-group list-group-flush">
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">王芳</h6>
-                                            <small class="text-muted">学费：¥1,200</small>
-                                        </div>
-                                        <span class="badge bg-warning">3天后到期</span>
-                                    </div>
-                                </div>
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">刘强</h6>
-                                            <small class="text-muted">学费：¥1,500</small>
-                                        </div>
-                                        <span class="badge bg-danger">已逾期5天</span>
-                                    </div>
-                                </div>
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">陈静</h6>
-                                            <small class="text-muted">学费：¥1,200</small>
-                                        </div>
-                                        <span class="badge bg-warning">5天后到期</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <canvas id="categoryChart" height="300"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- 添加收支记录模态框 -->
-    <div class="modal fade" id="addTransactionModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">添加收支记录</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">近期交易记录</h5>
+                    <a href="{% url 'teachers:payments' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-list me-1"></i>全部记录
+                    </a>
                 </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="mb-3">
-                            <label class="form-label">类型</label>
-                            <select class="form-select" required>
-                                <option>学费收入</option>
-                                <option>其他收入</option>
-                                <option>支出</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">学生</label>
-                            <select class="form-select" required>
-                                <option>李明</option>
-                                <option>张华</option>
-                                <option>王芳</option>
-                                <option>刘强</option>
-                                <option>赵丽</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">金额</label>
-                            <div class="input-group">
-                                <span class="input-group-text">¥</span>
-                                <input type="number" class="form-control" required autocomplete="off">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">日期</label>
-                            <input type="date" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">备注</label>
-                            <textarea class="form-control" rows="3" autocomplete="off"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary">保存</button>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>学生</th>
+                                    <th>交易项目</th>
+                                    <th>金额</th>
+                                    <th>日期</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in recent_payments %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if payment.student.avatar %}
+                                                    <img src="{{ payment.student.avatar.url }}" alt="{{ payment.student.name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                {% else %}
+                                                    <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center me-2" style="width: 40px; height: 40px;">
+                                                        {{ payment.student.name|slice:":1" }}
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <div class="fw-bold">{{ payment.student.name }}</div>
+                                                    <small class="text-muted">{{ payment.student.phone|default:"无联系方式" }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ payment.category.name }}</td>
+                                        <td class="fw-bold">¥{{ payment.amount|floatformat:2 }}</td>
+                                        <td>{{ payment.created_at|date:"Y-m-d" }}</td>
+                                        <td>
+                                            {% if payment.status == 'paid' %}
+                                                <span class="badge bg-success rounded-pill">
+                                                    <span class="transaction-status status-paid"></span>已支付
+                                                </span>
+                                            {% elif payment.status == 'pending' %}
+                                                <span class="badge bg-warning rounded-pill">
+                                                    <span class="transaction-status status-pending"></span>待支付
+                                                </span>
+                                            {% elif payment.status == 'overdue' %}
+                                                <span class="badge bg-danger rounded-pill">
+                                                    <span class="transaction-status status-overdue"></span>已逾期
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{% url 'teachers:edit_payment' payment.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-success" onclick="markAsPaid({{ payment.id }})">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">
+                                            <div class="text-muted mb-2">
+                                                <i class="fas fa-receipt fa-3x"></i>
+                                            </div>
+                                            <p>暂无交易记录</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/skin/default/layer.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/skin/default/layer.js' %}"></script>
     <script>
         // 移动端侧边栏切换
         document.querySelector('.mobile-toggle').addEventListener('click', function() {
@@ -597,32 +482,46 @@
             }
         });
         
-        // 收入趋势图表
-        const incomeCtx = document.getElementById('incomeChart').getContext('2d');
-        const incomeChart = new Chart(incomeCtx, {
+        // 添加系统时间显示功能
+        function updateSystemTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 初始化并每秒更新一次
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
+        
+        // 收入图表
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        const incomeChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                labels: {{ chart_labels|safe }},
                 datasets: [{
-                    label: '月收入（元）',
-                    data: [25000, 28000, 24000, 26000, 25800, 27000],
-                    backgroundColor: 'rgba(58, 90, 120, 0.2)',
-                    borderColor: 'rgba(58, 90, 120, 1)',
+                    label: '收入（元）',
+                    data: {{ income_data|safe }},
+                    backgroundColor: 'rgba(108, 92, 231, 0.2)',
+                    borderColor: 'rgba(108, 92, 231, 1)',
                     borderWidth: 2,
-                    tension: 0.3,
-                    pointBackgroundColor: 'rgba(58, 90, 120, 1)',
+                    tension: 0.4,
+                    pointBackgroundColor: 'rgba(108, 92, 231, 1)',
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '¥' + value;
-                            }
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
                         }
                     }
                 },
@@ -630,23 +529,26 @@
                     legend: {
                         display: false
                     }
-                }
+                },
+                responsive: true,
+                maintainAspectRatio: false
             }
         });
         
-        // 收入分布饼图
-        const distributionCtx = document.getElementById('incomeDistributionChart').getContext('2d');
-        const distributionChart = new Chart(distributionCtx, {
+        // 收入分类饼图
+        const pieCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(pieCtx, {
             type: 'doughnut',
             data: {
-                labels: ['钢琴基础课', '钢琴进阶课', '流行钢琴课', '古典钢琴课'],
+                labels: {{ category_labels|safe }},
                 datasets: [{
-                    data: [40, 30, 20, 10],
+                    data: {{ category_data|safe }},
                     backgroundColor: [
-                        'rgba(58, 90, 120, 0.8)',
-                        'rgba(40, 167, 69, 0.8)',
-                        'rgba(227, 176, 75, 0.8)',
-                        'rgba(23, 162, 184, 0.8)'
+                        'rgba(108, 92, 231, 0.8)',
+                        'rgba(253, 121, 168, 0.8)',
+                        'rgba(162, 155, 254, 0.8)',
+                        'rgba(85, 239, 196, 0.8)',
+                        'rgba(250, 177, 160, 0.8)',
                     ],
                     borderWidth: 0
                 }]
@@ -658,9 +560,46 @@
                     legend: {
                         position: 'bottom'
                     }
-                }
+                },
+                cutout: '70%'
             }
         });
+        
+        // 标记为已支付
+        function markAsPaid(paymentId) {
+            if (confirm('确定将此项标记为已支付吗？')) {
+                fetch(`/teachers/finance/payments/${paymentId}/mark-as-paid/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        layer.msg('操作成功', {icon: 1, time: 2000});
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        layer.msg('操作失败：' + data.error, {icon: 2, time: 2000});
+                    }
+                })
+                .catch(error => {
+                    layer.msg('操作失败，请重试', {icon: 2, time: 2000});
+                });
+            }
+        }
+        
+        // 显示成功消息
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    layer.msg('{{ message }}', {icon: 1, time: 2000});
+                {% else %}
+                    layer.msg('{{ message }}', {icon: 2, time: 2000});
+                {% endif %}
+            {% endfor %}
+        {% endif %}
     </script>
 </body>
 </html> 

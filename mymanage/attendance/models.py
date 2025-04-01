@@ -5,8 +5,9 @@ import qrcode
 from io import BytesIO
 from django.core.files import File
 from PIL import Image
-from mymanage.students.models import Student
-from mymanage.courses.models import Course, CourseSchedule, Piano
+# 使用字符串引用模型，避免循环导入
+# from mymanage.students.models import Student
+# from mymanage.courses.models import Course, CourseSchedule, Piano
 from mymanage.users.models import User
 
 
@@ -14,8 +15,10 @@ class QRCode(models.Model):
     """
     二维码模型，用于生成和存储课程考勤的二维码
     """
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='qrcodes')
+    course = models.ForeignKey('courses.Course', on_delete=models.CASCADE, related_name='qrcodes')
     uuid = models.UUIDField('唯一标识', default=uuid.uuid4, editable=False)
+    # 添加code字段以保持兼容性
+    code = models.CharField('二维码字符串', max_length=100, blank=True, null=True)
     created_at = models.DateTimeField('创建时间', auto_now_add=True)
     expires_at = models.DateTimeField('过期时间')
     qr_code_image = models.ImageField('二维码图片', upload_to='qrcodes/', blank=True, null=True)
@@ -29,6 +32,10 @@ class QRCode(models.Model):
         return f"二维码-{self.course.name}-{self.created_at.strftime('%Y-%m-%d %H:%M')}"
     
     def save(self, *args, **kwargs):
+        # 设置code字段与uuid一致
+        if not self.code:
+            self.code = str(self.uuid)
+            
         # 生成二维码图片
         if not self.qr_code_image:
             qr = qrcode.QRCode(
@@ -65,8 +72,8 @@ class AttendanceSession(models.Model):
         ('closed', '已关闭'),
     )
     
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='attendance_sessions')
-    schedule = models.ForeignKey(CourseSchedule, on_delete=models.CASCADE, related_name='attendance_sessions')
+    course = models.ForeignKey('courses.Course', on_delete=models.CASCADE, related_name='attendance_sessions')
+    schedule = models.ForeignKey('courses.CourseSchedule', on_delete=models.CASCADE, related_name='attendance_sessions')
     qrcode = models.OneToOneField(QRCode, on_delete=models.SET_NULL, null=True, related_name='session')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_sessions')
     start_time = models.DateTimeField('开始时间', auto_now_add=True)
@@ -102,8 +109,8 @@ class AttendanceRecord(models.Model):
     )
     
     session = models.ForeignKey(AttendanceSession, on_delete=models.CASCADE, related_name='records')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendance_records')
-    piano = models.ForeignKey(Piano, on_delete=models.SET_NULL, null=True, related_name='attendance_records')
+    student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='attendance_records')
+    piano = models.ForeignKey('courses.Piano', on_delete=models.SET_NULL, null=True, related_name='attendance_records')
     check_in_time = models.DateTimeField('签到时间', auto_now_add=True)
     check_out_time = models.DateTimeField('签退时间', null=True, blank=True)
     status = models.CharField('状态', max_length=20, choices=STATUS_CHOICES, default='checked_in')
@@ -163,7 +170,7 @@ class WaitingQueue(models.Model):
     等待队列模型，管理学生等待分配钢琴的队列
     """
     session = models.ForeignKey(AttendanceSession, on_delete=models.CASCADE, related_name='waiting_queue')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='waiting_records')
+    student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='waiting_records')
     join_time = models.DateTimeField('加入时间', auto_now_add=True)
     estimated_wait_time = models.IntegerField('预计等待时间(分钟)', default=0)
     is_active = models.BooleanField('是否在队列中', default=True)

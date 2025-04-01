@@ -202,15 +202,16 @@
                 </div>
             </div>
             
-            <form method="post" action="{% url 'users:login' %}">
+            <form method="post" action="{% url 'login' %}">
                 {% csrf_token %}
+                <input type="hidden" id="user_type_input" name="user_type" value="student">
                 
                 <div class="mb-3">
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="fas fa-user"></i>
                         </span>
-                        <input type="text" name="username" class="form-control" placeholder="用户名" required>
+                        {{ form.username }}
                     </div>
                     {% if form.username.errors %}
                     <ul class="errorlist">
@@ -226,7 +227,7 @@
                         <span class="input-group-text">
                             <i class="fas fa-lock"></i>
                         </span>
-                        <input type="password" name="password" class="form-control" placeholder="密码" required>
+                        {{ form.password }}
                     </div>
                     {% if form.password.errors %}
                     <ul class="errorlist">
@@ -238,14 +239,14 @@
                 </div>
                 
                 <div class="mb-3 form-check">
-                    <input type="checkbox" name="remember_me" class="form-check-input" id="remember_me">
-                    <label class="form-check-label" for="remember_me">记住我</label>
+                    {{ form.remember_me }}
+                    <label class="form-check-label" for="{{ form.remember_me.id_for_label }}">记住我</label>
                 </div>
                 
                 <button type="submit" class="btn btn-primary btn-login">登录</button>
                 <div class="text-center mt-3">
                     <p>还没有账号？<a href="{% url 'users:register' %}">立即注册</a></p>
-                    <p><a href="{% url 'users:password_reset_request' %}">忘记密码？</a></p>
+                    <p><a href="{% url 'users:password_reset' %}">忘记密码？</a></p>
                 </div>
             </form>
         </div>

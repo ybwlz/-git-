@@ -221,12 +221,12 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'students:exam' %}">
+                <a class="nav-link" href="{% url 'students:attendance' %}">
                     <i class="fas fa-calendar-check"></i> 考勤记录
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'students:grades' %}">
+                <a class="nav-link" href="{% url 'students:sheet_music' %}">
                     <i class="fas fa-file-alt"></i> 在线曲谱
                 </a>
             </li>
@@ -254,22 +254,24 @@
                                 <a class="nav-link" href="#">
                                     <i class="fas fa-bell"></i>
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        2
+                                        {{ notifications_count|default:"0" }}
                                     </span>
                                 </a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                    <img src="https://img.51miz.com/Element/00/88/05/53/c1f2b1e3_E880553_a4a3d5d9.jpg" class="rounded-circle" width="30" height="30">
-                                    <span class="ms-1">王小明</span>
+                                    {% if student.user.avatar %}
+                                    <img src="{{ student.user.avatar.url }}" class="rounded-circle" width="30" height="30">
+                                    {% else %}
+                                    <img src="{% static 'img/default-avatar.jpg' %}" class="rounded-circle" width="30" height="30">
+                                    {% endif %}
+                                    <span class="ms-1">{{ student.name }}</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li><a class="dropdown-item" href="{% url 'students:profile' %}"><i class="fas fa-user me-2"></i>个人资料</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>账号设置</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'students:profile' %}"><i class="fas fa-cog me-2"></i>账号设置</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a href="{% url 'logout' %}" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-2"></i>退出登录
-                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
                                 </ul>
                             </li>
                         </ul>
@@ -280,30 +282,39 @@
             <!-- 个人资料头部 -->
             <div class="profile-header">
                 <div class="row align-items-center">
-                    <div class="col-md-2 text-center">
-                        <img src="https://img.51miz.com/Element/00/88/05/53/c1f2b1e3_E880553_a4a3d5d9.jpg" class="profile-avatar">
+                    <div class="col-md-3 text-center">
+                        {% if student.user.avatar %}
+                        <img src="{{ student.user.avatar.url }}" class="profile-avatar">
+                        {% else %}
+                        <img src="{% static 'img/default-avatar.jpg' %}" class="profile-avatar">
+                        {% endif %}
                     </div>
-                    <div class="col-md-6">
-                        <h2>王小明 <span class="badge-level">钢琴四级</span></h2>
-                        <p class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>北京市海淀区</p>
-                        <p class="mb-0"><i class="fas fa-graduation-cap me-2"></i>学习钢琴 2 年 3 个月</p>
-                    </div>
-                    <div class="col-md-4 text-md-end">
-                        <button class="btn btn-light"><i class="fas fa-edit me-1"></i>编辑资料</button>
+                    <div class="col-md-9">
+                        <h3 class="mb-1">{{ student.name }}</h3>
+                        <p class="mb-3">{{ student.school }}</p>
+                        <div class="d-flex">
+                            <span class="badge-level">{{ student.get_level_display }}</span>
+                            <span class="ms-2 text-white-50">目标: {{ student.get_target_level_display }}</span>
+                        </div>
                     </div>
                 </div>
+                
                 <div class="profile-stats mt-4">
                     <div class="profile-stat-item">
-                        <div class="profile-stat-value">87</div>
-                        <div class="profile-stat-label">累计练习天数</div>
+                        <div class="profile-stat-value">{{ student.get_level_display }}</div>
+                        <div class="profile-stat-label">当前级别</div>
                     </div>
                     <div class="profile-stat-item">
-                        <div class="profile-stat-value">256</div>
-                        <div class="profile-stat-label">累计练习小时</div>
+                        <div class="profile-stat-value">{{ total_practice_time|default:"0" }}</div>
+                        <div class="profile-stat-label">练习总时长(分钟)</div>
                     </div>
                     <div class="profile-stat-item">
-                        <div class="profile-stat-value">12</div>
-                        <div class="profile-stat-label">掌握曲目</div>
+                        <div class="profile-stat-value">{{ total_attendance|default:"0" }}</div>
+                        <div class="profile-stat-label">考勤打卡</div>
+                    </div>
+                    <div class="profile-stat-item">
+                        <div class="profile-stat-value">{{ this_month_practice|default:"0" }}</div>
+                        <div class="profile-stat-label">本月练习(分钟)</div>
                     </div>
                 </div>
             </div>
@@ -312,34 +323,63 @@
                 <!-- 基本信息 -->
                 <div class="col-md-6">
                     <div class="profile-card">
-                        <h3 class="profile-card-title"><i class="fas fa-info-circle"></i>基本信息</h3>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">学号</div>
-                            <div class="profile-info-value">S20230015</div>
+                        <div class="profile-card-title">
+                            <i class="fas fa-info"></i> 基本信息
                         </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">姓名</div>
-                            <div class="profile-info-value">王小明</div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">姓名</div>
+                                    <div class="profile-info-value">{{ student.name }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">级别</div>
+                                    <div class="profile-info-value">{{ student.get_level_display }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">目标级别</div>
+                                    <div class="profile-info-value">{{ student.get_target_level_display }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">联系电话</div>
+                                    <div class="profile-info-value">{{ student.phone }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">家长姓名</div>
+                                    <div class="profile-info-value">{{ student.parent_name }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">家长电话</div>
+                                    <div class="profile-info-value">{{ student.parent_phone }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">就读学校</div>
+                                    <div class="profile-info-value">{{ student.school }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">加入时间</div>
+                                    <div class="profile-info-value">{{ student.created_at|date:"Y年m月d日" }}</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">性别</div>
-                            <div class="profile-info-value">男</div>
-                        </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">年龄</div>
-                            <div class="profile-info-value">12岁</div>
-                        </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">联系电话</div>
-                            <div class="profile-info-value">138****5678</div>
-                        </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">家长电话</div>
-                            <div class="profile-info-value">139****1234</div>
-                        </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">入学时间</div>
-                            <div class="profile-info-value">2021-09-01</div>
+                        <div class="text-end mt-3">
+                            <a href="{% url 'students:update_profile' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit me-1"></i> 编辑资料
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -382,42 +422,92 @@
                 <!-- 最近活动 -->
                 <div class="col-12 mt-4">
                     <div class="profile-card">
-                        <h3 class="profile-card-title"><i class="fas fa-history"></i>最近活动</h3>
-                        <div class="recent-activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-music"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">完成了《小星星变奏曲》的练习</div>
-                                <div class="activity-time">今天 14:30</div>
-                            </div>
+                        <div class="profile-card-title">
+                            <i class="fas fa-history"></i> 最近练琴记录
                         </div>
-                        <div class="recent-activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-calendar-check"></i>
+                        {% if practice_records %}
+                        <div class="recent-activities">
+                            {% for record in practice_records %}
+                            <div class="recent-activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">练习时长: {{ record.duration }} 分钟</div>
+                                    <div class="activity-info">钢琴编号: {{ record.piano_number }} 号</div>
+                                    <div class="activity-time">{{ record.date|date:"Y年m月d日" }} {{ record.start_time|time:"H:i" }}-{{ record.end_time|time:"H:i" }}</div>
+                                </div>
                             </div>
-                            <div class="activity-content">
-                                <div class="activity-title">参加了钢琴课程</div>
-                                <div class="activity-time">昨天 17:00</div>
-                            </div>
+                            {% endfor %}
                         </div>
-                        <div class="recent-activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">下载了《梦中的婚礼》曲谱</div>
-                                <div class="activity-time">2023-03-12 09:15</div>
-                            </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-music fs-1 text-muted mb-2"></i>
+                            <p class="mb-0">暂无练琴记录</p>
                         </div>
-                        <div class="recent-activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-trophy"></i>
+                        {% endif %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'students:practice' %}" class="btn btn-primary">
+                                <i class="fas fa-music me-1"></i> 去练琴
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最近考勤记录 -->
+                <div class="col-12 mt-4">
+                    <div class="profile-card">
+                        <div class="profile-card-title">
+                            <i class="fas fa-calendar-check"></i> 最近考勤记录
+                        </div>
+                        {% if attendances %}
+                        <div class="recent-activities">
+                            {% for attendance in attendances %}
+                            <div class="recent-activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">
+                                        {% if attendance.status == 'present' %}
+                                        <span class="text-success">已签到</span>
+                                        {% elif attendance.status == 'absent' %}
+                                        <span class="text-danger">未签到</span>
+                                        {% elif attendance.status == 'late' %}
+                                        <span class="text-warning">迟到</span>
+                                        {% elif attendance.status == 'early_leave' %}
+                                        <span class="text-warning">早退</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="activity-info">
+                                        签到时间: 
+                                        {% if attendance.check_in_time %}
+                                        {{ attendance.check_in_time|time:"H:i" }}
+                                        {% else %}
+                                        --:--
+                                        {% endif %}
+                                        | 签退时间: 
+                                        {% if attendance.check_out_time %}
+                                        {{ attendance.check_out_time|time:"H:i" }}
+                                        {% else %}
+                                        --:--
+                                        {% endif %}
+                                    </div>
+                                    <div class="activity-time">{{ attendance.date|date:"Y年m月d日" }}</div>
+                                </div>
                             </div>
-                            <div class="activity-content">
-                                <div class="activity-title">获得了"勤奋练习"徽章</div>
-                                <div class="activity-time">2023-03-10 16:45</div>
-                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-check fs-1 text-muted mb-2"></i>
+                            <p class="mb-0">暂无考勤记录</p>
+                        </div>
+                        {% endif %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'students:attendance' %}" class="btn btn-primary">
+                                <i class="fas fa-calendar-check me-1"></i> 查看全部
+                            </a>
                         </div>
                     </div>
                 </div>

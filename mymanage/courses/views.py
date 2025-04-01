@@ -1,559 +1,310 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
-from django.db.models import Q
-from django.utils import timezone
 from django.core.paginator import Paginator
-import datetime
+from django.db.models import Q
 
-from .models import Course, CourseSchedule, Enrollment, Piano, SheetMusic
-from .forms import (
-    CourseForm, CourseScheduleForm, EnrollmentForm,
-    PianoForm, SheetMusicForm, SheetMusicSearchForm
-)
+from .models import Piano, Course, CourseSchedule, SheetMusic, PianoLevel, PracticeSessionScheduler
+from mymanage.attendance.models import AttendanceSession, AttendanceRecord, WaitingQueue
+from mymanage.users.decorators import teacher_required
 from mymanage.students.models import Student
-from mymanage.teachers.models import Teacher
-
-
-@login_required
-def course_list(request):
-    """
-    课程列表页面
-    """
-    # 获取所有课程并应用筛选条件
-    courses = Course.objects.all()
-    
-    # 搜索过滤
-    search_query = request.GET.get('q', '')
-    if search_query:
-        courses = courses.filter(
-            Q(name__icontains=search_query) | 
-            Q(code__icontains=search_query) |
-            Q(teacher__name__icontains=search_query)
-        )
-    
-    # 级别过滤
-    level_filter = request.GET.get('level', '')
-    if level_filter:
-        courses = courses.filter(level=level_filter)
-    
-    # 状态过滤
-    status_filter = request.GET.get('status', '')
-    if status_filter:
-        courses = courses.filter(status=status_filter)
-    
-    # 分页
-    paginator = Paginator(courses, 10)  # 每页10条
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    # 获取级别和状态选项用于过滤器
-    level_choices = Course.LEVEL_CHOICES
-    status_choices = Course.COURSE_STATUS_CHOICES
-    
-    context = {
-        'page_obj': page_obj,
-        'search_query': search_query,
-        'level_filter': level_filter,
-        'status_filter': status_filter,
-        'level_choices': level_choices,
-        'status_choices': status_choices,
-    }
-    
-    return render(request, 'courses/course_list.html', context)
-
-
-@login_required
-def course_detail(request, pk):
-    """
-    课程详情页面
-    """
-    course = get_object_or_404(Course, pk=pk)
-    
-    # 获取课程安排
-    schedules = course.schedules.all().order_by('weekday', 'start_time')
-    
-    # 获取已报名学生
-    enrollments = course.enrollments.filter(status='active')
-    
-    # 获取相同级别的曲谱
-    related_sheets = SheetMusic.objects.filter(level=course.level)
-    
-    context = {
-        'course': course,
-        'schedules': schedules,
-        'enrollments': enrollments,
-        'available_seats': course.get_available_seats(),
-        'related_sheets': related_sheets,
-    }
-    
-    # 如果当前用户是学生，检查是否已报名此课程
-    if hasattr(request.user, 'student_profile'):
-        student = request.user.student_profile
-        enrolled = Enrollment.objects.filter(
-            student=student, 
-            course=course, 
-            status='active'
-        ).exists()
-        context['enrolled'] = enrolled
-    
-    return render(request, 'courses/course_detail.html', context)
-
-
-@login_required
-def course_create(request):
-    """
-    创建课程页面，仅管理员和教师可用
-    """
-    if not (request.user.is_staff or hasattr(request.user, 'teacher_profile')):
-        messages.error(request, '您没有权限创建课程')
-        return redirect('courses:list')
-    
-    if request.method == 'POST':
-        form = CourseForm(request.POST)
-        if form.is_valid():
-            course = form.save()
-            messages.success(request, f'成功创建课程: {course.name}')
-            return redirect('courses:detail', pk=course.id)
-    else:
-        # 如果是教师用户，自动设置教师字段
-        initial = {}
-        if hasattr(request.user, 'teacher_profile'):
-            initial['teacher'] = request.user.teacher_profile
-        
-        form = CourseForm(initial=initial)
-        
-        # 如果是教师用户，限制只能选择自己
-        if hasattr(request.user, 'teacher_profile') and not request.user.is_staff:
-            form.fields['teacher'].queryset = Teacher.objects.filter(pk=request.user.teacher_profile.pk)
-    
-    return render(request, 'courses/course_form.html', {
-        'form': form,
-        'action': '创建课程'
-    })
-
-
-@login_required
-def course_update(request, pk):
-    """
-    更新课程页面，仅课程教师和管理员可用
-    """
-    course = get_object_or_404(Course, pk=pk)
-    
-    # 权限检查
-    if not (request.user.is_staff or 
-            (hasattr(request.user, 'teacher_profile') and course.teacher == request.user.teacher_profile)):
-        messages.error(request, '您没有权限编辑此课程')
-        return redirect('courses:detail', pk=course.id)
-    
-    if request.method == 'POST':
-        form = CourseForm(request.POST, instance=course)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'成功更新课程: {course.name}')
-            return redirect('courses:detail', pk=course.id)
-    else:
-        form = CourseForm(instance=course)
-        
-        # 如果是教师用户，限制只能选择自己
-        if hasattr(request.user, 'teacher_profile') and not request.user.is_staff:
-            form.fields['teacher'].queryset = Teacher.objects.filter(pk=request.user.teacher_profile.pk)
-    
-    return render(request, 'courses/course_form.html', {
-        'form': form,
-        'course': course,
-        'action': '编辑课程'
-    })
-
-
-@login_required
-def course_schedule_create(request, course_id):
-    """
-    创建课程安排，仅课程教师和管理员可用
-    """
-    course = get_object_or_404(Course, pk=course_id)
-    
-    # 权限检查
-    if not (request.user.is_staff or 
-            (hasattr(request.user, 'teacher_profile') and course.teacher == request.user.teacher_profile)):
-        messages.error(request, '您没有权限为此课程创建安排')
-        return redirect('courses:detail', pk=course_id)
-    
-    if request.method == 'POST':
-        form = CourseScheduleForm(request.POST)
-        if form.is_valid():
-            schedule = form.save()
-            messages.success(request, '成功创建课程安排')
-            return redirect('courses:detail', pk=course_id)
-    else:
-        form = CourseScheduleForm(initial={'course': course})
-        form.fields['course'].widget = forms.HiddenInput()
-    
-    return render(request, 'courses/schedule_form.html', {
-        'form': form,
-        'course': course,
-        'action': '创建课程安排'
-    })
-
-
-@login_required
-def course_schedule_update(request, pk):
-    """
-    更新课程安排，仅课程教师和管理员可用
-    """
-    schedule = get_object_or_404(CourseSchedule, pk=pk)
-    course = schedule.course
-    
-    # 权限检查
-    if not (request.user.is_staff or 
-            (hasattr(request.user, 'teacher_profile') and course.teacher == request.user.teacher_profile)):
-        messages.error(request, '您没有权限编辑此课程安排')
-        return redirect('courses:detail', pk=course.id)
-    
-    if request.method == 'POST':
-        form = CourseScheduleForm(request.POST, instance=schedule)
-        if form.is_valid():
-            form.save()
-            messages.success(request, '成功更新课程安排')
-            return redirect('courses:detail', pk=course.id)
-    else:
-        form = CourseScheduleForm(instance=schedule)
-        form.fields['course'].widget = forms.HiddenInput()
-    
-    return render(request, 'courses/schedule_form.html', {
-        'form': form,
-        'schedule': schedule,
-        'course': course,
-        'action': '编辑课程安排'
-    })
-
-
-@login_required
-def enrollment_create(request, course_id=None):
-    """
-    学生报名课程
-    """
-    # 获取学生和课程
-    student = None
-    course = None
-    
-    if hasattr(request.user, 'student_profile'):
-        student = request.user.student_profile
-    
-    if course_id:
-        course = get_object_or_404(Course, pk=course_id)
-    
-    # 权限检查
-    if not (request.user.is_staff or student):
-        messages.error(request, '您无权进行报名操作')
-        return redirect('courses:list')
-    
-    if request.method == 'POST':
-        # 如果是学生用户，只能为自己报名
-        if student and not request.user.is_staff:
-            form = EnrollmentForm(request.POST, student=student)
-        else:
-            form = EnrollmentForm(request.POST)
-            
-        if form.is_valid():
-            enrollment = form.save()
-            messages.success(request, f'成功报名课程: {enrollment.course.name}')
-            
-            if student:
-                return redirect('courses:my_courses')
-            else:
-                return redirect('courses:detail', pk=enrollment.course.id)
-    else:
-        initial = {}
-        if student:
-            initial['student'] = student
-        if course:
-            initial['course'] = course
-            
-        # 如果是学生用户，只能为自己报名
-        if student and not request.user.is_staff:
-            form = EnrollmentForm(initial=initial, student=student)
-        else:
-            form = EnrollmentForm(initial=initial)
-    
-    context = {
-        'form': form,
-        'action': '课程报名',
-        'course': course
-    }
-    
-    return render(request, 'courses/enrollment_form.html', context)
-
-
-@login_required
-def enrollment_update(request, pk):
-    """
-    更新报名状态，仅管理员可用
-    """
-    enrollment = get_object_or_404(Enrollment, pk=pk)
-    
-    # 权限检查
-    if not request.user.is_staff:
-        messages.error(request, '您没有权限更新报名状态')
-        return redirect('courses:detail', pk=enrollment.course.id)
-    
-    if request.method == 'POST':
-        form = EnrollmentForm(request.POST, instance=enrollment)
-        if form.is_valid():
-            form.save()
-            messages.success(request, '成功更新报名状态')
-            return redirect('courses:detail', pk=enrollment.course.id)
-    else:
-        form = EnrollmentForm(instance=enrollment)
-    
-    return render(request, 'courses/enrollment_form.html', {
-        'form': form,
-        'enrollment': enrollment,
-        'action': '更新报名状态'
-    })
-
-
-@login_required
-def my_courses(request):
-    """
-    我的课程页面，显示学生报名的课程或教师教授的课程
-    """
-    if hasattr(request.user, 'student_profile'):
-        # 学生用户查看自己报名的课程
-        student = request.user.student_profile
-        enrollments = Enrollment.objects.filter(
-            student=student,
-            status='active'
-        ).select_related('course')
-        
-        courses = [enrollment.course for enrollment in enrollments]
-        
-        # 获取今天的课程安排
-        today = timezone.now().date()
-        weekday = today.weekday()
-        today_schedules = []
-        
-        for course in courses:
-            schedules = course.schedules.filter(weekday=weekday)
-            for schedule in schedules:
-                today_schedules.append({
-                    'course': course,
-                    'schedule': schedule
-                })
-        
-        # 按时间排序
-        today_schedules.sort(key=lambda x: x['schedule'].start_time)
-        
-        return render(request, 'courses/my_courses_student.html', {
-            'enrollments': enrollments,
-            'today_schedules': today_schedules
-        })
-        
-    elif hasattr(request.user, 'teacher_profile'):
-        # 教师用户查看自己教授的课程
-        teacher = request.user.teacher_profile
-        courses = Course.objects.filter(teacher=teacher)
-        
-        # 获取今天的课程安排
-        today = timezone.now().date()
-        weekday = today.weekday()
-        today_schedules = []
-        
-        for course in courses:
-            schedules = course.schedules.filter(weekday=weekday)
-            for schedule in schedules:
-                today_schedules.append({
-                    'course': course,
-                    'schedule': schedule
-                })
-        
-        # 按时间排序
-        today_schedules.sort(key=lambda x: x['schedule'].start_time)
-        
-        return render(request, 'courses/my_courses_teacher.html', {
-            'courses': courses,
-            'today_schedules': today_schedules
-        })
-        
-    else:
-        messages.error(request, '您没有相关课程信息')
-        return redirect('courses:list')
-
-
-@login_required
-def sheet_music_list(request):
-    """
-    曲谱列表页面
-    """
-    sheet_musics = SheetMusic.objects.all()
-    
-    # 搜索表单
-    form = SheetMusicSearchForm(request.GET)
-    if form.is_valid():
-        title = form.cleaned_data.get('title')
-        composer = form.cleaned_data.get('composer')
-        level = form.cleaned_data.get('level')
-        
-        if title:
-            sheet_musics = sheet_musics.filter(title__icontains=title)
-        if composer:
-            sheet_musics = sheet_musics.filter(composer__icontains=composer)
-        if level:
-            sheet_musics = sheet_musics.filter(level=level)
-    
-    # 分页
-    paginator = Paginator(sheet_musics, 12)  # 每页12条
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    # 获取级别选项
-    level_choices = SheetMusic.LEVEL_CHOICES
-    
-    return render(request, 'courses/sheet_music_list.html', {
-        'page_obj': page_obj,
-        'form': form,
-        'level_choices': level_choices
-    })
-
-
-@login_required
-def sheet_music_detail(request, pk):
-    """
-    曲谱详情页面
-    """
-    sheet_music = get_object_or_404(SheetMusic, pk=pk)
-    
-    # 获取相同级别的其他曲谱
-    related_sheets = SheetMusic.objects.filter(level=sheet_music.level).exclude(pk=pk)[:5]
-    
-    return render(request, 'courses/sheet_music_detail.html', {
-        'sheet_music': sheet_music,
-        'related_sheets': related_sheets
-    })
-
-
-@login_required
-def sheet_music_create(request):
-    """
-    创建曲谱页面，仅教师和管理员可用
-    """
-    if not (request.user.is_staff or hasattr(request.user, 'teacher_profile')):
-        messages.error(request, '您没有权限上传曲谱')
-        return redirect('courses:sheet_music_list')
-    
-    teacher = None
-    if hasattr(request.user, 'teacher_profile'):
-        teacher = request.user.teacher_profile
-    
-    if request.method == 'POST':
-        form = SheetMusicForm(request.POST, request.FILES, teacher=teacher)
-        if form.is_valid():
-            sheet_music = form.save()
-            messages.success(request, f'成功上传曲谱: {sheet_music.title}')
-            return redirect('courses:sheet_music_detail', pk=sheet_music.id)
-    else:
-        form = SheetMusicForm(teacher=teacher)
-    
-    return render(request, 'courses/sheet_music_form.html', {
-        'form': form,
-        'action': '上传曲谱'
-    })
-
-
-@login_required
-def sheet_music_update(request, pk):
-    """
-    更新曲谱页面，仅上传者和管理员可用
-    """
-    sheet_music = get_object_or_404(SheetMusic, pk=pk)
-    
-    # 权限检查
-    if not (request.user.is_staff or 
-            (hasattr(request.user, 'teacher_profile') and sheet_music.uploaded_by == request.user.teacher_profile)):
-        messages.error(request, '您没有权限编辑此曲谱')
-        return redirect('courses:sheet_music_detail', pk=pk)
-    
-    if request.method == 'POST':
-        form = SheetMusicForm(request.POST, request.FILES, instance=sheet_music)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'成功更新曲谱: {sheet_music.title}')
-            return redirect('courses:sheet_music_detail', pk=pk)
-    else:
-        form = SheetMusicForm(instance=sheet_music)
-    
-    return render(request, 'courses/sheet_music_form.html', {
-        'form': form,
-        'sheet_music': sheet_music,
-        'action': '编辑曲谱'
-    })
+from mymanage.teachers.models import TeacherProfile
 
 
 @login_required
 def piano_list(request):
-    """
-    钢琴列表页面，仅管理员可用
-    """
-    if not request.user.is_staff:
-        messages.error(request, '您无权访问此页面')
-        return redirect('courses:list')
+    """查看所有钢琴列表"""
+    pianos = Piano.objects.all()
+    return render(request, 'courses/piano_list.html', {'pianos': pianos})
+
+
+@login_required
+def piano_detail(request, piano_id):
+    """查看钢琴详情"""
+    piano = get_object_or_404(Piano, id=piano_id)
+    current_record = AttendanceRecord.objects.filter(piano=piano, status='checked_in').first()
+    return render(request, 'courses/piano_detail.html', {
+        'piano': piano,
+        'current_record': current_record
+    })
+
+
+@teacher_required
+def piano_manage(request, piano_id=None):
+    """管理钢琴信息"""
+    if piano_id:
+        piano = get_object_or_404(Piano, id=piano_id)
+        if request.method == 'POST':
+            # 处理表单提交
+            piano.brand = request.POST.get('brand')
+            piano.model = request.POST.get('model')
+            piano.is_active = 'is_active' in request.POST
+            piano.notes = request.POST.get('notes')
+            piano.save()
+            messages.success(request, '钢琴信息已更新')
+            return redirect('piano_list')
+    else:
+        piano = None
+        if request.method == 'POST':
+            # 创建新钢琴
+            Piano.objects.create(
+                number=request.POST.get('number'),
+                brand=request.POST.get('brand'),
+                model=request.POST.get('model'),
+                is_active='is_active' in request.POST,
+                notes=request.POST.get('notes')
+            )
+            messages.success(request, '新钢琴已添加')
+            return redirect('piano_list')
     
-    pianos = Piano.objects.all().order_by('piano_number')
+    return render(request, 'courses/piano_manage.html', {'piano': piano})
+
+
+@login_required
+def sheet_music_list(request):
+    """曲谱列表"""
+    query = request.GET.get('q', '')
+    level_id = request.GET.get('level', '')
     
-    return render(request, 'courses/piano_list.html', {
-        'pianos': pianos
+    sheet_music = SheetMusic.objects.filter(is_public=True)
+    
+    if query:
+        sheet_music = sheet_music.filter(
+            Q(title__icontains=query) | 
+            Q(composer__icontains=query) |
+            Q(description__icontains=query)
+        )
+    
+    if level_id:
+        sheet_music = sheet_music.filter(level_id=level_id)
+    
+    # 分页
+    paginator = Paginator(sheet_music, 12)  # 每页12个曲谱
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    levels = PianoLevel.objects.all()
+    
+    return render(request, 'courses/sheet_music_list.html', {
+        'sheet_music': page_obj,
+        'levels': levels,
+        'query': query,
+        'level_id': level_id
     })
 
 
 @login_required
-def piano_update(request, pk):
-    """
-    更新钢琴信息，仅管理员可用
-    """
-    if not request.user.is_staff:
-        messages.error(request, '您无权访问此页面')
-        return redirect('courses:piano_list')
+def sheet_music_detail(request, sheet_id):
+    """曲谱详情"""
+    sheet = get_object_or_404(SheetMusic, id=sheet_id)
+    if not sheet.is_public and (not request.user.is_teacher and sheet.uploaded_by != request.user):
+        messages.error(request, '您没有权限查看此曲谱')
+        return redirect('sheet_music_list')
     
-    piano = get_object_or_404(Piano, pk=pk)
-    
-    if request.method == 'POST':
-        form = PianoForm(request.POST, instance=piano)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'成功更新钢琴{piano.piano_number}号信息')
-            return redirect('courses:piano_list')
+    return render(request, 'courses/sheet_music_detail.html', {'sheet': sheet})
+
+
+@teacher_required
+def sheet_music_manage(request, sheet_id=None):
+    """管理曲谱"""
+    if sheet_id:
+        sheet = get_object_or_404(SheetMusic, id=sheet_id)
+        if request.method == 'POST':
+            # 处理更新
+            sheet.title = request.POST.get('title')
+            sheet.composer = request.POST.get('composer')
+            sheet.level_id = request.POST.get('level')
+            sheet.description = request.POST.get('description')
+            sheet.is_public = 'is_public' in request.POST
+            
+            if 'file' in request.FILES:
+                sheet.file = request.FILES['file']
+            if 'cover_image' in request.FILES:
+                sheet.cover_image = request.FILES['cover_image']
+            
+            sheet.save()
+            messages.success(request, '曲谱已更新')
+            return redirect('sheet_music_detail', sheet_id=sheet.id)
     else:
-        form = PianoForm(instance=piano)
+        sheet = None
+        if request.method == 'POST':
+            # 创建新曲谱
+            new_sheet = SheetMusic(
+                title=request.POST.get('title'),
+                composer=request.POST.get('composer'),
+                level_id=request.POST.get('level'),
+                description=request.POST.get('description'),
+                file=request.FILES.get('file'),
+                uploaded_by=request.user,
+                is_public='is_public' in request.POST
+            )
+            
+            if 'cover_image' in request.FILES:
+                new_sheet.cover_image = request.FILES['cover_image']
+            
+            new_sheet.save()
+            messages.success(request, '曲谱已添加')
+            return redirect('sheet_music_detail', sheet_id=new_sheet.id)
     
-    return render(request, 'courses/piano_form.html', {
-        'form': form,
-        'piano': piano,
-        'action': '编辑钢琴信息'
+    levels = PianoLevel.objects.all()
+    return render(request, 'courses/sheet_music_manage.html', {
+        'sheet': sheet,
+        'levels': levels
     })
 
 
-def initialize_pianos(request):
-    """
-    初始化钢琴数据，确保系统中有7台钢琴
-    """
-    if not request.user.is_superuser:
-        messages.error(request, '只有超级管理员可以执行此操作')
-        return redirect('courses:piano_list')
+@teacher_required
+def delete_sheet_music(request, sheet_id):
+    """删除曲谱"""
+    sheet = get_object_or_404(SheetMusic, id=sheet_id)
+    if request.method == 'POST':
+        sheet.delete()
+        messages.success(request, '曲谱已删除')
+        return redirect('sheet_music_list')
+    return render(request, 'courses/sheet_music_delete.html', {'sheet': sheet})
+
+
+@login_required
+def auto_scheduler_status(request):
+    """获取自动排课状态"""
+    # 获取当前用户的排课状态
+    if hasattr(request.user, 'student'):
+        student = request.user.student
+        
+        # 检查是否有活跃的考勤记录
+        active_record = AttendanceRecord.objects.filter(
+            student=student,
+            status='checked_in'
+        ).first()
+        
+        if active_record:
+            # 学生已在练习
+            return JsonResponse({
+                'status': 'practicing',
+                'piano': active_record.piano.number,
+                'start_time': active_record.check_in_time.strftime('%H:%M:%S'),
+                'session_id': active_record.session.id
+            })
+        
+        # 检查是否在队列中
+        current_session = AttendanceSession.objects.filter(status='active').first()
+        if not current_session:
+            return JsonResponse({'status': 'no_active_session'})
+        
+        waiting_record = WaitingQueue.objects.filter(
+            student=student,
+            session=current_session,
+            is_active=True
+        ).first()
+        
+        if waiting_record:
+            # 在队列中等待
+            position = PracticeSessionScheduler.get_queue_position(
+                current_session.id, student.id
+            )
+            wait_time = PracticeSessionScheduler.calculate_wait_time(position)
+            
+            return JsonResponse({
+                'status': 'waiting',
+                'position': position + 1,  # 显示给用户的位置从1开始
+                'estimated_wait_time': wait_time,
+                'session_id': current_session.id
+            })
+        
+        # 未在练习也未在队列中
+        return JsonResponse({'status': 'not_in_queue'})
     
-    # 检查是否已经有钢琴数据
-    existing_pianos = Piano.objects.all()
-    if existing_pianos.count() > 0:
-        messages.warning(request, '已存在钢琴数据，无需初始化')
-        return redirect('courses:piano_list')
+    return JsonResponse({'status': 'not_student'})
+
+
+@login_required
+def join_practice_queue(request):
+    """加入练习队列"""
+    if request.method == 'POST' and hasattr(request.user, 'student'):
+        student = request.user.student
+        
+        # 获取活跃的考勤会话
+        active_session = AttendanceSession.objects.filter(status='active').first()
+        if not active_session:
+            return JsonResponse({'success': False, 'message': '当前没有活跃的考勤会话'})
+        
+        # 检查学生是否已在队列中或已签到
+        if AttendanceRecord.objects.filter(student=student, session=active_session, status='checked_in').exists():
+            return JsonResponse({'success': False, 'message': '您已经签到并正在练习'})
+        
+        if WaitingQueue.objects.filter(student=student, session=active_session, is_active=True).exists():
+            return JsonResponse({'success': False, 'message': '您已在等待队列中'})
+        
+        # 检查是否有可用钢琴
+        available_piano = PracticeSessionScheduler.get_available_piano()
+        
+        if available_piano:
+            # 有可用钢琴，直接签到
+            available_piano.is_occupied = True
+            available_piano.save()
+            
+            AttendanceRecord.objects.create(
+                session=active_session,
+                student=student,
+                piano=available_piano,
+                status='checked_in'
+            )
+            
+            return JsonResponse({
+                'success': True, 
+                'status': 'assigned',
+                'message': f'已为您分配钢琴 {available_piano.number} 号',
+                'piano': available_piano.number
+            })
+        else:
+            # 没有可用钢琴，加入等待队列
+            waiting_queue_count = WaitingQueue.objects.filter(
+                session=active_session,
+                is_active=True
+            ).count()
+            
+            wait_time = PracticeSessionScheduler.calculate_wait_time(waiting_queue_count)
+            
+            WaitingQueue.objects.create(
+                session=active_session,
+                student=student,
+                estimated_wait_time=wait_time
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'status': 'waiting',
+                'message': f'您已加入等待队列，当前排队位置：{waiting_queue_count + 1}，预计等待时间：{wait_time}分钟',
+                'position': waiting_queue_count + 1,
+                'estimated_wait_time': wait_time
+            })
     
-    # 创建7台钢琴
-    for i in range(1, 8):
-        Piano.objects.create(
-            piano_number=i,
-            location='苗韵琴行教室',
-            is_occupied=False
-        )
+    return JsonResponse({'success': False, 'message': '无效的请求'})
+
+
+@login_required
+def check_out(request):
+    """签退"""
+    if request.method == 'POST' and hasattr(request.user, 'student'):
+        student = request.user.student
+        
+        # 查找学生的活跃考勤记录
+        active_record = AttendanceRecord.objects.filter(
+            student=student,
+            status='checked_in'
+        ).first()
+        
+        if not active_record:
+            return JsonResponse({'success': False, 'message': '没有找到您的活跃练习记录'})
+        
+        # 执行签退
+        active_record.check_out()
+        
+        return JsonResponse({
+            'success': True,
+            'message': '签退成功，感谢您的练习！',
+            'duration': str(active_record.duration)
+        })
     
-    messages.success(request, '成功初始化7台钢琴数据')
-    return redirect('courses:piano_list')
+    return JsonResponse({'success': False, 'message': '无效的请求'})

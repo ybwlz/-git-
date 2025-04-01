@@ -7,240 +7,97 @@
     <title>课程管理 - 苗韵琴行管理系统</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
+    <link rel="stylesheet" href="../static/css/teacher.css">
+    <link rel="stylesheet" href="../static/css/skin/default/layer.css">
     <style>
         :root {
-            --primary-color: #3a5a78;
-            --secondary-color: #f8f9fa;
-            --accent-color: #e3b04b;
-            --text-color: #333;
-            --sidebar-width: 280px;
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
         }
         
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background-color: #f5f7fa;
-            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
         }
         
         .sidebar {
-            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
             height: 100vh;
             position: fixed;
-            top: 0;
-            left: 0;
-            background-color: var(--primary-color);
-            color: white;
-            padding-top: 20px;
-            transition: all 0.3s;
-            z-index: 1000;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
         }
         
-        .sidebar-header {
-            padding: 0 20px 20px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .sidebar-header img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-        
-        .sidebar-menu a {
-            padding: 12px 20px;
-            color: rgba(255, 255, 255, 0.8);
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            text-decoration: none;
-            transition: all 0.3s;
         }
         
-        .sidebar-menu a:hover, .sidebar-menu a.active {
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .sidebar .nav-link:hover {
             background-color: rgba(255, 255, 255, 0.1);
             color: white;
-            border-left: 4px solid var(--accent-color);
+            transform: translateX(5px);
         }
         
-        .sidebar-menu i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
         }
         
         .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            transition: all 0.3s;
+            margin-left: 250px;
+            padding: 2rem;
         }
         
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
-            margin-bottom: 20px;
-            overflow: hidden;
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
         }
         
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-weight: 600;
-        }
-        
-        .course-stats {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .course-stats .stat-card {
-            flex: 1;
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            text-align: center;
-        }
-        
-        .course-stats .stat-card .icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        
-        .course-stats .stat-card .value {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 5px 0;
-        }
-        
-        .course-stats .stat-card .label {
-            color: #6c757d;
-            font-size: 14px;
-        }
-        
-        .timetable {
-            display: grid;
-            grid-template-columns: 100px repeat(7, 1fr);
-            gap: 1px;
-            background-color: #dee2e6;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .timetable-header {
-            background-color: var(--primary-color);
+        .sidebar h5 {
             color: white;
-            padding: 10px;
-            text-align: center;
+            margin-top: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
         }
         
-        .timetable-time {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-        
-        .timetable-cell {
-            background-color: white;
-            padding: 10px;
-            min-height: 80px;
-        }
-        
-        .course-item {
-            background-color: rgba(58, 90, 120, 0.1);
-            border-left: 3px solid var(--primary-color);
-            padding: 8px;
-            border-radius: 5px;
-            margin-bottom: 5px;
-            font-size: 12px;
-        }
-        
-        .course-item:hover {
-            background-color: rgba(58, 90, 120, 0.2);
-            cursor: pointer;
-        }
-        
-        .course-item .student-name {
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-        
-        .course-item .course-type {
-            color: #6c757d;
-        }
-        
-        @media (max-width: 992px) {
+        @media (max-width: 768px) {
             .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
-            
-            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
-                display: none;
-            }
-            
-            .sidebar-menu a {
-                padding: 15px 0;
-                justify-content: center;
-            }
-            
-            .sidebar-menu i {
-                margin-right: 0;
-                font-size: 18px;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-            }
-            
-            .timetable {
-                font-size: 12px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 0;
+                width: 100%;
+                height: auto;
+                position: relative;
             }
             
             .main-content {
                 margin-left: 0;
             }
             
-            .mobile-toggle {
-                display: block !important;
+            .sidebar .nav-link:hover {
+                transform: none;
             }
-            
-            .timetable {
-                grid-template-columns: 60px repeat(7, 1fr);
-            }
-        }
-        
-        .mobile-toggle {
-            display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 8px 12px;
         }
     </style>
 </head>
@@ -249,49 +106,53 @@
         <i class="fas fa-bars"></i>
     </button>
     
-    <div class="sidebar">
-        <div class="sidebar-header d-flex align-items-center">
-            <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="me-2">
-            <span class="ms-1">
-                <div class="fw-bold">{{ request.user.teacher_profile.name|default:"王老师" }}</div>
-                <div class="small text-white-50">钢琴教师</div>
-            </span>
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            <img src="../static/img/logo.jpg" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            <h5 class="mt-2">苗韵琴行</h5>
         </div>
-        
-        <div class="sidebar-menu">
-            <a href="{% url 'teachers:dashboard' %}">
-                <i class="fas fa-home"></i>
-                <span>仪表盘</span>
-            </a>
-            <a href="{% url 'teachers:student_list' %}">
-                <i class="fas fa-user-graduate"></i>
-                <span>学生管理</span>
-            </a>
-            <a href="{% url 'teachers:course_list' %}" class="active">
-                <i class="fas fa-book"></i>
-                <span>课程管理</span>
-            </a>
-            <a href="{% url 'teachers:attendance_management' %}">
-                <i class="fas fa-clipboard-check"></i>
-                <span>考勤管理</span>
-            </a>
-            <a href="{% url 'teachers:sheet_music_management' %}">
-                <i class="fas fa-music"></i>
-                <span>曲谱管理</span>
-            </a>
-            <a href="{% url 'teachers:finance_management' %}">
-                <i class="fas fa-yuan-sign"></i>
-                <span>财务管理</span>
-            </a>
-            <a href="{% url 'teachers:profile' %}">
-                <i class="fas fa-user-cog"></i>
-                <span>个人设置</span>
-            </a>
-            <a href="{% url 'logout' %}">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>退出登录</span>
-            </a>
-        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="teacher_dashboard.html">
+                    <i class="fas fa-home"></i> 控制面板
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="teacher_profile.html">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="teacher_students.html">
+                    <i class="fas fa-users"></i> 学生管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="teacher_courses.html">
+                    <i class="fas fa-book"></i> 课程管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="teacher_attendance.html">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="teacher_sheet_music.html">
+                    <i class="fas fa-music"></i> 曲谱管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="teacher_finance.html">
+                    <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="../login.html">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
     </div>
     
     <div class="main-content">
@@ -561,7 +422,7 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    <script src="../static/js/skin/default/layer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // 移动端侧边栏切换
