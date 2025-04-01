@@ -20,7 +20,6 @@ urlpatterns = [
     path('courses/', include('mymanage.courses.urls')),
     path('attendance/', include('mymanage.attendance.urls')),
     path('finance/', include('mymanage.finance.urls')),
-    path('scores/', include('mymanage.scores.urls')),
 ]
 
 # 添加媒体和静态文件的URL模式

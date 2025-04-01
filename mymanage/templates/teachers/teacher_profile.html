@@ -5,9 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个人设置 - 苗韵琴行管理系统</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #3a5a78;
@@ -243,39 +242,39 @@
     
     <div class="sidebar">
         <div class="sidebar-header d-flex align-items-center">
-            <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像">
-            <span class="ms-2">
-                <div class="fw-bold">王老师</div>
+            <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="me-2">
+            <span class="ms-1">
+                <div class="fw-bold">{{ request.user.teacher_profile.name|default:"王老师" }}</div>
                 <div class="small text-white-50">钢琴教师</div>
             </span>
         </div>
         
         <div class="sidebar-menu">
-            <a href="teacher_dashboard.html">
+            <a href="{% url 'teachers:dashboard' %}">
                 <i class="fas fa-home"></i>
                 <span>仪表盘</span>
             </a>
-            <a href="teacher_students.html">
+            <a href="{% url 'teachers:student_list' %}">
                 <i class="fas fa-user-graduate"></i>
                 <span>学生管理</span>
             </a>
-            <a href="teacher_courses.html">
+            <a href="{% url 'teachers:course_list' %}">
                 <i class="fas fa-book"></i>
                 <span>课程管理</span>
             </a>
-            <a href="teacher_attendance.html">
+            <a href="{% url 'teachers:attendance_management' %}">
                 <i class="fas fa-clipboard-check"></i>
                 <span>考勤管理</span>
             </a>
-            <a href="teacher_sheet_music.html">
-                <i class="fas fa-music"></i>
-                <span>曲谱管理</span>
-            </a>
-            <a href="teacher_finance.html">
+            <a href="{% url 'teachers:finance_management' %}">
                 <i class="fas fa-yuan-sign"></i>
                 <span>财务管理</span>
             </a>
-            <a href="teacher_profile.html" class="active">
+            <a href="{% url 'teachers:sheet_music_management' %}">
+                <i class="fas fa-music"></i>
+                <span>曲谱管理</span>
+            </a>
+            <a href="{% url 'teachers:profile' %}" class="active">
                 <i class="fas fa-user-cog"></i>
                 <span>个人设置</span>
             </a>
@@ -288,22 +287,33 @@
     
     <div class="main-content">
         <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">个人设置</h2>
+                <div>
+                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
+                    <button class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-bell me-1"></i>
+                        <span class="badge bg-danger">{{ unread_notifications_count|default:"0" }}</span>
+                    </button>
+                </div>
+            </div>
+            
             <div class="profile-header text-center">
-                <img src="https://img.zcool.cn/community/01a0a85d20932ca8012187f447cfef.jpg@1280w_1l_2o_100sh.jpg" alt="教师头像" class="profile-avatar">
-                <h3 class="mb-2">王老师</h3>
+                <img src="{{ request.user.teacher_profile.avatar.url|default:'#' }}" alt="教师头像" class="profile-avatar">
+                <h3 class="mb-2">{{ request.user.teacher_profile.name|default:"王老师" }}</h3>
                 <p class="mb-0">钢琴教师</p>
                 
                 <div class="profile-stats">
                     <div class="profile-stat-item">
-                        <div class="profile-stat-value">42</div>
+                        <div class="profile-stat-value">{{ student_count|default:"0" }}</div>
                         <div class="profile-stat-label">学生数</div>
                     </div>
                     <div class="profile-stat-item">
-                        <div class="profile-stat-value">168</div>
+                        <div class="profile-stat-value">{{ total_lessons|default:"0" }}</div>
                         <div class="profile-stat-label">课时数</div>
                     </div>
                     <div class="profile-stat-item">
-                        <div class="profile-stat-value">4.8</div>
+                        <div class="profile-stat-value">{{ rating|default:"5.0" }}</div>
                         <div class="profile-stat-label">评分</div>
                     </div>
                 </div>
@@ -339,42 +349,43 @@
                                     <h5 class="mb-0">个人信息</h5>
                                 </div>
                                 <div class="card-body">
-                                    <form>
+                                    <form method="post" action="{% url 'teachers:update_profile' %}" enctype="multipart/form-data">
+                                        {% csrf_token %}
                                         <div class="row mb-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">姓名</label>
-                                                <input type="text" class="form-control" value="王老师" autocomplete="name">
+                                                <input type="text" name="name" class="form-control" value="{{ request.user.teacher_profile.name|default:'王老师' }}" autocomplete="name">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">性别</label>
-                                                <select class="form-select">
-                                                    <option>男</option>
-                                                    <option>女</option>
+                                                <select class="form-select" name="gender">
+                                                    <option value="男" {% if request.user.teacher_profile.gender == '男' %}selected{% endif %}>男</option>
+                                                    <option value="女" {% if request.user.teacher_profile.gender == '女' %}selected{% endif %}>女</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">手机号码</label>
-                                                <input type="tel" class="form-control" value="13800138000" autocomplete="tel">
+                                                <input type="tel" name="phone" class="form-control" value="{{ request.user.teacher_profile.phone|default:'13800138000' }}" autocomplete="tel">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">邮箱</label>
-                                                <input type="email" class="form-control" value="teacher@example.com" autocomplete="email">
+                                                <input type="email" name="email" class="form-control" value="{{ request.user.email|default:'teacher@example.com' }}" autocomplete="email">
                                             </div>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">教学专长</label>
-                                            <select class="form-select" multiple>
-                                                <option selected>钢琴基础课</option>
-                                                <option selected>钢琴进阶课</option>
-                                                <option>流行钢琴课</option>
-                                                <option selected>古典钢琴课</option>
+                                            <select class="form-select" name="specialties" multiple>
+                                                <option value="钢琴基础课" {% if '钢琴基础课' in specialties %}selected{% endif %}>钢琴基础课</option>
+                                                <option value="钢琴进阶课" {% if '钢琴进阶课' in specialties %}selected{% endif %}>钢琴进阶课</option>
+                                                <option value="流行钢琴课" {% if '流行钢琴课' in specialties %}selected{% endif %}>流行钢琴课</option>
+                                                <option value="古典钢琴课" {% if '古典钢琴课' in specialties %}selected{% endif %}>古典钢琴课</option>
                                             </select>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">个人简介</label>
-                                            <textarea class="form-control" rows="4" autocomplete="off">从事钢琴教学15年，擅长儿童钢琴启蒙教育和古典钢琴教学。曾获得多项钢琴比赛奖项，培养的学生多次在各类比赛中获奖。</textarea>
+                                            <textarea class="form-control" name="bio" rows="4" autocomplete="off">{{ request.user.teacher_profile.bio|default:'从事钢琴教学15年，擅长儿童钢琴启蒙教育和古典钢琴教学。曾获得多项钢琴比赛奖项，培养的学生多次在各类比赛中获奖。' }}</textarea>
                                         </div>
                                         <button type="submit" class="btn btn-primary">保存修改</button>
                                     </form>
@@ -398,7 +409,7 @@
                                                 <p class="mb-0 text-muted">建议定期更换密码，确保账户安全</p>
                                             </div>
                                         </div>
-                                        <button class="btn btn-outline-primary">修改</button>
+                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">修改</button>
                                     </div>
                                     <div class="security-item">
                                         <div class="d-flex align-items-center">
@@ -407,10 +418,10 @@
                                             </div>
                                             <div>
                                                 <h6 class="mb-1">手机验证</h6>
-                                                <p class="mb-0 text-muted">已绑定：138****8000</p>
+                                                <p class="mb-0 text-muted">已绑定：{{ request.user.teacher_profile.phone|default:'138****8000'|slice:":3" }}****{{ request.user.teacher_profile.phone|default:'13800138000'|slice:"-4:" }}</p>
                                             </div>
                                         </div>
-                                        <button class="btn btn-outline-primary">修改</button>
+                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePhoneModal">修改</button>
                                     </div>
                                     <div class="security-item">
                                         <div class="d-flex align-items-center">
@@ -419,10 +430,10 @@
                                             </div>
                                             <div>
                                                 <h6 class="mb-1">邮箱验证</h6>
-                                                <p class="mb-0 text-muted">已绑定：tea****@example.com</p>
+                                                <p class="mb-0 text-muted">已绑定：{{ request.user.email|default:'teacher@example.com'|slice:":3" }}****@{{ request.user.email|default:'teacher@example.com'|cut:'@'|slice:"-10:" }}</p>
                                             </div>
                                         </div>
-                                        <button class="btn btn-outline-primary">修改</button>
+                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">修改</button>
                                     </div>
                                     <div class="security-item">
                                         <div class="d-flex align-items-center">
@@ -434,7 +445,7 @@
                                                 <p class="mb-0 text-muted">未开启</p>
                                             </div>
                                         </div>
-                                        <button class="btn btn-outline-primary">开启</button>
+                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#two-factor-modal">开启</button>
                                     </div>
                                 </div>
                             </div>
@@ -446,39 +457,42 @@
                                     <h5 class="mb-0">通知设置</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="mb-4">
-                                        <h6 class="mb-3">系统通知</h6>
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" checked>
-                                            <label class="form-check-label">课程提醒</label>
+                                    <form method="post" action="{% url 'teachers:update_notifications' %}">
+                                        {% csrf_token %}
+                                        <div class="mb-4">
+                                            <h6 class="mb-3">系统通知</h6>
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" name="course_reminder" {% if notification_settings.course_reminder %}checked{% endif %}>
+                                                <label class="form-check-label">课程提醒</label>
+                                            </div>
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" name="attendance_reminder" {% if notification_settings.attendance_reminder %}checked{% endif %}>
+                                                <label class="form-check-label">考勤提醒</label>
+                                            </div>
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" name="fee_reminder" {% if notification_settings.fee_reminder %}checked{% endif %}>
+                                                <label class="form-check-label">学费提醒</label>
+                                            </div>
                                         </div>
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" checked>
-                                            <label class="form-check-label">考勤提醒</label>
+                                        
+                                        <div class="mb-4">
+                                            <h6 class="mb-3">通知方式</h6>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" name="in_app" {% if notification_settings.in_app %}checked{% endif %}>
+                                                <label class="form-check-label">站内消息</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" name="sms" {% if notification_settings.sms %}checked{% endif %}>
+                                                <label class="form-check-label">短信通知</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" name="email" {% if notification_settings.email %}checked{% endif %}>
+                                                <label class="form-check-label">邮件通知</label>
+                                            </div>
                                         </div>
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" checked>
-                                            <label class="form-check-label">学费提醒</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-4">
-                                        <h6 class="mb-3">通知方式</h6>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" checked>
-                                            <label class="form-check-label">站内消息</label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" checked>
-                                            <label class="form-check-label">短信通知</label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">邮件通知</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-primary">保存设置</button>
+                                        
+                                        <button type="submit" class="btn btn-primary">保存设置</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -489,35 +503,38 @@
                                     <h5 class="mb-0">隐私设置</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="mb-4">
-                                        <h6 class="mb-3">个人信息可见性</h6>
-                                        <div class="mb-3">
-                                            <label class="form-label">手机号码</label>
-                                            <select class="form-select">
-                                                <option>仅自己可见</option>
-                                                <option selected>仅学生可见</option>
-                                                <option>所有人可见</option>
-                                            </select>
+                                    <form method="post" action="{% url 'teachers:update_privacy' %}">
+                                        {% csrf_token %}
+                                        <div class="mb-4">
+                                            <h6 class="mb-3">个人信息可见性</h6>
+                                            <div class="mb-3">
+                                                <label class="form-label">手机号码</label>
+                                                <select class="form-select" name="phone_visibility">
+                                                    <option value="self" {% if privacy_settings.phone_visibility == 'self' %}selected{% endif %}>仅自己可见</option>
+                                                    <option value="students" {% if privacy_settings.phone_visibility == 'students' %}selected{% endif %}>仅学生可见</option>
+                                                    <option value="all" {% if privacy_settings.phone_visibility == 'all' %}selected{% endif %}>所有人可见</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">邮箱地址</label>
+                                                <select class="form-select" name="email_visibility">
+                                                    <option value="self" {% if privacy_settings.email_visibility == 'self' %}selected{% endif %}>仅自己可见</option>
+                                                    <option value="students" {% if privacy_settings.email_visibility == 'students' %}selected{% endif %}>仅学生可见</option>
+                                                    <option value="all" {% if privacy_settings.email_visibility == 'all' %}selected{% endif %}>所有人可见</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">个人简介</label>
+                                                <select class="form-select" name="bio_visibility">
+                                                    <option value="self" {% if privacy_settings.bio_visibility == 'self' %}selected{% endif %}>仅自己可见</option>
+                                                    <option value="students" {% if privacy_settings.bio_visibility == 'students' %}selected{% endif %}>仅学生可见</option>
+                                                    <option value="all" {% if privacy_settings.bio_visibility == 'all' %}selected{% endif %}>所有人可见</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">邮箱地址</label>
-                                            <select class="form-select">
-                                                <option selected>仅自己可见</option>
-                                                <option>仅学生可见</option>
-                                                <option>所有人可见</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">个人简介</label>
-                                            <select class="form-select">
-                                                <option>仅自己可见</option>
-                                                <option>仅学生可见</option>
-                                                <option selected>所有人可见</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-primary">保存设置</button>
+                                        
+                                        <button type="submit" class="btn btn-primary">保存设置</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -527,8 +544,7 @@
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // 移动端侧边栏切换
         document.querySelector('.mobile-toggle').addEventListener('click', function() {

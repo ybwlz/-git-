@@ -15,7 +15,6 @@ from mymanage.students.models import Student
 from mymanage.courses.models import Course, CourseSchedule
 from mymanage.attendance.models import AttendanceRecord
 from mymanage.finance.models import Payment
-from mymanage.scores.models import Score
 from mymanage.users.decorators import teacher_required
 
 
@@ -163,9 +162,6 @@ class TeacherStudentManagementView:
             messages.error(request, '您无权查看此学生信息')
             return redirect('teachers:student_list')
         
-        # 获取学生成绩
-        scores = Score.objects.filter(student=student, course__in=courses)
-        
         # 获取学生考勤
         attendances = AttendanceRecord.objects.filter(
             student=student,
@@ -176,7 +172,6 @@ class TeacherStudentManagementView:
             'teacher': teacher,
             'student': student,
             'courses': courses,
-            'scores': scores,
             'attendances': attendances,
         }
         

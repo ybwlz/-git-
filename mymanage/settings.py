@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     'mymanage.courses',
     'mymanage.attendance',
     'mymanage.finance',
-    'mymanage.scores',
 ]
 
 MIDDLEWARE = [
