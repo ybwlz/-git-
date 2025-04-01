@@ -22,7 +22,7 @@ class PianoLevel(models.Model):
         (10, '10级'),
     ]
     
-    level = models.IntegerField('等级', choices=LEVEL_CHOICES, unique=True)
+    level = models.IntegerField('等级', choices=LEVEL_CHOICES, unique=True, default=1)
     description = models.TextField('描述', blank=True)
     
     class Meta:
@@ -101,6 +101,7 @@ class CourseSchedule(models.Model):
     start_time = models.TimeField('开始时间')
     end_time = models.TimeField('结束时间')
     is_active = models.BooleanField('是否有效', default=True)
+    is_temporary = models.BooleanField('是否临时', default=False)
     
     class Meta:
         verbose_name = '课程安排'

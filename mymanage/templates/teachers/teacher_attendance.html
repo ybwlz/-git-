@@ -329,6 +329,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:piano_arrangement' %}">
+                    <i class="fas fa-guitar"></i> 练琴安排
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="{% url 'teachers:students' %}">
                     <i class="fas fa-users"></i> 学生管理
                 </a>
@@ -358,14 +363,14 @@
     
     <div class="main-content">
         <div class="container-fluid">
+            {% csrf_token %}
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">考勤管理</h2>
                 <div>
-                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
-                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
-                        <i class="fas fa-clock me-1"></i>
-                        <span id="currentTime">00:00:00</span>
-                    </div>
+                    <span id="currentTime" class="me-3 text-secondary"></span>
+                    <button data-bs-toggle="modal" data-bs-target="#generateQRCodeModal" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i>生成考勤码
+                    </button>
                 </div>
             </div>
             
@@ -420,66 +425,54 @@
                 <div class="col-md-7 mb-4 mb-md-0">
                     <div class="card h-100">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">当前活跃考勤</h5>
-                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#generateQRModal">
-                                <i class="fas fa-qrcode me-1"></i>生成考勤码
-                            </button>
+                            <h5 class="mb-0">考勤二维码</h5>
+                            <div class="btn-group">
+                                <button id="refreshQRCodeBtn" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-sync-alt me-1"></i>刷新二维码
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#generateQRCodeModal">
+                                    <i class="fas fa-sliders-h me-1"></i>高级设置
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
-                            {% if active_sessions %}
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle">
-                                        <thead>
-                                            <tr>
-                                                <th>课程</th>
-                                                <th>时间</th>
-                                                <th>状态</th>
-                                                <th>已到/总人数</th>
-                                                <th>操作</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for session in active_sessions %}
-                                                <tr>
-                                                    <td>{{ session.course.name }}</td>
-                                                    <td>{{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</td>
-                                                    <td>
-                                                        {% if session.status == 'active' %}
-                                                            <span class="badge bg-success">进行中</span>
-                                                        {% elif session.status == 'pending' %}
-                                                            <span class="badge bg-warning">待开始</span>
-                                                        {% elif session.status == 'completed' %}
-                                                            <span class="badge bg-secondary">已结束</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td>{{ session.attendance_count }}/{{ session.total_students }}</td>
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <a href="{% url 'teachers:session_detail' session.id %}" class="btn btn-sm btn-outline-primary">
-                                                                <i class="fas fa-eye"></i>
-                                                            </a>
-                                                            <button class="btn btn-sm btn-outline-success" onclick="showQRCode('{{ session.qrcode.code }}')">
-                                                                <i class="fas fa-qrcode"></i>
-                                                            </button>
-                                                            <button class="btn btn-sm btn-outline-danger" onclick="endSession({{ session.id }})">
-                                                                <i class="fas fa-stop-circle"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
-                                <div class="text-center py-5">
-                                    <div class="mb-3 text-muted">
-                                        <i class="fas fa-calendar-xmark fa-4x"></i>
+                            <div class="text-center">
+                                {% if qrcode_to_display and qrcode_to_display.qr_code_image %}
+                                    <div class="qr-display mb-4">
+                                        <img src="{{ qrcode_to_display.qr_code_image.url }}" class="img-fluid rounded border p-2 shadow-sm" style="max-width: 280px;">
                                     </div>
-                                    <h5>当前没有活跃的考勤</h5>
-                                    <p class="text-muted">点击"生成考勤码"开始新的考勤记录</p>
-                                </div>
-                            {% endif %}
+                                    <div class="qr-info mb-4">
+                                        <h6 class="mb-3">扫码签到</h6>
+                                        <div class="alert alert-info">
+                                            <p class="mb-1"><i class="fas fa-book me-2"></i>课程: {{ qrcode_to_display.course.name }}</p>
+                                            <p class="mb-1"><i class="fas fa-clock me-2"></i>有效期至: {{ qrcode_to_display.expires_at|date:"Y-m-d H:i" }}</p>
+                                        </div>
+                                        <div class="mt-3">
+                                            <button class="btn btn-outline-primary" id="downloadQRCodeBtn">
+                                                <i class="fas fa-download me-1"></i>下载二维码
+                                            </button>
+                                            {% if active_sessions %}
+                                            <a href="{% url 'teachers:session_detail' active_sessions.0.id %}" class="btn btn-outline-success ms-2">
+                                                <i class="fas fa-users me-1"></i>查看签到情况
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div id="noQRCodeContainer" class="{% if qrcode_to_display %}d-none{% endif %}">
+                                        <div class="py-5">
+                                            <div class="mb-4 text-muted">
+                                                <i class="fas fa-qrcode fa-5x"></i>
+                                            </div>
+                                            <h5>暂无考勤码</h5>
+                                            <p class="text-muted mb-4">点击"刷新二维码"按钮生成新的考勤码</p>
+                                            <button id="generateQRCodeBtnInline" class="btn btn-primary">
+                                                <i class="fas fa-sync-alt me-1"></i>立即生成
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -643,42 +636,33 @@
     </div>
     
     <!-- 生成考勤码模态框 -->
-    <div class="modal fade" id="generateQRModal" tabindex="-1">
+    <div class="modal fade" id="generateQRCodeModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">生成考勤二维码</h5>
+                    <h5 class="modal-title">高级考勤设置</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="qrCodeForm" method="post" action="{% url 'teachers:generate_qrcode' %}">
+                    <p class="text-muted mb-3">您可以在此自定义考勤参数，如选择特定课程、时间等。若要快速生成，请直接点击页面上的"立即生成考勤码"按钮。</p>
+                    <form id="qrCodeForm">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label class="form-label">选择课程</label>
-                            <select name="course_id" class="form-select" required>
+                            <select id="qrcode_course" name="course_id" class="form-select">
                                 <option value="">请选择课程</option>
                                 {% for course in courses %}
                                     <option value="{{ course.id }}">{{ course.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">开始时间</label>
-                                <input type="time" name="start_time" class="form-control" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">结束时间</label>
-                                <input type="time" name="end_time" class="form-control" required>
-                            </div>
-                        </div>
                         <div class="mb-3">
-                            <label class="form-label">考勤说明</label>
-                            <textarea name="description" class="form-control" rows="3"></textarea>
+                            <label class="form-label">有效时长（小时）</label>
+                            <input type="number" id="qrcode_hours" name="hours" class="form-control" value="2" min="1" max="24">
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                            <button type="submit" class="btn btn-primary">生成二维码</button>
+                            <button type="button" id="generateQRCodeBtn" class="btn btn-primary">生成二维码</button>
                         </div>
                     </form>
                 </div>
@@ -718,116 +702,255 @@
         </div>
     </div>
     
+    <!-- 隐藏的表单字段，用于存储当前会话ID -->
+    <input type="hidden" id="currentSessionId" value="">
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script src="{% static 'js/skin/default/layer.js' %}"></script>
     <script>
-        // 显示二维码
-        function showQRCode(code) {
-            const qrDiv = document.getElementById('qrCodeImage');
-            qrDiv.innerHTML = '';
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取所有需要的DOM元素
+        var generateBtn = document.getElementById('generateQRCodeBtn');  // 模态框中的按钮
+        var inlineBtn = document.getElementById('generateQRCodeBtnInline');  // 页面内的按钮
+        var refreshBtn = document.getElementById('refreshQRCodeBtn');  // 刷新按钮
+        var downloadBtn = document.getElementById('downloadQRCodeBtn');  // 下载按钮
+        var endSessionBtn = document.getElementById('endSessionBtn');  // 结束会话按钮
+        
+        // 下载二维码功能
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function() {
+                // 查找二维码图片
+                var imgElement = document.querySelector('.qr-display img');
+                if (imgElement) {
+                    var a = document.createElement('a');
+                    a.href = imgElement.src;
+                    // 获取课程名称
+                    var courseName = "考勤码";
+                    var courseNameElement = document.querySelector('.qr-info .alert p:first-child');
+                    if (courseNameElement) {
+                        courseName = courseNameElement.textContent.replace(/课程: /, '').trim();
+                    }
+                    a.download = courseName + '_考勤码.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } else {
+                    alert('找不到二维码图片');
+                }
+            });
+        }
+        
+        // 生成二维码的核心函数
+        function createQRCode(courseId, hours) {
+            // 默认值
+            courseId = courseId || '';
+            hours = hours || 2;
             
-            // 生成QR码
-            const qr = qrcode(0, 'M');
-            qr.addData(code);
-            qr.make();
+            // 获取CSRF令牌
+            var csrfTokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (!csrfTokenElement) {
+                alert('无法获取CSRF令牌，请刷新页面重试');
+                return;
+            }
             
-            // 创建图片并添加到div
-            const img = document.createElement('img');
-            img.src = qr.createDataURL();
-            img.classList.add('img-fluid');
-            img.style.maxWidth = '250px';
-            qrDiv.appendChild(img);
+            var csrfToken = csrfTokenElement.value;
             
-            // 显示模态框
-            const modal = new bootstrap.Modal(document.getElementById('qrCodeDisplayModal'));
-            modal.show();
+            // 显示加载提示
+            alert('正在生成考勤码，请稍候...');
             
-            // 设置下载按钮
-            document.getElementById('downloadQRCode').onclick = function() {
-                const link = document.createElement('a');
-                link.download = '考勤二维码.png';
-                link.href = img.src;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+            // 如果没有指定课程ID，使用GET请求（使用默认课程）
+            if (!courseId) {
+                try {
+                    // 使用fetch发送GET请求，而不是直接跳转，这样可以更好地处理错误
+                    fetch('/teachers/attendance/qrcode/', {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('服务器返回错误: ' + response.status);
+                        }
+                        
+                        // 由于GET请求会返回重定向，直接刷新页面
+                        window.location.href = '/teachers/attendance/';
+                    })
+                    .catch(error => {
+                        console.error('请求出错:', error);
+                        alert('生成考勤码失败: ' + error.message);
+                    });
+                } catch (e) {
+                    console.error('执行GET请求时出错:', e);
+                    // 如果fetch失败，尝试直接跳转
+                    window.location.href = '/teachers/attendance/';
+                }
+                return;
+            }
+            
+            // 有指定课程ID时，使用POST请求
+            var formData = new FormData();
+            formData.append('course_id', courseId);
+            // 计算当前时间和结束时间
+            var now = new Date();
+            var end = new Date(now.getTime() + hours * 60 * 60 * 1000);
+            
+            // 格式化时间为HH:MM格式
+            var formatTime = function(date) {
+                var hours = date.getHours().toString().padStart(2, '0');
+                var minutes = date.getMinutes().toString().padStart(2, '0');
+                return hours + ':' + minutes;
             };
-        }
-        
-        // 结束考勤
-        function endSession(sessionId) {
-            if (confirm('确定要结束此次考勤吗？')) {
-                fetch(`/teachers/attendance/session/${sessionId}/end/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
+            
+            formData.append('start_time', formatTime(now));
+            formData.append('end_time', formatTime(end));
+            formData.append('description', '通过考勤页面生成的二维码');
+            
+            // 发送请求
+            fetch('/teachers/attendance/qrcode/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(function(response) {
+                if (response.redirected) {
+                    // 如果响应是重定向，直接跳转
+                    window.location.href = response.url;
+                    return null;
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                if (data) {
                     if (data.success) {
-                        layer.msg('考勤已成功结束', {icon: 1, time: 2000});
-                        setTimeout(() => location.reload(), 2000);
+                        alert('考勤码生成成功！页面将刷新以显示新的考勤码。');
+                        window.location.reload();
                     } else {
-                        layer.msg('操作失败：' + data.error, {icon: 2, time: 2000});
+                        alert('错误: ' + data.message);
+                        console.error(data);
                     }
-                })
-                .catch(error => {
-                    layer.msg('操作失败，请重试', {icon: 2, time: 2000});
-                });
-            }
+                }
+            })
+            .catch(function(error) {
+                console.error('生成二维码时出错:', error);
+                alert('生成考勤码失败，请重试');
+            });
         }
         
-        // 显示成功消息
-        {% if messages %}
-            {% for message in messages %}
-                {% if message.tags == 'success' %}
-                    layer.msg('{{ message }}', {icon: 1, time: 2000});
-                {% else %}
-                    layer.msg('{{ message }}', {icon: 2, time: 2000});
-                {% endif %}
-            {% endfor %}
-        {% endif %}
+        // 模态框中的生成按钮
+        if (generateBtn) {
+            generateBtn.addEventListener('click', function() {
+                var courseSelect = document.getElementById('qrcode_course');
+                var hoursInput = document.getElementById('qrcode_hours');
+                
+                var courseId = courseSelect ? courseSelect.value : '';
+                var hours = hoursInput && hoursInput.value ? parseInt(hoursInput.value) : 2;
+                
+                // 关闭模态框
+                var modal = bootstrap.Modal.getInstance(document.getElementById('generateQRCodeModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                
+                createQRCode(courseId, hours);
+            });
+        }
         
-        // 如果URL中有qrcode参数，自动显示二维码
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const qrcode = urlParams.get('qrcode');
-            if (qrcode) {
-                {% if qrcode_to_display %}
-                    // 直接显示模态框
-                    const modal = new bootstrap.Modal(document.getElementById('qrCodeDisplayModal'));
-                    modal.show();
+        // 内联生成按钮
+        if (inlineBtn) {
+            inlineBtn.addEventListener('click', function() {
+                createQRCode('', 2);  // 使用默认值
+            });
+        }
+        
+        // 刷新按钮
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                createQRCode('', 2);  // 使用默认值
+            });
+        }
+        
+        // 结束会话按钮
+        if (endSessionBtn) {
+            endSessionBtn.addEventListener('click', function() {
+                var sessionId = document.getElementById('currentSessionId').value;
+                if (!sessionId) {
+                    alert('找不到活跃的考勤会话');
+                    return;
+                }
+                
+                if (confirm('确定要结束此考勤会话吗？')) {
+                    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                     
-                    // 设置下载按钮
-                    document.getElementById('downloadQRCode').onclick = function() {
-                        const link = document.createElement('a');
-                        link.download = '考勤二维码_{{ qrcode_to_display.course.name }}.png';
-                        link.href = "{{ qrcode_to_display.qr_code_image.url }}";
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    };
-                {% else %}
-                    // 尝试动态生成
-                    showQRCode(qrcode);
-                {% endif %}
-            }
-        });
-        
-        // 添加系统时间显示功能
-        function updateSystemTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+                    fetch('/attendance/end-session/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            session_id: sessionId
+                        })
+                    })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (data.success) {
+                            alert(data.message);
+                            window.location.reload();
+                        } else {
+                            alert('错误: ' + data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('结束会话时出错:', error);
+                        alert('操作失败，请重试');
+                    });
+                }
+            });
         }
         
-        // 初始化并每秒更新一次
-        updateSystemTime();
-        setInterval(updateSystemTime, 1000);
+        // 显示Django消息
+        var djangoMessages = [];
+        // 从预处理的数据中获取消息
+        var messagesContainer = document.getElementById('django-messages-data');
+        if (messagesContainer) {
+            try {
+                var rawContent = messagesContainer.textContent.trim();
+                // 检查是否有实际内容，避免解析空数组
+                if (rawContent && rawContent !== '[]' && rawContent !== '[\n]') {
+                    djangoMessages = JSON.parse(rawContent);
+                }
+            } catch (e) {
+                console.error('解析Django消息时出错:', e);
+                // 显示友好的错误消息，但不阻止其他功能
+                console.log('原始内容:', messagesContainer.textContent);
+            }
+        }
+        
+        if (djangoMessages && djangoMessages.length > 0) {
+            for (var i = 0; i < djangoMessages.length; i++) {
+                if (djangoMessages[i] && djangoMessages[i].text) {
+                    alert(djangoMessages[i].text);
+                }
+            }
+        }
+    });
+    </script>
+    
+    <!-- 存储Django消息的隐藏元素 -->
+    <script type="text/template" id="django-messages-data">
+    [{% if messages %}{% for message in messages %}
+        {
+            "text": "{{ message|escapejs }}",
+            "tags": "{{ message.tags|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+    {% endfor %}{% endif %}]
     </script>
 </body>
 </html> 

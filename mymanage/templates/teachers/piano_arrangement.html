@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>练琴安排 - 苗韵琴行管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar h5 {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .piano-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .piano-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .piano-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .piano-card .piano-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .piano-card .piano-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .piano-status.available {
+            background-color: #e3fcef;
+            color: #20bf6b;
+        }
+        
+        .piano-status.occupied {
+            background-color: #fff3e6;
+            color: #fd9644;
+        }
+        
+        .piano-status.maintenance {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        .piano-details {
+            margin-top: 15px;
+        }
+        
+        .piano-details p {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .waiting-list {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .waiting-list h4 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .waiting-list h4 i {
+            margin-right: 10px;
+        }
+        
+        .waiting-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .waiting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .waiting-number {
+            width: 30px;
+            height: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+        
+        .waiting-student {
+            flex-grow: 1;
+        }
+        
+        .waiting-student-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .waiting-time {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .waiting-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar .nav-link:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-toggle btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            {% if teacher.avatar %}
+                <img src="{{ teacher.avatar.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ teacher.name|default:"苗韵琴行" }}</h5>
+            {% if teacher.job_title %}
+                <p class="text-light mb-0"><small>{{ teacher.job_title }}</small></p>
+            {% endif %}
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:dashboard' %}">
+                    <i class="fas fa-home"></i> 控制面板
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:students' %}">
+                    <i class="fas fa-users"></i> 学生管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'teachers:piano_arrangement' %}">
+                    <i class="fas fa-guitar"></i> 练琴安排
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:attendance' %}">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:sheet_music' %}">
+                    <i class="fas fa-music"></i> 曲谱管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:finance' %}">
+                    <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">练琴安排</h2>
+                <div>
+                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
+                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime">00:00:00</span>
+                    </div>
+                    <button class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#generateQrcodeModal">
+                        <i class="fas fa-qrcode me-1"></i> 生成考勤码
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 统计卡片 -->
+            <div class="row mb-4">
+                <div class="col-sm-6 col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                                <i class="fas fa-user-check text-primary fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="card-title mb-0">今日已签到</h6>
+                                <h3 class="mt-2 mb-0">{{ checked_in_today|default:"0" }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                                <i class="fas fa-piano text-success fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="card-title mb-0">钢琴使用率</h6>
+                                <h3 class="mt-2 mb-0">{{ piano_usage_rate|default:"0%" }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                                <i class="fas fa-user-clock text-warning fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="card-title mb-0">等待人数</h6>
+                                <h3 class="mt-2 mb-0">{{ waiting_count|default:"0" }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                                <i class="fas fa-clock text-info fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="card-title mb-0">平均等待</h6>
+                                <h3 class="mt-2 mb-0">{{ avg_wait_time|default:"0分钟" }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 钢琴状态 -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-piano me-2"></i>钢琴状态</h5>
+                    <button class="btn btn-sm btn-outline-primary" id="refreshPianoStatus">
+                        <i class="fas fa-sync-alt me-1"></i>刷新状态
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="piano-status-grid">
+                        {% for piano in pianos %}
+                        <div class="piano-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="piano-number">钢琴 {{ piano.number }}</div>
+                                {% if piano.is_active and not piano.is_occupied %}
+                                <span class="piano-status available">可用</span>
+                                {% elif piano.is_active and piano.is_occupied %}
+                                <span class="piano-status occupied">使用中</span>
+                                {% else %}
+                                <span class="piano-status maintenance">维护中</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if piano.is_active and piano.is_occupied and piano.current_student %}
+                            <div class="student-info mt-3">
+                                <div class="d-flex align-items-center">
+                                    {% if piano.current_student.avatar %}
+                                    <img src="{{ piano.current_student.avatar.url }}" alt="{{ piano.current_student.name }}" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        {{ piano.current_student.name|slice:":1" }}
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold">{{ piano.current_student.name }}</div>
+                                        <div class="text-muted small">{{ piano.current_student.level }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="piano-details">
+                                <p>
+                                    <span class="text-muted">开始时间:</span>
+                                    <span>{{ piano.start_time|time:"H:i" }}</span>
+                                </p>
+                                <p>
+                                    <span class="text-muted">结束时间:</span>
+                                    <span>{{ piano.end_time|time:"H:i" }}</span>
+                                </p>
+                                <p>
+                                    <span class="text-muted">已练习:</span>
+                                    <span>{{ piano.practiced_time }}</span>
+                                </p>
+                            </div>
+                            {% else %}
+                            <div class="piano-details">
+                                <p>
+                                    <span class="text-muted">品牌:</span>
+                                    <span>{{ piano.brand }}</span>
+                                </p>
+                                <p>
+                                    <span class="text-muted">型号:</span>
+                                    <span>{{ piano.model }}</span>
+                                </p>
+                                <p>
+                                    <span class="text-muted">状态:</span>
+                                    <span>{% if piano.is_active %}正常{% else %}维护中{% endif %}</span>
+                                </p>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="d-flex mt-3">
+                                {% if piano.is_active %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#pianoDashboardModal" data-piano-id="{{ piano.id }}">
+                                    <i class="fas fa-info-circle me-1"></i>详情
+                                </button>
+                                {% if not piano.is_occupied %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#pianaMaintainanceModal" data-piano-id="{{ piano.id }}">
+                                    <i class="fas fa-tools me-1"></i>维护
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#forceCheckoutModal" data-piano-id="{{ piano.id }}" data-student-name="{{ piano.current_student.name }}">
+                                    <i class="fas fa-sign-out-alt me-1"></i>强制签退
+                                </button>
+                                {% endif %}
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-outline-primary w-100" onclick="activatePiano({{ piano.id }})">
+                                    <i class="fas fa-check-circle me-1"></i>恢复使用
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 等待队列 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-clock me-2"></i>等待队列</h5>
+                </div>
+                <div class="card-body">
+                    {% if waiting_students %}
+                    <div class="waiting-list">
+                        {% for student in waiting_students %}
+                        <div class="waiting-item">
+                            <div class="waiting-number">{{ forloop.counter }}</div>
+                            <div class="waiting-student">
+                                <div class="waiting-student-name">{{ student.name }}</div>
+                                <div class="waiting-time">
+                                    <i class="fas fa-clock me-1"></i>等待时间: {{ student.wait_time }}分钟
+                                    <span class="ms-2 text-muted">|</span>
+                                    <i class="fas fa-hourglass-half ms-2 me-1"></i>预计分配: {{ student.estimated_start_time|time:"H:i" }}
+                                </div>
+                            </div>
+                            <div class="waiting-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#assignPianoModal" data-student-id="{{ student.id }}" data-student-name="{{ student.name }}">
+                                    <i class="fas fa-piano me-1"></i>分配钢琴
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="removeFromQueue({{ student.id }})">
+                                    <i class="fas fa-times me-1"></i>移出队列
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-users text-muted fa-3x"></i>
+                        </div>
+                        <h5 class="text-muted">当前没有学生在等待</h5>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 历史记录 -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>今日练琴记录</h5>
+                    <a href="{% url 'teachers:attendance' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>查看所有记录
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>学生</th>
+                                    <th>钢琴</th>
+                                    <th>开始时间</th>
+                                    <th>结束时间</th>
+                                    <th>练习时长</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if today_records %}
+                                {% for record in today_records %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if record.student.avatar %}
+                                            <img src="{{ record.student.avatar.url }}" alt="{{ record.student.name }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                {{ record.student.name|slice:":1" }}
+                                            </div>
+                                            {% endif %}
+                                            {{ record.student.name }}
+                                        </div>
+                                    </td>
+                                    <td>钢琴 {{ record.piano.number }}</td>
+                                    <td>{{ record.check_in_time|time:"H:i" }}</td>
+                                    <td>{{ record.check_out_time|time:"H:i"|default:"-" }}</td>
+                                    <td>{{ record.duration|default:"进行中" }}</td>
+                                    <td>
+                                        {% if record.status == 'checked_in' %}
+                                        <span class="badge bg-primary">进行中</span>
+                                        {% else %}
+                                        <span class="badge bg-success">已完成</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">今日暂无练琴记录</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 生成考勤码模态框 -->
+    <div class="modal fade" id="generateQrcodeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">生成考勤码</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generateQrcodeForm" action="{% url 'teachers:generate_qrcode' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">考勤码类型</label>
+                            <select class="form-select" name="qrcode_type" required>
+                                <option value="practice">练琴考勤</option>
+                                <option value="class">上课考勤</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">有效时间</label>
+                            <select class="form-select" name="expiry_time" required>
+                                <option value="30">30分钟</option>
+                                <option value="60">1小时</option>
+                                <option value="120">2小时</option>
+                                <option value="240">4小时</option>
+                                <option value="480">8小时</option>
+                                <option value="720">12小时</option>
+                                <option value="1440">24小时</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" form="generateQrcodeForm" class="btn btn-primary">生成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 分配钢琴模态框 -->
+    <div class="modal fade" id="assignPianoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">手动分配钢琴</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignPianoForm" action="{% url 'teachers:assign_piano' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="student_id" id="assignStudentId">
+                        <div class="mb-3">
+                            <label class="form-label">学生</label>
+                            <input type="text" class="form-control" id="assignStudentName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">选择钢琴</label>
+                            <select class="form-select" name="piano_id" required>
+                                <option value="">选择钢琴...</option>
+                                {% for piano in available_pianos %}
+                                <option value="{{ piano.id }}">钢琴 {{ piano.number }} - {{ piano.brand }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" form="assignPianoForm" class="btn btn-primary">分配</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 强制签退模态框 -->
+    <div class="modal fade" id="forceCheckoutModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">强制签退确认</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您确定要强制为 <span id="forceCheckoutStudentName" class="fw-bold"></span> 签退吗？</p>
+                    <p class="text-danger">注意: 强制签退会立即结束学生的练习会话</p>
+                    <form id="forceCheckoutForm" action="{% url 'teachers:force_checkout' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="piano_id" id="forceCheckoutPianoId">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" form="forceCheckoutForm" class="btn btn-danger">强制签退</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 钢琴维护模态框 -->
+    <div class="modal fade" id="pianaMaintainanceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">钢琴维护</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="pianoMaintainanceForm" action="{% url 'teachers:piano_maintenance' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="piano_id" id="maintainancePianoId">
+                        <div class="mb-3">
+                            <label class="form-label">维护原因</label>
+                            <select class="form-select" name="reason" required>
+                                <option value="调音">钢琴调音</option>
+                                <option value="维修">钢琴维修</option>
+                                <option value="清洁">钢琴清洁</option>
+                                <option value="其他">其他原因</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">预计维护时间</label>
+                            <select class="form-select" name="duration" required>
+                                <option value="60">1小时</option>
+                                <option value="120">2小时</option>
+                                <option value="240">4小时</option>
+                                <option value="480">8小时</option>
+                                <option value="1440">24小时</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">备注信息</label>
+                            <textarea class="form-control" name="notes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" form="pianoMaintainanceForm" class="btn btn-primary">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    
+    <script>
+        // 移动端侧边栏切换
+        document.querySelector('.mobile-toggle').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebar.style.width === '280px') {
+                sidebar.style.width = '0';
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '280px';
+                mainContent.style.marginLeft = '280px';
+            }
+        });
+
+        // 系统时间显示
+        function updateSystemTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 初始化并每秒更新一次
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
+        
+        // 模态框数据传递
+        const assignPianoModal = document.getElementById('assignPianoModal');
+        if (assignPianoModal) {
+            assignPianoModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const studentId = button.getAttribute('data-student-id');
+                const studentName = button.getAttribute('data-student-name');
+                
+                document.getElementById('assignStudentId').value = studentId;
+                document.getElementById('assignStudentName').value = studentName;
+            });
+        }
+        
+        const forceCheckoutModal = document.getElementById('forceCheckoutModal');
+        if (forceCheckoutModal) {
+            forceCheckoutModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const pianoId = button.getAttribute('data-piano-id');
+                const studentName = button.getAttribute('data-student-name');
+                
+                document.getElementById('forceCheckoutPianoId').value = pianoId;
+                document.getElementById('forceCheckoutStudentName').textContent = studentName;
+            });
+        }
+        
+        const pianaMaintainanceModal = document.getElementById('pianaMaintainanceModal');
+        if (pianaMaintainanceModal) {
+            pianaMaintainanceModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const pianoId = button.getAttribute('data-piano-id');
+                
+                document.getElementById('maintainancePianoId').value = pianoId;
+            });
+        }
+        
+        // 刷新钢琴状态
+        document.getElementById('refreshPianoStatus').addEventListener('click', function() {
+            refreshPianoStatus();
+        });
+        
+        function refreshPianoStatus() {
+            fetch('{% url "teachers:refresh_piano_status" %}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        layer.msg('状态已更新');
+                        // 无需重新加载整个页面，可以使用JS更新DOM
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        layer.msg('更新失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    layer.msg('更新失败，请稍后重试');
+                });
+        }
+        
+        // 从队列中移除学生
+        function removeFromQueue(studentId) {
+            if (confirm('确定要将学生从等待队列中移除吗？')) {
+                fetch('{% url "teachers:remove_from_queue" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: `student_id=${studentId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        layer.msg('学生已从队列中移除');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        layer.msg('操作失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    layer.msg('操作失败，请稍后重试');
+                });
+            }
+        }
+        
+        // 恢复钢琴使用
+        function activatePiano(pianoId) {
+            if (confirm('确定要恢复此钢琴为可用状态吗？')) {
+                fetch('{% url "teachers:activate_piano" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: `piano_id=${pianoId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        layer.msg('钢琴状态已更新');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        layer.msg('操作失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    layer.msg('操作失败，请稍后重试');
+                });
+            }
+        }
+        
+        // 页面加载后自动更新状态
+        document.addEventListener('DOMContentLoaded', function() {
+            // 每30秒自动刷新一次状态
+            setInterval(refreshPianoStatus, 30000);
+        });
+    </script>
+</body>
+</html>

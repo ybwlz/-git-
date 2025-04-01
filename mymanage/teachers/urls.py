@@ -18,11 +18,14 @@ urlpatterns = [
     path('students/<int:student_id>/edit/', views.edit_student, name='edit_student'),
     path('students/<int:student_id>/delete/', views.delete_student, name='delete_student'),
     
-    # 课程管理
-    path('courses/', views.teacher_courses, name='courses'),
-    path('courses/<int:course_id>/', views.course_detail, name='course_detail'),
-    path('courses/add/', views.add_course, name='add_course'),
-    path('courses/<int:course_id>/edit/', views.edit_course, name='edit_course'),
+    # 练琴安排（替代课程管理）
+    path('piano-arrangement/', views.piano_arrangement, name='piano_arrangement'),
+    path('piano-arrangement/refresh/', views.refresh_piano_status, name='refresh_piano_status'),
+    path('piano-arrangement/assign/', views.assign_piano, name='assign_piano'),
+    path('piano-arrangement/force-checkout/', views.force_checkout, name='force_checkout'),
+    path('piano-arrangement/maintenance/', views.piano_maintenance, name='piano_maintenance'),
+    path('piano-arrangement/activate/', views.activate_piano, name='activate_piano'),
+    path('piano-arrangement/remove-from-queue/', views.remove_from_queue, name='remove_from_queue'),
     
     # 考勤管理
     path('attendance/', views.teacher_attendance, name='attendance'),

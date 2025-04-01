@@ -29,7 +29,12 @@ class QRCode(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"二维码-{self.course.name}-{self.created_at.strftime('%Y-%m-%d %H:%M')}"
+        # 确保created_at不为None
+        if self.created_at:
+            time_str = self.created_at.strftime('%Y-%m-%d %H:%M')
+        else:
+            time_str = timezone.now().strftime('%Y-%m-%d %H:%M')
+        return f"二维码-{self.course.name}-{time_str}"
     
     def save(self, *args, **kwargs):
         # 设置code字段与uuid一致
@@ -51,8 +56,12 @@ class QRCode(models.Model):
             buffer = BytesIO()
             img.save(buffer, format="PNG")
             
+            # 使用当前时间代替self.created_at，因为created_at可能为None
+            current_time = timezone.now()
+            filename = f"{self.course.code}_{current_time.strftime('%Y%m%d%H%M')}.png"
+            
             self.qr_code_image.save(
-                f"{self.course.code}_{self.created_at.strftime('%Y%m%d%H%M')}.png",
+                filename,
                 File(buffer),
                 save=False
             )
@@ -79,6 +88,7 @@ class AttendanceSession(models.Model):
     start_time = models.DateTimeField('开始时间', auto_now_add=True)
     end_time = models.DateTimeField('结束时间', null=True, blank=True)
     status = models.CharField('状态', max_length=10, choices=STATUS_CHOICES, default='active')
+    description = models.TextField('描述', blank=True)
     
     class Meta:
         verbose_name = '考勤会话'

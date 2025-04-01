@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.utils import timezone
 import datetime
 import json
+import uuid as uuid_lib
 
 from .models import QRCode, AttendanceSession, AttendanceRecord, WaitingQueue
 from mymanage.courses.models import Course, CourseSchedule, Piano
@@ -356,3 +357,173 @@ def teacher_attendance_stats(request):
     }
     
     return render(request, 'attendance/teacher_stats.html', context)
+
+
+@login_required
+@teacher_required
+def generate_qrcode(request):
+    """生成新的二维码"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) if request.body else request.POST
+            course_id = data.get('course_id')
+            hours = int(data.get('hours', 2))
+            
+            # 获取课程
+            teacher = request.user.teacher_profile
+            course = None
+            
+            try:
+                # 尝试获取指定的课程
+                if course_id:
+                    course = Course.objects.get(id=course_id, teacher=teacher)
+            except Course.DoesNotExist:
+                # 如果未找到课程，使用默认课程
+                course = None
+                
+            # 如果没有找到课程或没有提供课程ID，则创建一个默认课程
+            if not course:
+                # 先获取或创建一个有效的钢琴级别
+                from mymanage.courses.models import PianoLevel
+                try:
+                    # 尝试获取第一个现有级别
+                    piano_level = PianoLevel.objects.first()
+                    if not piano_level:
+                        # 如果没有钢琴级别，先创建一个默认级别
+                        piano_level = PianoLevel.objects.create(
+                            level=1,
+                            description="初级"
+                        )
+                except Exception as e:
+                    # 如果获取级别失败，创建一个新级别
+                    piano_level = PianoLevel.objects.create(
+                        level=1,
+                        description="初级"
+                    )
+                
+                # 检查是否已存在默认课程
+                default_course = Course.objects.filter(
+                    code="DEFAULT",
+                    teacher=teacher
+                ).first()
+                
+                if default_course:
+                    course = default_course
+                else:
+                    # 创建新的默认课程
+                    course = Course.objects.create(
+                        name="通用考勤",
+                        code="DEFAULT",
+                        teacher=teacher,
+                        description='自动生成的通用考勤课程',
+                        level=piano_level  # 确保提供有效的级别
+                    )
+            
+            # 设置二维码过期时间
+            current_time = timezone.now()
+            expires_at = current_time + datetime.timedelta(hours=hours)
+            
+            # 创建二维码
+            qrcode_uuid = str(uuid_lib.uuid4())
+            qrcode = QRCode.objects.create(
+                course=course,
+                uuid=uuid_lib.UUID(qrcode_uuid),
+                code=qrcode_uuid,
+                expires_at=expires_at
+            )
+            
+            # 获取当前weekday
+            weekday = current_time.weekday()
+            
+            # 获取或创建课程时间表
+            schedule, created = CourseSchedule.objects.get_or_create(
+                course=course,
+                weekday=weekday,
+                defaults={
+                    'start_time': current_time.time(),
+                    'end_time': expires_at.time(),
+                    'is_temporary': True
+                }
+            )
+            
+            # 创建考勤会话
+            session = AttendanceSession.objects.create(
+                course=course,
+                schedule=schedule,
+                qrcode=qrcode,
+                created_by=request.user,
+                start_time=current_time,
+                end_time=expires_at,
+                description=f"手动生成的考勤 - {current_time.strftime('%Y-%m-%d %H:%M')}",
+                status='active'
+            )
+            
+            # 构建二维码图片的URL
+            qrcode_url = request.build_absolute_uri(qrcode.qr_code_image.url) if qrcode.qr_code_image else None
+            
+            return JsonResponse({
+                'success': True,
+                'session_id': session.id,
+                'qrcode_uuid': qrcode_uuid,
+                'qrcode_url': qrcode_url,
+                'course_name': course.name,
+                'expires_at': expires_at.isoformat(),
+                'message': '二维码生成成功'
+            })
+            
+        except Exception as e:
+            import traceback
+            error_traceback = traceback.format_exc()
+            return JsonResponse({
+                'success': False,
+                'message': f'生成二维码时出错: {str(e)}',
+                'traceback': error_traceback
+            })
+    
+    return JsonResponse({
+        'success': False,
+        'message': '仅支持POST请求'
+    })
+
+
+@login_required
+@teacher_required
+def end_qrcode_session(request):
+    """结束二维码考勤会话"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) if request.body else request.POST
+            session_id = data.get('session_id')
+            
+            if not session_id:
+                return JsonResponse({
+                    'success': False,
+                    'message': '请提供会话ID'
+                })
+            
+            # 获取会话
+            session = get_object_or_404(
+                AttendanceSession, 
+                id=session_id, 
+                course__teacher=request.user.teacher_profile,
+                status='active'
+            )
+            
+            # 关闭会话
+            session.close_session()
+            
+            return JsonResponse({
+                'success': True,
+                'message': '考勤会话已成功关闭'
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'关闭会话时出错: {str(e)}'
+            })
+    
+    return JsonResponse({
+        'success': False,
+        'message': '仅支持POST请求'
+    })
