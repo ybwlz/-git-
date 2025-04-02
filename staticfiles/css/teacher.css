@@ -1,0 +1,239 @@
+:root {
+    --primary-color: #3a5a78;
+    --secondary-color: #f8f9fa;
+    --accent-color: #e3b04b;
+    --text-color: #333;
+    --sidebar-width: 280px;
+}
+
+body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background-color: #f5f7fa;
+    color: var(--text-color);
+}
+
+/* 侧边栏样式 */
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--primary-color);
+    color: white;
+    padding-top: 20px;
+    transition: all 0.3s;
+    z-index: 1000;
+}
+
+.sidebar-header {
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.sidebar-menu a {
+    padding: 12px 20px;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.sidebar-menu a:hover, .sidebar-menu a.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-left: 4px solid var(--accent-color);
+}
+
+.sidebar-menu i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* 主内容区域 */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+/* 卡片样式 */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-weight: 600;
+}
+
+/* 图标样式 */
+.card-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    margin-right: 15px;
+    color: white;
+}
+
+.bg-primary-soft {
+    background-color: rgba(58, 90, 120, 0.1);
+    color: var(--primary-color);
+}
+
+.bg-success-soft {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.bg-warning-soft {
+    background-color: rgba(227, 176, 75, 0.1);
+    color: var(--accent-color);
+}
+
+.bg-info-soft {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+}
+
+.bg-danger-soft {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.bg-purple-soft {
+    background-color: rgba(111, 66, 193, 0.1);
+    color: #6f42c1;
+}
+
+/* 统计卡片 */
+.stat-card {
+    padding: 15px;
+}
+
+.stat-card .value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.stat-card .label {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* 表格样式 */
+.table-responsive {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* 头像样式 */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge-pill {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.chart-container {
+    height: 300px;
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 70px;
+        overflow: hidden;
+    }
+    
+    .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
+        display: none;
+    }
+    
+    .sidebar-menu a {
+        padding: 15px 0;
+        justify-content: center;
+    }
+    
+    .sidebar-menu i {
+        margin-right: 0;
+        font-size: 18px;
+    }
+    
+    .main-content {
+        margin-left: 70px;
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        width: 0;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .mobile-toggle {
+        display: block !important;
+    }
+}
+
+.mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+} 

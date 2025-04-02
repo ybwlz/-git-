@@ -14,6 +14,7 @@ urlpatterns = [
     # 学生管理
     path('students/', views.teacher_students, name='students'),
     path('students/<int:student_id>/', views.student_detail, name='student_detail'),
+    path('students/ajax/<int:student_id>/', views.student_detail_ajax, name='student_detail_ajax'),
     path('students/add/', views.add_student, name='add_student'),
     path('students/<int:student_id>/edit/', views.edit_student, name='edit_student'),
     path('students/<int:student_id>/delete/', views.delete_student, name='delete_student'),
@@ -30,7 +31,6 @@ urlpatterns = [
     # 考勤管理
     path('attendance/', views.teacher_attendance, name='attendance'),
     path('attendance/qrcode/', views.generate_qrcode, name='generate_qrcode'),
-    path('attendance/qrcode/<uuid:qrcode_id>/', views.show_qrcode, name='show_qrcode'),
     path('attendance/session/<int:session_id>/', views.attendance_session_detail, name='session_detail'),
     path('attendance/stats/', views.attendance_stats, name='attendance_stats'),
     

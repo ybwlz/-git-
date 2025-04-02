@@ -1,13 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人设置 - 苗韵琴行管理系统</title>
+    <title>个人主页 - 苗韵琴行</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
     <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
     <style>
         :root {
@@ -21,7 +20,6 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f7fb;
-            color: var(--text-color);
         }
         
         .sidebar {
@@ -69,6 +67,19 @@
             padding: 2rem;
         }
         
+        .card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+        
         .sidebar img.rounded-circle {
             width: 80px;
             height: 80px;
@@ -83,105 +94,6 @@
             margin-top: 1rem;
             font-size: 1.1rem;
             font-weight: 600;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-weight: 600;
-        }
-        
-        .profile-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 40px 0;
-            margin-bottom: 30px;
-            border-radius: 10px;
-        }
-        
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid white;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 15px;
-            object-fit: cover;
-        }
-        
-        .profile-stats {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-        }
-        
-        .profile-stat-item {
-            text-align: center;
-        }
-        
-        .profile-stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .profile-stat-label {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        
-        .nav-pills .nav-link {
-            color: var(--text-color);
-            padding: 10px 20px;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-        
-        .nav-pills .nav-link.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .form-label {
-            font-weight: 500;
-        }
-        
-        .security-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .security-item:last-child {
-            border-bottom: none;
-        }
-        
-        .security-item-icon {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(58, 90, 120, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-color);
-            margin-right: 15px;
         }
         
         @media (max-width: 768px) {
@@ -212,6 +124,20 @@
             border-radius: 5px;
             padding: 8px 12px;
         }
+        
+        /* 表单保存反馈样式 */
+        .form-feedback {
+            display: inline-block;
+            color: #28a745;
+            font-weight: 500;
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .form-feedback.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -221,12 +147,15 @@
     
     <div class="sidebar col-md-3 col-lg-2 d-md-block">
         <div class="text-center mb-4">
-            {% if teacher.avatar %}
-                <img src="{{ teacher.avatar.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% if teacher_profile.avatar %}
+                <img src="{{ teacher_profile.avatar.url }}" alt="{{ teacher_profile.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
             {% else %}
                 <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
             {% endif %}
-            <h5 class="mt-2">{{ teacher.name|default:"苗韵琴行" }}</h5>
+            <h5 class="mt-2">{{ teacher_profile.name|default:"苗韵琴行" }}</h5>
+            {% if teacher_profile.job_title %}
+                <p class="text-light mb-0"><small>{{ teacher_profile.job_title }}</small></p>
+            {% endif %}
         </div>
         <ul class="nav flex-column">
             <li class="nav-item">
@@ -285,296 +214,128 @@
                 </div>
             </div>
             
-            <div class="profile-header text-center">
-                {% if teacher_profile.avatar %}
-                    <img src="{{ teacher_profile.avatar.url }}" alt="{{ teacher_profile.name }}" class="profile-avatar">
-                {% else %}
-                    <img src="{% static 'img/default_avatar.jpg' %}" alt="默认头像" class="profile-avatar">
-                {% endif %}
-                <h3 class="mb-2">{{ teacher_profile.name }}</h3>
-                <p class="mb-0">钢琴教师</p>
-                
-                <div class="profile-stats">
-                    <div class="profile-stat-item">
-                        <div class="profile-stat-value">{{ student_count|default:"0" }}</div>
-                        <div class="profile-stat-label">学生数</div>
-                    </div>
-                    <div class="profile-stat-item">
-                        <div class="profile-stat-value">{{ total_lessons|default:"0" }}</div>
-                        <div class="profile-stat-label">课时数</div>
-                    </div>
-                    <div class="profile-stat-item">
-                        <div class="profile-stat-value">{{ rating|default:"5.0" }}</div>
-                        <div class="profile-stat-label">评分</div>
-                    </div>
-                </div>
-            </div>
-            
             <div class="row">
-                <div class="col-lg-3">
+                <div class="col-md-8">
+                    <!-- 基本信息 -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">基本信息</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="profileForm" action="javascript:void(0);" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="update_profile">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">姓名</label>
+                                        <input type="text" name="name" class="form-control" value="{{ teacher_profile.name }}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">性别</label>
+                                        <select class="form-select" name="gender">
+                                            <option value="男" {% if teacher_profile.gender == '男' %}selected{% endif %}>男</option>
+                                            <option value="女" {% if teacher_profile.gender == '女' %}selected{% endif %}>女</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">手机号码</label>
+                                        <input type="tel" name="phone" class="form-control" value="{{ teacher_profile.phone }}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">邮箱</label>
+                                        <input type="email" name="email" class="form-control" value="{{ request.user.email }}" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">教学专长</label>
+                                    <select class="form-select" name="specialties" multiple>
+                                        <option value="钢琴基础课" {% if '钢琴基础课' in teacher_profile.specialties %}selected{% endif %}>钢琴基础课</option>
+                                        <option value="钢琴进阶课" {% if '钢琴进阶课' in teacher_profile.specialties %}selected{% endif %}>钢琴进阶课</option>
+                                        <option value="流行钢琴课" {% if '流行钢琴课' in teacher_profile.specialties %}selected{% endif %}>流行钢琴课</option>
+                                        <option value="古典钢琴课" {% if '古典钢琴课' in teacher_profile.specialties %}selected{% endif %}>古典钢琴课</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">个人简介</label>
+                                    <textarea class="form-control" name="bio" rows="4">{{ teacher_profile.bio }}</textarea>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button type="submit" class="btn btn-primary">保存修改</button>
+                                    <span class="form-feedback">已保存</span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- 修改密码 -->
                     <div class="card">
-                        <div class="card-body p-0">
-                            <div class="nav flex-column nav-pills" role="tablist">
-                                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#profile-info">
-                                    <i class="fas fa-user me-2"></i>个人信息
-                                </button>
-                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#security">
-                                    <i class="fas fa-shield-alt me-2"></i>账户安全
-                                </button>
-                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#notification">
-                                    <i class="fas fa-bell me-2"></i>通知设置
-                                </button>
-                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#privacy">
-                                    <i class="fas fa-lock me-2"></i>隐私设置
-                                </button>
-                            </div>
+                        <div class="card-header">
+                            <h5 class="mb-0">修改密码</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="passwordForm" action="javascript:void(0);">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="change_password">
+                                <div class="mb-3">
+                                    <label class="form-label">当前密码</label>
+                                    <input type="password" name="old_password" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">新密码</label>
+                                    <input type="password" name="new_password" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">确认新密码</label>
+                                    <input type="password" name="confirm_password" class="form-control" required>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button type="submit" class="btn btn-primary">修改密码</button>
+                                    <span class="form-feedback">密码已修改</span>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
                 
-                <div class="col-lg-9">
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="profile-info">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">个人信息</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form method="post" action="{% url 'teachers:update_profile' %}" enctype="multipart/form-data">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="update_profile">
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">姓名</label>
-                                                <input type="text" name="name" class="form-control" value="{{ teacher_profile.name }}" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">性别</label>
-                                                <select class="form-select" name="gender">
-                                                    <option value="男" {% if teacher_profile.gender == '男' %}selected{% endif %}>男</option>
-                                                    <option value="女" {% if teacher_profile.gender == '女' %}selected{% endif %}>女</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">手机号码</label>
-                                                <input type="tel" name="phone" class="form-control" value="{{ teacher_profile.phone }}" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">邮箱</label>
-                                                <input type="email" name="email" class="form-control" value="{{ request.user.email }}" required>
-                                            </div>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">头像</label>
-                                            <input type="file" name="avatar" class="form-control" accept="image/*">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">教学专长</label>
-                                            <select class="form-select" name="specialties" multiple>
-                                                <option value="钢琴基础课" {% if '钢琴基础课' in teacher_profile.specialties %}selected{% endif %}>钢琴基础课</option>
-                                                <option value="钢琴进阶课" {% if '钢琴进阶课' in teacher_profile.specialties %}selected{% endif %}>钢琴进阶课</option>
-                                                <option value="流行钢琴课" {% if '流行钢琴课' in teacher_profile.specialties %}selected{% endif %}>流行钢琴课</option>
-                                                <option value="古典钢琴课" {% if '古典钢琴课' in teacher_profile.specialties %}selected{% endif %}>古典钢琴课</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">个人简介</label>
-                                            <textarea class="form-control" name="bio" rows="4">{{ teacher_profile.bio }}</textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">保存修改</button>
-                                    </form>
-                                </div>
-                            </div>
+                <div class="col-md-4">
+                    <!-- 教师信息卡片 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">教师信息</h5>
                         </div>
-                        
-                        <div class="tab-pane fade" id="security">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">账户安全</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="security-item">
-                                        <div class="d-flex align-items-center">
-                                            <div class="security-item-icon">
-                                                <i class="fas fa-key"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-1">登录密码</h6>
-                                                <p class="mb-0 text-muted">建议定期更换密码，确保账户安全</p>
-                                            </div>
-                                        </div>
-                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">修改</button>
-                                    </div>
-                                    <div class="security-item">
-                                        <div class="d-flex align-items-center">
-                                            <div class="security-item-icon">
-                                                <i class="fas fa-mobile-alt"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-1">手机验证</h6>
-                                                <p class="mb-0 text-muted">已绑定：{{ teacher_profile.phone|slice:":3" }}****{{ teacher_profile.phone|slice:"-4:" }}</p>
-                                            </div>
-                                        </div>
-                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePhoneModal">修改</button>
-                                    </div>
-                                    <div class="security-item">
-                                        <div class="d-flex align-items-center">
-                                            <div class="security-item-icon">
-                                                <i class="fas fa-envelope"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-1">邮箱验证</h6>
-                                                <p class="mb-0 text-muted">已绑定：{{ request.user.email|slice:":3" }}****@{{ request.user.email|cut:'@'|slice:"-10:" }}</p>
-                                            </div>
-                                        </div>
-                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">修改</button>
-                                    </div>
-                                    <div class="security-item">
-                                        <div class="d-flex align-items-center">
-                                            <div class="security-item-icon">
-                                                <i class="fas fa-shield-alt"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-1">两步验证</h6>
-                                                <p class="mb-0 text-muted">未开启</p>
-                                            </div>
-                                        </div>
-                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#two-factor-modal">开启</button>
-                                    </div>
-                                </div>
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                {% if teacher_profile.avatar %}
+                                    <img id="teacherAvatar" src="{{ teacher_profile.avatar.url }}" alt="{{ teacher_profile.name }}" class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% else %}
+                                    <img id="teacherAvatar" src="{% static 'img/logo.jpg' %}" alt="默认头像" class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% endif %}
                             </div>
-                        </div>
-                        
-                        <div class="tab-pane fade" id="notification">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">通知设置</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form method="post" action="{% url 'teachers:profile' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="update_notifications">
-                                        <div class="mb-4">
-                                            <h6 class="mb-3">系统通知</h6>
-                                            <div class="form-check form-switch mb-2">
-                                                <input class="form-check-input" type="checkbox" name="course_reminder" {% if notification_settings.course_reminder %}checked{% endif %}>
-                                                <label class="form-check-label">课程提醒</label>
-                                            </div>
-                                            <div class="form-check form-switch mb-2">
-                                                <input class="form-check-input" type="checkbox" name="attendance_reminder" {% if notification_settings.attendance_reminder %}checked{% endif %}>
-                                                <label class="form-check-label">考勤提醒</label>
-                                            </div>
-                                            <div class="form-check form-switch mb-2">
-                                                <input class="form-check-input" type="checkbox" name="fee_reminder" {% if notification_settings.fee_reminder %}checked{% endif %}>
-                                                <label class="form-check-label">学费提醒</label>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="mb-4">
-                                            <h6 class="mb-3">通知方式</h6>
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" type="checkbox" name="in_app" {% if notification_settings.in_app %}checked{% endif %}>
-                                                <label class="form-check-label">站内消息</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" type="checkbox" name="sms" {% if notification_settings.sms %}checked{% endif %}>
-                                                <label class="form-check-label">短信通知</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" type="checkbox" name="email" {% if notification_settings.email %}checked{% endif %}>
-                                                <label class="form-check-label">邮件通知</label>
-                                            </div>
-                                        </div>
-                                        
-                                        <button type="submit" class="btn btn-primary">保存设置</button>
-                                    </form>
-                                </div>
+                            <h4 id="teacherName">{{ teacher_profile.name }}</h4>
+                            <p class="text-muted">钢琴教师</p>
+                            <hr>
+                            <div class="text-start">
+                                <p><strong>手机号码：</strong> <span id="teacherPhone">{{ teacher_profile.phone }}</span></p>
+                                <p><strong>邮箱：</strong> <span id="teacherEmail">{{ request.user.email|default:"未设置" }}</span></p>
+                                <p><strong>注册时间：</strong> {{ teacher_profile.created_at|date:"Y年m月d日" }}</p>
                             </div>
-                        </div>
-                        
-                        <div class="tab-pane fade" id="privacy">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">隐私设置</h5>
+                            
+                            <form id="avatarForm" action="javascript:void(0);" enctype="multipart/form-data" class="mt-3">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="update_avatar">
+                                <div class="mb-3">
+                                    <label for="avatar" class="form-label">更换头像</label>
+                                    <input type="file" name="avatar" id="avatar" class="form-control" accept="image/*" required>
                                 </div>
-                                <div class="card-body">
-                                    <form method="post" action="{% url 'teachers:profile' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="update_privacy">
-                                        <div class="mb-4">
-                                            <h6 class="mb-3">个人信息可见性</h6>
-                                            <div class="mb-3">
-                                                <label class="form-label">手机号码</label>
-                                                <select class="form-select" name="phone_visibility">
-                                                    <option value="self" {% if privacy_settings.phone_visibility == 'self' %}selected{% endif %}>仅自己可见</option>
-                                                    <option value="students" {% if privacy_settings.phone_visibility == 'students' %}selected{% endif %}>仅学生可见</option>
-                                                    <option value="all" {% if privacy_settings.phone_visibility == 'all' %}selected{% endif %}>所有人可见</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">邮箱地址</label>
-                                                <select class="form-select" name="email_visibility">
-                                                    <option value="self" {% if privacy_settings.email_visibility == 'self' %}selected{% endif %}>仅自己可见</option>
-                                                    <option value="students" {% if privacy_settings.email_visibility == 'students' %}selected{% endif %}>仅学生可见</option>
-                                                    <option value="all" {% if privacy_settings.email_visibility == 'all' %}selected{% endif %}>所有人可见</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="mb-4">
-                                            <h6 class="mb-3">其他设置</h6>
-                                            <div class="form-check form-switch mb-2">
-                                                <input class="form-check-input" type="checkbox" name="show_online_status" {% if privacy_settings.show_online_status %}checked{% endif %}>
-                                                <label class="form-check-label">显示在线状态</label>
-                                            </div>
-                                            <div class="form-check form-switch mb-2">
-                                                <input class="form-check-input" type="checkbox" name="show_last_login" {% if privacy_settings.show_last_login %}checked{% endif %}>
-                                                <label class="form-check-label">显示最近登录时间</label>
-                                            </div>
-                                        </div>
-                                        
-                                        <button type="submit" class="btn btn-primary">保存设置</button>
-                                    </form>
+                                <div class="d-flex align-items-center">
+                                    <button type="submit" class="btn btn-outline-primary w-100">上传头像</button>
+                                    <span class="form-feedback">头像已更新</span>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 修改密码模态框 -->
-    <div class="modal fade" id="changePasswordModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">修改密码</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="post" action="{% url 'teachers:profile' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="change_password">
-                        <div class="mb-3">
-                            <label class="form-label">当前密码</label>
-                            <input type="password" name="old_password" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">新密码</label>
-                            <input type="password" name="new_password" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">确认新密码</label>
-                            <input type="password" name="confirm_password" class="form-control" required>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                            <button type="submit" class="btn btn-primary">确认修改</button>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
@@ -582,6 +343,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    
     <script>
         // 移动端侧边栏切换
         document.querySelector('.mobile-toggle').addEventListener('click', function() {
@@ -597,12 +359,126 @@
             }
         });
         
-        // 添加表单验证代码
-        {% if messages %}
-            {% for message in messages %}
-                layer.msg('{{ message }}', {icon: {% if message.tags == 'success' %}1{% else %}2{% endif %}, time: 2000});
-            {% endfor %}
-        {% endif %}
+        // AJAX表单提交
+        document.addEventListener('DOMContentLoaded', function() {
+            // 个人信息表单
+            const profileForm = document.getElementById('profileForm');
+            const profileFeedback = profileForm.querySelector('.form-feedback');
+            
+            profileForm.addEventListener('submit', function(e) {
+                const formData = new FormData(profileForm);
+                
+                fetch('{% url "teachers:profile" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 更新页面上的信息，无需刷新
+                        document.getElementById('teacherName').textContent = formData.get('name');
+                        document.getElementById('teacherPhone').textContent = formData.get('phone');
+                        document.getElementById('teacherEmail').textContent = formData.get('email');
+                        
+                        // 显示保存成功反馈
+                        profileFeedback.classList.add('show');
+                        setTimeout(() => {
+                            profileFeedback.classList.remove('show');
+                        }, 2000);
+                    } else {
+                        layer.msg(data.message || '保存失败，请重试', {icon: 2});
+                    }
+                })
+                .catch(error => {
+                    console.error('提交表单出错:', error);
+                    layer.msg('提交表单时发生错误，请重试', {icon: 2});
+                });
+            });
+            
+            // 修改密码表单
+            const passwordForm = document.getElementById('passwordForm');
+            const passwordFeedback = passwordForm.querySelector('.form-feedback');
+            
+            passwordForm.addEventListener('submit', function(e) {
+                const formData = new FormData(passwordForm);
+                
+                fetch('{% url "teachers:profile" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 清空表单
+                        passwordForm.reset();
+                        
+                        // 显示保存成功反馈
+                        passwordFeedback.classList.add('show');
+                        setTimeout(() => {
+                            passwordFeedback.classList.remove('show');
+                        }, 2000);
+                    } else {
+                        layer.msg(data.message || '密码修改失败，请检查当前密码是否正确', {icon: 2});
+                    }
+                })
+                .catch(error => {
+                    console.error('提交表单出错:', error);
+                    layer.msg('提交表单时发生错误，请重试', {icon: 2});
+                });
+            });
+            
+            // 头像上传表单
+            const avatarForm = document.getElementById('avatarForm');
+            const avatarFeedback = avatarForm.querySelector('.form-feedback');
+            
+            avatarForm.addEventListener('submit', function(e) {
+                const formData = new FormData(avatarForm);
+                
+                fetch('{% url "teachers:profile" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 更新头像预览
+                        if (data.avatar_url) {
+                            document.getElementById('teacherAvatar').src = data.avatar_url;
+                            
+                            // 更新侧边栏头像
+                            const sidebarAvatar = document.querySelector('.sidebar img.rounded-circle');
+                            if (sidebarAvatar) {
+                                sidebarAvatar.src = data.avatar_url;
+                            }
+                        }
+                        
+                        // 清空表单
+                        avatarForm.reset();
+                        
+                        // 显示保存成功反馈
+                        avatarFeedback.classList.add('show');
+                        setTimeout(() => {
+                            avatarFeedback.classList.remove('show');
+                        }, 2000);
+                    } else {
+                        layer.msg(data.message || '头像上传失败，请重试', {icon: 2});
+                    }
+                })
+                .catch(error => {
+                    console.error('提交表单出错:', error);
+                    layer.msg('提交表单时发生错误，请重试', {icon: 2});
+                });
+            });
+        });
         
         // 添加系统时间显示功能
         function updateSystemTime() {

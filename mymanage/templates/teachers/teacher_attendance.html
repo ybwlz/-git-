@@ -329,13 +329,13 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:piano_arrangement' %}">
-                    <i class="fas fa-guitar"></i> 练琴安排
+                <a class="nav-link" href="{% url 'teachers:students' %}">
+                    <i class="fas fa-users"></i> 学生管理
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:students' %}">
-                    <i class="fas fa-users"></i> 学生管理
+                <a class="nav-link" href="{% url 'teachers:piano_arrangement' %}">
+                    <i class="fas fa-guitar"></i> 练琴安排
                 </a>
             </li>
             <li class="nav-item">
@@ -367,10 +367,11 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">考勤管理</h2>
                 <div>
-                    <span id="currentTime" class="me-3 text-secondary"></span>
-                    <button data-bs-toggle="modal" data-bs-target="#generateQRCodeModal" class="btn btn-primary">
-                        <i class="fas fa-plus-circle me-2"></i>生成考勤码
-                    </button>
+                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
+                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime">00:00:00</span>
+                    </div>
                 </div>
             </div>
             
@@ -428,10 +429,7 @@
                             <h5 class="mb-0">考勤二维码</h5>
                             <div class="btn-group">
                                 <button id="refreshQRCodeBtn" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-sync-alt me-1"></i>刷新二维码
-                                </button>
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#generateQRCodeModal">
-                                    <i class="fas fa-sliders-h me-1"></i>高级设置
+                                    <i class="fas fa-sync-alt me-1"></i>生成考勤码
                                 </button>
                             </div>
                         </div>
@@ -640,11 +638,11 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">高级考勤设置</h5>
+                    <h5 class="modal-title">考勤设置</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted mb-3">您可以在此自定义考勤参数，如选择特定课程、时间等。若要快速生成，请直接点击页面上的"立即生成考勤码"按钮。</p>
+                    <p class="text-muted mb-3">您可以在此选择特定课程进行考勤。考勤码有效期为24小时。</p>
                     <form id="qrCodeForm">
                         {% csrf_token %}
                         <div class="mb-3">
@@ -656,10 +654,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">有效时长（小时）</label>
-                            <input type="number" id="qrcode_hours" name="hours" class="form-control" value="2" min="1" max="24">
-                        </div>
+                        <input type="hidden" id="qrcode_hours" name="hours" value="24">
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                             <button type="button" id="generateQRCodeBtn" class="btn btn-primary">生成二维码</button>
@@ -717,6 +712,19 @@
         var downloadBtn = document.getElementById('downloadQRCodeBtn');  // 下载按钮
         var endSessionBtn = document.getElementById('endSessionBtn');  // 结束会话按钮
         
+        // 更新系统时间
+        function updateSystemTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 初始化并每秒更新一次
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
+        
         // 下载二维码功能
         if (downloadBtn) {
             downloadBtn.addEventListener('click', function() {
@@ -745,7 +753,7 @@
         function createQRCode(courseId, hours) {
             // 默认值
             courseId = courseId || '';
-            hours = hours || 2;
+            hours = 24; // 固定为24小时
             
             // 获取CSRF令牌
             var csrfTokenElement = document.querySelector('[name=csrfmiddlewaretoken]');

@@ -107,6 +107,23 @@ class AttendanceSession(models.Model):
         # 释放所有钢琴
         for record in self.records.filter(status='checked_in'):
             record.check_out()
+    
+    @classmethod
+    def check_and_close_expired_sessions(cls):
+        """检查并关闭所有过期的考勤会话"""
+        current_time = timezone.now()
+        # 获取所有活跃状态但二维码已过期的会话
+        expired_sessions = cls.objects.filter(
+            status='active',
+            qrcode__expires_at__lt=current_time
+        )
+        
+        count = 0
+        for session in expired_sessions:
+            session.close_session()
+            count += 1
+        
+        return count
 
 
 class AttendanceRecord(models.Model):

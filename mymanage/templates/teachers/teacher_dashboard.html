@@ -331,6 +331,32 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">财务概览</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>本月收入:</span>
+                                <span class="text-success">¥{{ payments_this_month|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>待缴学费:</span>
+                                <span class="text-danger">¥{{ pending_payments|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>本年收入:</span>
+                                <span>¥{{ yearly_income|default:"0" }}</span>
+                            </div>
+                            
+                            <div class="mt-3 text-center">
+                                <a href="{% url 'teachers:finance' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-chart-line me-1"></i>财务详情
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="col-lg-4">
@@ -383,32 +409,6 @@
                             <div class="mt-3 text-center">
                                 <a href="{% url 'teachers:attendance' %}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-list me-1"></i>查看全部
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">财务概览</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-3">
-                                <span>本月收入:</span>
-                                <span class="text-success">¥{{ payments_this_month|default:"0" }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <span>待缴学费:</span>
-                                <span class="text-danger">¥{{ pending_payments|default:"0" }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <span>本年收入:</span>
-                                <span>¥{{ yearly_income|default:"0" }}</span>
-                            </div>
-                            
-                            <div class="mt-3 text-center">
-                                <a href="{% url 'teachers:finance' %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-chart-line me-1"></i>财务详情
                                 </a>
                             </div>
                         </div>

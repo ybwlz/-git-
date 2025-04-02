@@ -144,6 +144,50 @@
                 transform: none;
             }
         }
+        
+        /* 添加曲谱卡片悬停效果 */
+        .card {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .card a {
+            color: inherit;
+        }
+        
+        .card-img-top {
+            height: 180px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+        
+        .difficulty {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            z-index: 2;
+        }
+        
+        .card-footer {
+            background: transparent;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -269,26 +313,103 @@
                 {% if sheet_music %}
                     {% for sheet in sheet_music %}
                     <div class="col-md-3 mb-4">
-                        <div class="card sheet-music-card">
-                            {% if sheet.cover_image %}
-                            <img src="{{ sheet.cover_image.url }}" class="card-img-top" alt="{{ sheet.title }}封面">
-                            {% else %}
-                            <img src="{% static 'img/sheet_music_default.jpg' %}" class="card-img-top" alt="默认曲谱封面">
-                            {% endif %}
-                            <span class="difficulty">{{ sheet.difficulty }}</span>
-                            <div class="card-body">
-                                <h5 class="card-title mb-1">{{ sheet.title }}</h5>
-                                <p class="composer mb-3">{{ sheet.composer }}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-primary">{{ sheet.style }}</span>
-                                    <div class="btn-group">
-                                        <a href="{% url 'teachers:sheet_music_detail' sheet.id %}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{% url 'teachers:delete_sheet_music' sheet.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('确定要删除这份曲谱吗？');">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
+                        <div class="card">
+                            <a href="{% url 'teachers:sheet_music_detail' sheet.id %}" class="text-decoration-none">
+                                {% if sheet.cover_image %}
+                                <img src="{{ sheet.cover_image.url }}" class="card-img-top" alt="{{ sheet.title }}封面">
+                                {% else %}
+                                <img src="{% static 'img/sheet_music_default.jpg' %}" class="card-img-top" alt="默认曲谱封面">
+                                {% endif %}
+                                <span class="difficulty">{{ sheet.difficulty }}</span>
+                                <div class="card-body">
+                                    <h5 class="card-title mb-1">{{ sheet.title }}</h5>
+                                    <p class="composer mb-3">{{ sheet.composer }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary">{{ sheet.style }}</span>
                                     </div>
+                                </div>
+                            </a>
+                            <div class="card-footer bg-transparent border-top-0 text-end">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#sheetDetailModal{{ sheet.id }}">
+                                    <i class="fas fa-info-circle"></i> 详情
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 曲谱详情模态框 -->
+                    <div class="modal fade" id="sheetDetailModal{{ sheet.id }}" tabindex="-1" aria-labelledby="sheetDetailModalLabel{{ sheet.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="sheetDetailModalLabel{{ sheet.id }}">{{ sheet.title }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <!-- 曲谱封面 -->
+                                        <div class="col-lg-4 text-center">
+                                            {% if sheet.cover_image %}
+                                            <img src="{{ sheet.cover_image.url }}" alt="{{ sheet.title }}封面" class="img-fluid rounded mb-3" style="max-height: 200px;">
+                                            {% else %}
+                                            <img src="{% static 'img/sheet_music_default.jpg' %}" alt="默认曲谱封面" class="img-fluid rounded mb-3" style="max-height: 200px;">
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- 曲谱详细信息 -->
+                                        <div class="col-lg-8">
+                                            <h4>{{ sheet.title }}</h4>
+                                            <h6 class="text-muted">{{ sheet.composer }}</h6>
+                                            
+                                            <div class="row mt-3">
+                                                <div class="col-md-6">
+                                                    <p><strong>难度等级：</strong> <span class="badge bg-primary">{{ sheet.difficulty }}</span></p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>风格：</strong> <span class="badge bg-info">{{ sheet.style }}</span></p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>钢琴级别：</strong> {{ sheet.level.description }}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>上传时间：</strong> {{ sheet.upload_time|date:"Y-m-d H:i" }}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>上传者：</strong> {{ sheet.uploaded_by.username }}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>是否公开：</strong> {% if sheet.is_public %}是{% else %}否{% endif %}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if sheet.description %}
+                                            <div class="mt-3">
+                                                <h6>描述</h6>
+                                                <p>{{ sheet.description|linebreaksbr }}</p>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="{% url 'teachers:sheet_music_detail' sheet.id %}" class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> 查看曲谱
+                                    </a>
+                                    <a href="{% url 'teachers:edit_sheet_music' sheet.id %}" class="btn btn-info">
+                                        <i class="fas fa-edit"></i> 编辑
+                                    </a>
+                                    {% if sheet.file %}
+                                    <a href="{{ sheet.file.url }}" class="btn btn-success" download>
+                                        <i class="fas fa-download"></i> 下载
+                                    </a>
+                                    {% endif %}
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
                                 </div>
                             </div>
                         </div>

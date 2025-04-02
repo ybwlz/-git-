@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'mymanage.courses',
     'mymanage.attendance',
     'mymanage.finance',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -40,7 +41,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'mymanage.urls'
@@ -121,3 +122,28 @@ LOGIN_REDIRECT_URL = '/'
 
 # 自定义用户模型
 AUTH_USER_MODEL = 'users.User'
+
+# X-Frame-Options设置为SAMEORIGIN以允许同源iframe嵌套
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# 安全设置 - 允许iframe嵌套和PDF显示
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = False  # 开发环境设为False，生产环境设为True
+
+# 添加CSP设置，允许内容加载
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+CSP_IMG_SRC = ("'self'", "data:", "blob:")
+CSP_FONT_SRC = ("'self'",)
+CSP_CONNECT_SRC = ("'self'",)
+CSP_FRAME_SRC = ("'self'", "*")
+CSP_FRAME_ANCESTORS = ("'self'", "*")
+CSP_OBJECT_SRC = ("'self'", "data:", "blob:")
+
+# CORS设置
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+CORS_ALLOW_HEADERS = ['*'] 

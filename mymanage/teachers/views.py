@@ -11,6 +11,7 @@ import base64
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 import json
+from django.urls import reverse
 
 from mymanage.users.decorators import teacher_required
 from .models import TeacherProfile, TeacherCertificate, PrivacySetting
@@ -23,40 +24,34 @@ from mymanage.finance.models import Payment, PaymentCategory, Fee
 @login_required
 @teacher_required
 def teacher_dashboard(request):
-    """教师仪表板"""
+    """教师控制面板视图"""
     teacher = request.user.teacher_profile
+    current_time = timezone.now()  # 获取当前时间
     
-    # 获取当前时间以确保一致性
-    current_time = timezone.now()
-    today = current_time.date()
+    # 获取所有学生数量（修改为获取所有学生）
+    students_count = Student.objects.count()
     
-    # 获取基本统计数据
-    students_count = Student.objects.filter(
-        courses__teacher=teacher, 
-        courses__is_active=True
-    ).distinct().count()
-    
+    # 获取课程数量
     courses_count = Course.objects.filter(teacher=teacher).count()
     
-    # 获取今日考勤记录
+    # 获取今日考勤记录数
+    today = timezone.now().date()
     attendance_today = AttendanceRecord.objects.filter(
-        session__course__teacher=teacher,
         check_in_time__date=today
     ).count()
     
-    # 获取本月收款金额
-    month_start = today.replace(day=1)
+    # 获取本月收入
+    today = timezone.now()
+    start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     payments_this_month = Payment.objects.filter(
-        student__courses__teacher=teacher,
         status='paid',
-        payment_date__gte=month_start,
+        payment_date__gte=start_of_month,
         payment_date__lte=today
     ).aggregate(total=Sum('amount'))
     
-    # 获取本年收入
-    year_start = today.replace(month=1, day=1)
+    # 获取年度收入
+    year_start = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
     yearly_income = Payment.objects.filter(
-        student__courses__teacher=teacher,
         status='paid',
         payment_date__gte=year_start,
         payment_date__lte=today
@@ -64,7 +59,6 @@ def teacher_dashboard(request):
     
     # 获取待缴学费
     pending_payments = Payment.objects.filter(
-        student__courses__teacher=teacher,
         status='pending'
     ).aggregate(total=Sum('amount'))
     
@@ -85,15 +79,33 @@ def teacher_dashboard(request):
     student_levels = []
     for i in range(1, 11):
         level_name = f"{i}级"
+        # 修改为获取所有学生的等级分布
         count = Student.objects.filter(
-            courses__teacher=teacher,
-            courses__is_active=True,
             level=i
-        ).distinct().count()
+        ).count()
         student_levels.append({
             'name': level_name,
             'count': count
         })
+    
+    # 获取活跃的考勤会话及二维码
+    active_sessions = AttendanceSession.objects.filter(
+        course__teacher=teacher,
+        status='active'
+    ).order_by('-start_time')
+    
+    current_qrcode = None
+    qrcode_expiry_time = None
+    
+    # 如果有活跃的考勤会话，尝试获取其二维码
+    if active_sessions.exists():
+        active_session = active_sessions.first()
+        if hasattr(active_session, 'qrcode') and active_session.qrcode:
+            qrcode = active_session.qrcode
+            if qrcode.is_valid():
+                # 获取二维码图片URL
+                current_qrcode = qrcode.qr_code_image.url if qrcode.qr_code_image else None
+                qrcode_expiry_time = qrcode.expires_at
     
     context = {
         'teacher': teacher,  # 添加教师对象到上下文
@@ -108,6 +120,8 @@ def teacher_dashboard(request):
         'pending_payments': pending_payments.get('total', 0),
         'current_time': current_time,  # 添加当前时间到上下文
         'unread_notifications_count': 0,  # 为模板提供默认值
+        'current_qrcode': current_qrcode,  # 添加当前二维码到上下文
+        'qrcode_expiry_time': qrcode_expiry_time,  # 添加二维码过期时间到上下文
     }
     
     return render(request, 'teachers/teacher_dashboard.html', context)
@@ -137,31 +151,127 @@ def teacher_profile(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         
+        # 检查是否为Ajax请求
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        
         if action == 'update_profile':
-            form = TeacherProfileForm(request.POST, request.FILES, instance=teacher_profile)
-            if form.is_valid():
-                form.save()
-                messages.success(request, '个人信息更新成功！')
-                return redirect('teachers:profile')
+            # 手动处理表单字段
+            teacher_profile.name = request.POST.get('name', teacher_profile.name)
+            teacher_profile.gender = request.POST.get('gender', teacher_profile.gender)
+            teacher_profile.phone = request.POST.get('phone', teacher_profile.phone)
+            teacher_profile.bio = request.POST.get('bio', teacher_profile.bio)
+            
+            # 更新专长（多选字段）
+            teacher_profile.specialties = request.POST.getlist('specialties')
+            
+            # 处理文件上传
+            if 'avatar' in request.FILES:
+                teacher_profile.avatar = request.FILES['avatar']
+            
+            # 保存教师个人资料
+            teacher_profile.save()
+            
+            # 直接更新用户邮箱
+            email = request.POST.get('email')
+            if email and email != request.user.email:
+                request.user.email = email
+                request.user.save(update_fields=['email'])
+            
+            # 如果是Ajax请求，返回JSON响应
+            if is_ajax:
+                return JsonResponse({
+                    'success': True,
+                    'message': '个人信息已更新'
+                })
+            else:
+                # 非Ajax请求，使用常规重定向
+                return redirect(reverse('teachers:profile') + '?success_message=1')
         
         elif action == 'update_privacy':
             form = PrivacySettingForm(request.POST, instance=privacy_settings)
             if form.is_valid():
                 form.save()
-                messages.success(request, '隐私设置更新成功！')
-                return redirect('teachers:profile')
+                
+                if is_ajax:
+                    return JsonResponse({
+                        'success': True,
+                        'message': '隐私设置已更新'
+                    })
+                else:
+                    messages.success(request, '隐私设置更新成功！')
+                    return redirect('teachers:profile')
+            elif is_ajax:
+                return JsonResponse({
+                    'success': False,
+                    'message': '表单验证失败',
+                    'errors': form.errors
+                })
         
         elif action == 'change_password':
-            form = PasswordChangeForm(request.POST)
-            if form.is_valid():
-                if request.user.check_password(form.cleaned_data['old_password']):
-                    request.user.set_password(form.cleaned_data['new_password'])
-                    request.user.save()
-                    update_session_auth_hash(request, request.user)
-                    messages.success(request, '密码修改成功！')
+            old_password = request.POST.get('old_password')
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            # 验证密码
+            if not old_password or not new_password or not confirm_password:
+                error_message = '所有密码字段都是必填的'
+                if is_ajax:
+                    return JsonResponse({'success': False, 'message': error_message})
                 else:
-                    messages.error(request, '当前密码不正确！')
+                    messages.error(request, error_message)
+                    return redirect('teachers:profile')
+            
+            if new_password != confirm_password:
+                error_message = '新密码和确认密码不匹配'
+                if is_ajax:
+                    return JsonResponse({'success': False, 'message': error_message})
+                else:
+                    messages.error(request, error_message)
+                    return redirect('teachers:profile')
+            
+            if not request.user.check_password(old_password):
+                error_message = '当前密码不正确'
+                if is_ajax:
+                    return JsonResponse({'success': False, 'message': error_message})
+                else:
+                    messages.error(request, error_message)
+                    return redirect('teachers:profile')
+            
+            # 更新密码
+            request.user.set_password(new_password)
+            request.user.save()
+            update_session_auth_hash(request, request.user)
+            
+            if is_ajax:
+                return JsonResponse({
+                    'success': True,
+                    'message': '密码已成功修改'
+                })
+            else:
+                messages.success(request, '密码修改成功！')
                 return redirect('teachers:profile')
+        
+        elif action == 'update_avatar':
+            # 处理头像上传
+            if 'avatar' in request.FILES:
+                avatar_file = request.FILES['avatar']
+                teacher_profile.avatar = avatar_file
+                teacher_profile.save(update_fields=['avatar'])
+                
+                if is_ajax:
+                    return JsonResponse({
+                        'success': True,
+                        'message': '头像已更新',
+                        'avatar_url': teacher_profile.avatar.url
+                    })
+                else:
+                    return redirect(reverse('teachers:profile') + '?success_message=1')
+            else:
+                error_message = '未提供头像文件'
+                if is_ajax:
+                    return JsonResponse({'success': False, 'message': error_message})
+                else:
+                    return redirect('teachers:profile')
     
     context = {
         'teacher': teacher,
@@ -212,18 +322,14 @@ def teacher_students(request):
     # 获取搜索参数
     search_query = request.GET.get('search', '')
     
-    # 获取该教师相关的所有学生
-    students = Student.objects.filter(
-        courses__teacher=teacher, 
-        courses__is_active=True
-    ).distinct()
+    # 修改查询逻辑：获取所有学生，而不仅仅是与当前教师关联的学生
+    students = Student.objects.all()
     
     # 应用搜索过滤
     if search_query:
         students = students.filter(
             Q(name__icontains=search_query) | 
-            Q(phone__icontains=search_query) |
-            Q(email__icontains=search_query)
+            Q(phone__icontains=search_query)
         )
     
     # 统计数据
@@ -233,53 +339,25 @@ def teacher_students(request):
     today = timezone.now()
     first_day_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     new_students_this_month = Student.objects.filter(
-        courses__teacher=teacher,
-        courses__is_active=True,
         created_at__gte=first_day_of_month
     ).distinct().count()
     
-    # 计算平均出勤率
-    last_30_days = today - timezone.timedelta(days=30)
-    total_sessions = AttendanceSession.objects.filter(
-        course__teacher=teacher,
-        start_time__gte=last_30_days
-    ).count()
+    # 等级分布
+    level_distribution = {}
+    for level in range(1, 11):
+        level_distribution[level] = students.filter(level=level).count()
     
-    if total_sessions > 0:
-        attended_records = AttendanceRecord.objects.filter(
-            session__course__teacher=teacher,
-            session__start_time__gte=last_30_days
-        ).count()
-        attendance_rate = (attended_records / total_sessions) * 100
-    else:
-        attendance_rate = 0
-    
-    # 今日练琴人数
-    today_start = today.replace(hour=0, minute=0, second=0, microsecond=0)
-    today_attendance = PracticeRecord.objects.filter(
-        student__courses__teacher=teacher,
-        start_time__gte=today_start
-    ).values('student').distinct().count()
-    
-    # 分页处理
-    paginator = Paginator(students, 10)  # 每页10个学生
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    # 获取钢琴级别选项（用于添加学生表单）
-    piano_levels = PianoLevel.objects.all()
+    # 最近加入的5名学生
+    recent_students = students.order_by('-created_at')[:5]
     
     context = {
-        'teacher': teacher,
-        'students': page_obj,  # 分页后的学生
+        'teacher': teacher,  # 添加教师信息到上下文
+        'students': students,
         'total_students': total_students,
         'new_students_this_month': new_students_this_month,
-        'attendance_rate': attendance_rate,
-        'today_attendance': today_attendance,
-        'piano_levels': piano_levels,
-        'is_paginated': page_obj.has_other_pages(),
-        'paginator': paginator,
-        'page_obj': page_obj,
+        'level_distribution': level_distribution,
+        'recent_students': recent_students,
+        'search_query': search_query,
         'unread_notifications_count': 0,  # 为模板提供默认值
     }
     
@@ -289,29 +367,10 @@ def teacher_students(request):
 @login_required
 @teacher_required
 def student_detail(request, student_id):
-    """学生详情"""
-    teacher = request.user.teacher_profile
-    student = get_object_or_404(Student, id=student_id)
-    
-    # 确认该学生是否与教师相关
-    courses = Course.objects.filter(teacher=teacher, students=student, is_active=True)
-    if not courses.exists():
-        messages.error(request, '您无权查看此学生信息')
-        return redirect('teacher_students')
-    
-    # 获取学生考勤记录
-    attendance_records = AttendanceRecord.objects.filter(
-        student=student,
-        session__course__teacher=teacher
-    ).order_by('-check_in_time')[:10]
-    
-    context = {
-        'student': student,
-        'courses': courses,
-        'attendance_records': attendance_records
-    }
-    
-    return render(request, 'teachers/student_detail.html', context)
+    """学生详情 - 重定向到学生列表页面并打开详情模态框"""
+    # 由于现在使用模态框展示详情，这里只需要重定向到学生列表页面
+    # 将student_id作为URL参数，以便前端页面加载后自动打开对应的模态框
+    return redirect(f"{reverse('teachers:students')}?view_student={student_id}")
 
 
 @login_required
@@ -321,35 +380,45 @@ def add_student(request):
     if request.method == 'POST':
         # 处理表单提交
         name = request.POST.get('name')
-        gender = request.POST.get('gender')
         phone = request.POST.get('phone')
         parent_phone = request.POST.get('parent_phone')
+        parent_name = request.POST.get('parent_name', '')
+        school = request.POST.get('school', '')
         level_id = request.POST.get('level')
-        birthday = request.POST.get('birthday')
-        notes = request.POST.get('notes')
-        avatar = request.FILES.get('avatar')
+        target_level_id = request.POST.get('target_level', level_id)
         
         # 创建学生记录
         student = Student(
             name=name,
-            gender=gender,
             phone=phone,
             parent_phone=parent_phone,
-            birthday=birthday,
-            notes=notes
+            parent_name=parent_name,
+            school=school
         )
         
-        if avatar:
-            student.avatar = avatar
-            
+        # 设置级别
         if level_id:
             piano_level = get_object_or_404(PianoLevel, id=level_id)
             student.level = piano_level.level
             
+        if target_level_id:
+            piano_target_level = get_object_or_404(PianoLevel, id=target_level_id)
+            student.target_level = piano_target_level.level
+        else:
+            student.target_level = student.level
+            
+        # 创建用户账号
+        from django.contrib.auth.models import User
+        import random
+        username = f"student_{random.randint(10000, 99999)}"
+        password = f"pwd_{random.randint(100000, 999999)}"
+        user = User.objects.create_user(username=username, password=password)
+        student.user = user
+            
         student.save()
         
-        # 将学生添加到教师的某门课程
-        messages.success(request, f'学生"{name}"已成功添加')
+        # 将学生添加到教师的某门课程已通过信号自动处理
+        messages.success(request, f'学生"{name}"已成功添加，账号：{username}，密码：{password}')
         return redirect('teachers:students')
         
     # GET请求，显示添加学生表单
@@ -378,35 +447,39 @@ def edit_student(request, student_id):
     if request.method == 'POST':
         # 处理表单提交
         student.name = request.POST.get('name', student.name)
-        student.gender = request.POST.get('gender', student.gender)
         student.phone = request.POST.get('phone', student.phone)
         student.parent_phone = request.POST.get('parent_phone', student.parent_phone)
+        student.parent_name = request.POST.get('parent_name', student.parent_name)
+        student.school = request.POST.get('school', student.school)
         
-        level_id = request.POST.get('level')
-        if level_id:
-            piano_level = get_object_or_404(PianoLevel, id=level_id)
-            student.level = piano_level.level
+        # 获取并处理性别信息
+        gender = request.POST.get('gender')
+        if gender in ['male', 'female']:
+            student.gender = gender
             
-        birthday = request.POST.get('birthday')
-        if birthday:
-            student.birthday = birthday
+        # 处理级别信息
+        level = request.POST.get('level')
+        if level and level.isdigit():
+            student.level = int(level)
             
-        student.notes = request.POST.get('notes', student.notes)
-        
-        avatar = request.FILES.get('avatar')
-        if avatar:
-            student.avatar = avatar
+        target_level = request.POST.get('target_level')
+        if target_level and target_level.isdigit():
+            student.target_level = int(target_level)
             
         student.save()
         messages.success(request, f'学生"{student.name}"信息已更新')
+        
+        # AJAX请求返回JSON响应
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': f'学生"{student.name}"信息已更新'
+            })
+        
         return redirect('teachers:students')
     
-    # GET请求，显示编辑表单
-    piano_levels = PianoLevel.objects.all()
-    return render(request, 'teachers/edit_student.html', {
-        'student': student,
-        'piano_levels': piano_levels
-    })
+    # 对于GET请求，重定向到学生列表页面并打开编辑模态框
+    return redirect(f"{reverse('teachers:students')}?edit_student={student_id}")
 
 
 @login_required
@@ -476,6 +549,11 @@ def edit_course(request, course_id):
 def teacher_attendance(request):
     """教师考勤记录"""
     teacher = request.user.teacher_profile
+    
+    # 自动关闭过期的考勤会话
+    expired_sessions_count = AttendanceSession.check_and_close_expired_sessions()
+    if expired_sessions_count > 0:
+        messages.info(request, f'已自动关闭 {expired_sessions_count} 个过期的考勤会话')
     
     # 获取当前时间
     current_time = timezone.now()
@@ -561,8 +639,8 @@ def teacher_attendance(request):
                     level=piano_level  # 确保提供有效的级别
                 )
             
-            # 创建二维码，有效期2小时
-            expires_at = current_time + timezone.timedelta(hours=2)
+            # 创建二维码，有效期24小时
+            expires_at = current_time + timezone.timedelta(hours=24)
             import uuid
             qrcode_uuid = str(uuid.uuid4())
             qrcode_to_display = QRCode.objects.create(
@@ -733,9 +811,19 @@ def generate_qrcode(request):
     # 处理GET请求 - 直接生成默认考勤码
     if request.method == 'GET':
         try:
-            # 获取当前时间和过期时间(默认2小时)
+            # 获取当前时间和过期时间(默认24小时)
             current_time = timezone.now()
-            expires_at = current_time + timezone.timedelta(hours=2)
+            expires_at = current_time + timezone.timedelta(hours=24)
+            
+            # 关闭该教师的所有活跃会话
+            active_sessions = AttendanceSession.objects.filter(
+                course__teacher=teacher,
+                status='active'
+            )
+            for session in active_sessions:
+                session.status = 'closed'
+                session.end_time = current_time
+                session.save()
             
             # 创建或获取通用考勤课程
             default_course, created = Course.objects.get_or_create(
@@ -793,92 +881,7 @@ def generate_qrcode(request):
     
     # 处理POST请求
     if request.method == 'POST':
-        # 检查是否来自练琴安排页面的请求
-        qrcode_type = request.POST.get('qrcode_type')
-        expiry_time = request.POST.get('expiry_time')
-        
-        if qrcode_type and expiry_time:
-            # 处理来自练琴安排页面的请求
-            try:
-                # 转换为整数分钟
-                expiry_minutes = int(expiry_time)
-                
-                # 获取当前时间和过期时间
-                current_time = timezone.now()
-                expires_at = current_time + timezone.timedelta(minutes=expiry_minutes)
-                
-                # 根据考勤类型选择课程
-                if qrcode_type == 'practice':
-                    # 创建或获取练琴通用课程
-                    practice_course, created = Course.objects.get_or_create(
-                        name="练琴考勤",
-                        code="PRACTICE",
-                        teacher=teacher,
-                        defaults={
-                            'description': '练琴考勤通用课程',
-                            'level': PianoLevel.objects.first()  # 使用第一个级别作为默认值
-                        }
-                    )
-                    course = practice_course
-                elif qrcode_type == 'class':
-                    # 获取教师的第一个课程作为通用课程
-                    course = Course.objects.filter(teacher=teacher).first()
-                    if not course:
-                        # 如果没有课程，创建一个通用课程
-                        course = Course.objects.create(
-                            name="通用考勤",
-                            code="GENERAL",
-                            teacher=teacher,
-                            description='通用考勤课程',
-                            level=PianoLevel.objects.first()  # 使用第一个级别作为默认值
-                        )
-                else:
-                    messages.error(request, '无效的考勤码类型')
-                    return redirect('teachers:piano_arrangement')
-                
-                # 创建二维码
-                import uuid
-                qrcode_uuid = str(uuid.uuid4())
-                qrcode = QRCode.objects.create(
-                    course=course,
-                    uuid=uuid.UUID(qrcode_uuid),
-                    code=qrcode_uuid,
-                    expires_at=expires_at
-                )
-                
-                # 创建考勤会话
-                # 获取或创建一个当天的课程安排
-                weekday = current_time.weekday()
-                schedule, created = CourseSchedule.objects.get_or_create(
-                    course=course,
-                    weekday=weekday,
-                    defaults={
-                        'start_time': current_time.time(),
-                        'end_time': expires_at.time(),
-                        'is_temporary': True
-                    }
-                )
-                
-                session = AttendanceSession.objects.create(
-                    course=course,
-                    schedule=schedule,
-                    qrcode=qrcode,
-                    created_by=request.user,
-                    start_time=current_time,
-                    end_time=expires_at,
-                    description=f"{qrcode_type.title()} 考勤 - {expiry_minutes}分钟",
-                    status='active'
-                )
-                
-                # 重定向到考勤页面，并显示二维码
-                messages.success(request, '考勤二维码已生成')
-                return redirect(f'/teachers/attendance/?qrcode={qrcode_uuid}')
-                
-            except Exception as e:
-                messages.error(request, f'生成二维码时发生错误：{str(e)}')
-                return redirect('teachers:piano_arrangement')
-        
-        # 处理来自考勤页面的原始请求
+        # 处理来自考勤页面的请求
         course_id = request.POST.get('course_id')
         start_time_str = request.POST.get('start_time')
         end_time_str = request.POST.get('end_time')
@@ -895,17 +898,20 @@ def generate_qrcode(request):
         hours, minutes = map(int, end_time_str.split(':'))
         end_time = timezone.make_aware(datetime.combine(today, datetime.min.time().replace(hour=hours, minute=minutes)))
         
-        # 检查是否已有活跃的考勤会话
-        active_session = AttendanceSession.objects.filter(
-            course=course,
-            status='active'
-        ).first()
+        # 确保结束时间不超过24小时
+        max_end_time = start_time + timezone.timedelta(hours=24)
+        if end_time > max_end_time:
+            end_time = max_end_time
         
-        if active_session:
-            # 关闭已有的活跃会话
-            active_session.status = 'closed'
-            active_session.end_time = timezone.now()
-            active_session.save()
+        # 关闭该教师的所有活跃会话
+        active_sessions = AttendanceSession.objects.filter(
+            course__teacher=teacher,
+            status='active'
+        )
+        for session in active_sessions:
+            session.status = 'closed'
+            session.end_time = timezone.now()
+            session.save()
         
         # 获取或创建课程安排
         from django.db.models import Q
@@ -1036,7 +1042,7 @@ def teacher_sheet_music(request):
     teacher = request.user.teacher_profile
     
     # 获取所有曲谱
-    sheet_music_list = SheetMusic.objects.filter(uploaded_by=request.user)
+    sheet_music_list = SheetMusic.objects.all()
     
     # 获取过滤参数
     difficulty = request.GET.get('difficulty')
@@ -1124,7 +1130,7 @@ def add_sheet_music(request):
         
         sheet.save()
         messages.success(request, '曲谱添加成功')
-        return redirect('teacher_sheet_music')
+        return redirect('teachers:sheet_music')
     
     return render(request, 'teachers/add_sheet_music.html')
 
@@ -1150,7 +1156,7 @@ def edit_sheet_music(request, sheet_id):
         
         sheet.save()
         messages.success(request, '曲谱更新成功')
-        return redirect('teacher_sheet_music_detail', sheet_id=sheet.id)
+        return redirect('teachers:sheet_music_detail', sheet_id=sheet.id)
     
     return render(request, 'teachers/edit_sheet_music.html', {'sheet': sheet})
 
@@ -1164,7 +1170,7 @@ def delete_sheet_music(request, sheet_id):
     if request.method == 'POST':
         sheet.delete()
         messages.success(request, '曲谱已删除')
-        return redirect('teacher_sheet_music')
+        return redirect('teachers:sheet_music')
     
     return render(request, 'teachers/delete_sheet_music.html', {'sheet': sheet})
 
@@ -1404,32 +1410,18 @@ def update_profile_ajax(request):
 
 @login_required
 @teacher_required
-def show_qrcode(request, qrcode_id):
-    """显示指定的二维码"""
-    qrcode = get_object_or_404(QRCode, uuid=qrcode_id)
-    
-    # 检查权限
-    if qrcode.course.teacher != request.user.teacher_profile:
-        messages.error(request, '您没有权限查看此二维码')
-        return redirect('teachers:attendance')
-    
-    context = {
-        'qrcode': qrcode,
-        'session': qrcode.session
-    }
-    
-    return render(request, 'teachers/show_qrcode.html', context)
-
-
-@login_required
-@teacher_required
 def piano_arrangement(request):
     """练琴安排视图（替代课程管理）"""
     teacher = request.user.teacher_profile
     current_time = timezone.now()
     
+    # 添加调试日志
+    print(f"当前时间: {current_time}")
+    print(f"当前教师: {teacher.name}")
+    
     # 获取所有钢琴及其状态
     pianos = Piano.objects.all().order_by('number')
+    print(f"系统中钢琴数量: {pianos.count()}")
     
     # 为每个钢琴添加当前使用学生信息
     for piano in pianos:
@@ -1449,6 +1441,15 @@ def piano_arrangement(request):
                 # 计算已练习时间
                 practiced_minutes = int((current_time - current_record.check_in_time).total_seconds() / 60)
                 piano.practiced_time = f"{practiced_minutes}分钟"
+                print(f"钢琴{piano.number}被{current_record.student.name}使用中，已练习{practiced_minutes}分钟")
+            else:
+                # 这里是错误状态：钢琴标记为占用，但没有对应的考勤记录
+                print(f"警告: 钢琴{piano.number}标记为占用，但找不到对应的考勤记录")
+                # 修正钢琴状态
+                piano.is_occupied = False
+                piano.save()
+        else:
+            print(f"钢琴{piano.number} - 状态: {'可用' if piano.is_active else '维护中'}，{'被占用' if piano.is_occupied else '空闲'}")
     
     # 获取当前等待队列中的学生
     waiting_students = []
@@ -1457,6 +1458,7 @@ def piano_arrangement(request):
         session__status='active'
     ).order_by('join_time')
     
+    print(f"等待队列学生数量: {active_waiters.count()}")
     for waiter in active_waiters:
         waiting_time = int((current_time - waiter.join_time).total_seconds() / 60)
         estimated_start = waiter.join_time + timedelta(minutes=waiter.estimated_wait_time)
@@ -1468,6 +1470,7 @@ def piano_arrangement(request):
             'wait_time': waiting_time,
             'estimated_start_time': estimated_start,
         })
+        print(f"等待学生: {waiter.student.name}，等待时间: {waiting_time}分钟")
     
     # 获取可用钢琴列表（用于手动分配）
     available_pianos = Piano.objects.filter(is_active=True, is_occupied=False)
@@ -1476,6 +1479,10 @@ def piano_arrangement(request):
     today_records = AttendanceRecord.objects.filter(
         check_in_time__date=current_time.date()
     ).order_by('-check_in_time')
+    
+    print(f"今日签到记录数: {today_records.count()}")
+    for record in today_records:
+        print(f"签到记录: {record.student.name} - 状态: {record.status} - 钢琴: {record.piano.number if record.piano else '无'}")
     
     # 计算统计信息
     checked_in_today = AttendanceRecord.objects.filter(
@@ -1496,6 +1503,17 @@ def piano_arrangement(request):
         join_time__date=current_time.date()
     ).aggregate(avg_time=Avg('estimated_wait_time'))
     avg_wait_time = f"{int(average_wait['avg_time'] or 0)}分钟"
+    
+    # 检查并自动签退超时的记录
+    auto_checkout_threshold = current_time - timedelta(hours=4)  # 4小时自动签退
+    overtime_records = AttendanceRecord.objects.filter(
+        status='checked_in',
+        check_in_time__lt=auto_checkout_threshold
+    )
+    
+    for record in overtime_records:
+        print(f"自动签退超时记录: {record.student.name} - 签到时间: {record.check_in_time}")
+        record.check_out()
     
     context = {
         'teacher': teacher,
@@ -1520,29 +1538,36 @@ def refresh_piano_status(request):
     try:
         # 获取所有钢琴状态
         pianos = Piano.objects.all()
+        current_time = timezone.now()
         
         piano_data = []
         for piano in pianos:
             # 查找当前使用此钢琴的学生
+            student_info = None
             if piano.is_active and piano.is_occupied:
                 current_record = AttendanceRecord.objects.filter(
                     piano=piano,
                     status='checked_in'
                 ).order_by('-check_in_time').first()
                 
-                student_info = None
                 if current_record:
+                    # 计算已练习时间
+                    practiced_minutes = int((current_time - current_record.check_in_time).total_seconds() / 60)
+                    
                     student_info = {
                         'id': current_record.student.id,
                         'name': current_record.student.name,
                         'level': str(current_record.student.level),
                         'start_time': current_record.check_in_time.strftime('%H:%M'),
+                        'practiced_time': f"{practiced_minutes}分钟",
                         'end_time': (current_record.check_in_time + timedelta(minutes=30)).strftime('%H:%M')
                     }
             
             piano_data.append({
                 'id': piano.id,
                 'number': piano.number,
+                'brand': piano.brand,
+                'model': piano.model,
                 'is_active': piano.is_active,
                 'is_occupied': piano.is_occupied,
                 'student': student_info
@@ -1701,16 +1726,51 @@ def activate_piano(request):
     try:
         from mymanage.courses.models import Piano
         
+        # 尝试获取钢琴实例，记录原始状态用于调试
         piano = Piano.objects.get(id=piano_id)
+        original_active = piano.is_active
+        original_occupied = piano.is_occupied
+        
+        # 打印调试信息
+        print(f"恢复钢琴: ID={piano_id}, 编号={piano.number}, 原状态: is_active={original_active}, is_occupied={original_occupied}")
         
         # 恢复钢琴为活动状态
         piano.is_active = True
+        piano.is_occupied = False  # 确保钢琴不被占用
         piano.notes = f"{piano.notes}\n恢复使用: {timezone.now().strftime('%Y-%m-%d %H:%M')}"
         piano.save()
         
-        return JsonResponse({'success': True, 'message': '钢琴已恢复为可用状态'})
+        # 验证保存结果
+        piano.refresh_from_db()
+        
+        # 检查保存后的状态
+        if piano.is_active:
+            return JsonResponse({
+                'success': True, 
+                'message': '钢琴已恢复为可用状态',
+                'piano_id': piano_id,
+                'piano_number': piano.number,
+                'is_active': piano.is_active,
+                'is_occupied': piano.is_occupied
+            })
+        else:
+            # 状态未更新成功
+            return JsonResponse({
+                'success': False,
+                'message': '钢琴状态更新失败',
+                'piano_id': piano_id,
+                'original_active': original_active,
+                'original_occupied': original_occupied,
+                'current_active': piano.is_active,
+                'current_occupied': piano.is_occupied
+            })
     
+    except Piano.DoesNotExist:
+        return JsonResponse({'success': False, 'message': f'找不到ID为 {piano_id} 的钢琴'})
     except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"恢复钢琴出错: {str(e)}\n{error_traceback}")
         return JsonResponse({'success': False, 'message': f'操作失败: {str(e)}'})
 
 
@@ -1748,3 +1808,92 @@ def remove_from_queue(request):
     
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'操作失败: {str(e)}'})
+
+
+@login_required
+@teacher_required
+def student_detail_ajax(request, student_id):
+    """通过AJAX获取学生详情"""
+    try:
+        student = get_object_or_404(Student, id=student_id)
+        
+        # 准备学生数据
+        # 处理性别显示
+        gender_display = ""
+        gender_value = ""
+        if hasattr(student, 'gender'):
+            if student.gender == 'male':
+                gender_display = "男"
+                gender_value = "male"
+            elif student.gender == 'female':
+                gender_display = "女" 
+                gender_value = "female"
+        
+        student_data = {
+            'id': student.id,
+            'name': student.name,
+            'gender': gender_display,
+            'gender_value': gender_value,
+            'level': student.level,
+            'target_level': student.target_level,
+            'phone': student.phone or '未设置',
+            'parent_phone': student.parent_phone or '未设置',
+            'parent_name': student.parent_name or '未设置',
+            'school': student.school or '未设置',
+            'avatar_url': student.avatar.url if hasattr(student, 'avatar') and student.avatar else None,
+            'created_at': student.created_at.strftime('%Y-%m-%d') if student.created_at else '',
+        }
+        
+        # 添加可能不存在的属性
+        if hasattr(student, 'last_practice'):
+            student_data['last_practice'] = student.last_practice.strftime('%Y-%m-%d') if student.last_practice else '从未练琴'
+        else:
+            student_data['last_practice'] = '从未练琴'
+            
+        if hasattr(student, 'total_practice_time'):
+            student_data['total_practice_time'] = student.total_practice_time
+        else:
+            student_data['total_practice_time'] = 0
+            
+        if hasattr(student, 'progress'):
+            student_data['progress'] = student.progress
+        else:
+            student_data['progress'] = 0
+        
+        # 获取最近考勤记录
+        attendance_records = AttendanceRecord.objects.filter(
+            student=student
+        ).order_by('-check_in_time')[:5]
+        
+        attendance_data = []
+        for record in attendance_records:
+            session_name = '未知课程'
+            if hasattr(record, 'session') and record.session:
+                if hasattr(record.session, 'course') and record.session.course:
+                    session_name = record.session.course.name
+            
+            check_in_time = record.check_in_time.strftime('%Y-%m-%d %H:%M') if record.check_in_time else ''
+            check_out_time = record.check_out_time.strftime('%H:%M') if record.check_out_time else '未签退'
+            
+            duration = '未完成'
+            if hasattr(record, 'duration_minutes') and record.duration_minutes:
+                duration = f"{record.duration_minutes} 分钟"
+            
+            attendance_data.append({
+                'session_name': session_name,
+                'check_in_time': check_in_time,
+                'check_out_time': check_out_time,
+                'duration': duration,
+            })
+        
+        # 返回JSON响应
+        return JsonResponse({
+            'success': True,
+            'student': student_data,
+            'attendance_records': attendance_data
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'获取学生信息失败: {str(e)}'
+        })

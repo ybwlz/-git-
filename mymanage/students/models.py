@@ -1,6 +1,8 @@
 from django.db import models
 from mymanage.users.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Student(models.Model):
     LEVEL_CHOICES = [(i, f"{i}级") for i in range(1, 11)]
@@ -23,6 +25,19 @@ class Student(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.get_level_display()}"
+
+# 添加信号处理器，自动将新创建的学生添加到默认课程
+@receiver(post_save, sender=Student)
+def add_student_to_default_course(sender, instance, created, **kwargs):
+    """当新学生被创建时，自动将其添加到默认通用课程"""
+    if created:  # 只在学生首次创建时执行
+        from mymanage.courses.models import Course
+        # 获取所有默认通用课程
+        default_courses = Course.objects.filter(code='DEFAULT')
+        # 将学生添加到所有默认课程
+        for course in default_courses:
+            course.students.add(instance)
+            print(f"学生 {instance.name} 已自动添加到 {course.name} 课程")
 
 class PracticeRecord(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='practice_records', verbose_name='学生')

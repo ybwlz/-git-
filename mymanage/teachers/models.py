@@ -1,5 +1,7 @@
 from django.db import models
 from mymanage.users.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class TeacherProfile(models.Model):
     """教师个人信息模型"""
@@ -19,6 +21,35 @@ class TeacherProfile(models.Model):
 
     def __str__(self):
         return self.name
+
+# 添加信号处理器，自动为新教师创建默认课程
+@receiver(post_save, sender=TeacherProfile)
+def create_default_course_for_teacher(sender, instance, created, **kwargs):
+    """当新教师被创建时，自动创建默认通用课程"""
+    if created:  # 只在教师首次创建时执行
+        from mymanage.courses.models import Course, PianoLevel
+        # 获取或创建默认钢琴等级
+        piano_level, _ = PianoLevel.objects.get_or_create(
+            level=1,
+            defaults={'description': '初级'}
+        )
+        
+        # 检查该教师是否已经有默认课程
+        default_course_exists = Course.objects.filter(
+            code='DEFAULT',
+            teacher=instance
+        ).exists()
+        
+        # 如果没有，则创建
+        if not default_course_exists:
+            course = Course.objects.create(
+                name='通用考勤',
+                code='DEFAULT',
+                teacher=instance,
+                description='自动生成的通用考勤课程',
+                level=piano_level
+            )
+            print(f"为教师 {instance.name} 创建了默认通用课程")
 
 class TeacherCertificate(models.Model):
     """教师证书模型"""

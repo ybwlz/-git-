@@ -1,0 +1,211 @@
+{% extends "teachers/teacher_base.html" %}
+{% load static %}
+
+{% block title %}曲谱详情 - {{ sheet.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    #pdf-viewer {
+        width: 100%;
+        height: 75vh;
+        border: 1px solid #ddd;
+        background-color: #f5f5f5;
+    }
+    .pdf-controls {
+        margin: 10px 0;
+        text-align: center;
+    }
+    .pdf-controls button {
+        margin: 0 5px;
+    }
+    .page-info {
+        display: inline-block;
+        margin: 0 15px;
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+    <!-- 正文内容 -->
+    <div class="container-fluid">
+        <!-- 面包屑导航 -->
+        <div class="row page-titles mb-3">
+            <div class="col-md-5 align-self-center">
+                <h4 class="text-themecolor">曲谱预览 - {{ sheet.title }}</h4>
+            </div>
+            <div class="col-md-7 align-self-center text-end">
+                <div class="d-flex justify-content-end align-items-center">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'teachers:dashboard' %}">首页</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'teachers:sheet_music' %}">曲谱管理</a></li>
+                        <li class="breadcrumb-item active">曲谱预览</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 返回按钮 -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <a href="{% url 'teachers:sheet_music' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回曲谱列表
+                </a>
+                
+                {% if sheet.uploaded_by == request.user %}
+                <a href="{% url 'teachers:edit_sheet_music' sheet.id %}" class="btn btn-info">
+                    <i class="fas fa-edit"></i> 编辑
+                </a>
+                <a href="{% url 'teachers:delete_sheet_music' sheet.id %}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> 删除
+                </a>
+                {% endif %}
+                
+                {% if sheet.file %}
+                <a href="{{ sheet.file.url }}" class="btn btn-success" download>
+                    <i class="fas fa-download"></i> 下载曲谱
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 曲谱文件直接显示 -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        {% if sheet.file %}
+                            {% if sheet.file.url|slice:"-4:" == ".pdf" %}
+                                <!-- PDF查看器控制区 -->
+                                <div class="pdf-controls mb-3">
+                                    <button id="prev-page" class="btn btn-sm btn-outline-primary"><i class="fas fa-arrow-left"></i> 上一页</button>
+                                    <div class="page-info">
+                                        <span>第 <span id="page-num">1</span> 页 / 共 <span id="page-count">0</span> 页</span>
+                                    </div>
+                                    <button id="next-page" class="btn btn-sm btn-outline-primary">下一页 <i class="fas fa-arrow-right"></i></button>
+                                    <button id="zoom-in" class="btn btn-sm btn-outline-secondary"><i class="fas fa-search-plus"></i> 放大</button>
+                                    <button id="zoom-out" class="btn btn-sm btn-outline-secondary"><i class="fas fa-search-minus"></i> 缩小</button>
+                                </div>
+                                
+                                <!-- PDF查看器 -->
+                                <div id="pdf-container">
+                                    <canvas id="pdf-viewer"></canvas>
+                                </div>
+                                
+                                <!-- PDF文件URL，用于JavaScript加载 -->
+                                <input type="hidden" id="pdf-url" value="{{ sheet.file.url }}">
+                            {% elif sheet.file.url|slice:"-4:" == ".jpg" or sheet.file.url|slice:"-4:" == ".png" or sheet.file.url|slice:"-5:" == ".jpeg" %}
+                                <div class="text-center">
+                                    <img src="{{ sheet.file.url }}" class="img-fluid" alt="{{ sheet.title }}">
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info m-3">
+                                    <p>该曲谱文件格式不支持直接预览，请下载后查看。</p>
+                                    <a href="{{ sheet.file.url }}" class="btn btn-primary" download>
+                                        <i class="fas fa-download"></i> 下载文件
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-warning m-3">
+                                <p>该曲谱没有上传文件。</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- 引入PDF.js库 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+    console.log('曲谱详情页面加载完成');
+    
+    // 检查是否是PDF文件
+    if (document.getElementById('pdf-url')) {
+        // PDF.js的配置
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
+        // 获取PDF文件URL
+        var pdfUrl = document.getElementById('pdf-url').value;
+        var pageNum = 1;
+        var pdfDoc = null;
+        var scale = 1.5;
+        var canvas = document.getElementById('pdf-viewer');
+        var ctx = canvas.getContext('2d');
+        
+        // 加载PDF
+        loadPDF();
+        
+        // 添加按钮事件监听
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (pageNum <= 1) {
+                return;
+            }
+            pageNum--;
+            renderPage(pageNum);
+        });
+        
+        document.getElementById('next-page').addEventListener('click', function() {
+            if (pageNum >= pdfDoc.numPages) {
+                return;
+            }
+            pageNum++;
+            renderPage(pageNum);
+        });
+        
+        document.getElementById('zoom-in').addEventListener('click', function() {
+            scale += 0.2;
+            renderPage(pageNum);
+        });
+        
+        document.getElementById('zoom-out').addEventListener('click', function() {
+            if (scale <= 0.5) {
+                return;
+            }
+            scale -= 0.2;
+            renderPage(pageNum);
+        });
+        
+        // 加载PDF文件
+        function loadPDF() {
+            pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+                pdfDoc = pdf;
+                document.getElementById('page-count').textContent = pdfDoc.numPages;
+                
+                // 初始渲染第一页
+                renderPage(pageNum);
+            }).catch(function(error) {
+                console.error('加载PDF文件失败:', error);
+                var container = document.getElementById('pdf-container');
+                container.innerHTML = '<div class="alert alert-danger">PDF加载失败，请尝试下载查看。原因：' + error.message + '</div>';
+            });
+        }
+        
+        // 渲染页面
+        function renderPage(num) {
+            pdfDoc.getPage(num).then(function(page) {
+                var viewport = page.getViewport({ scale: scale });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                var renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                
+                page.render(renderContext).promise.then(function() {
+                    document.getElementById('page-num').textContent = pageNum;
+                });
+            });
+        }
+    }
+</script>
+{% endblock %} 

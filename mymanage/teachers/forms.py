@@ -3,6 +3,8 @@ from .models import TeacherProfile, NotificationSetting, PrivacySetting, Teacher
 
 class TeacherProfileForm(forms.ModelForm):
     """教师个人信息表单"""
+    email = forms.EmailField(label='邮箱', widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    
     class Meta:
         model = TeacherProfile
         fields = ['name', 'gender', 'phone', 'avatar', 'bio', 'specialties']
@@ -10,6 +12,12 @@ class TeacherProfileForm(forms.ModelForm):
             'specialties': forms.SelectMultiple(attrs={'class': 'form-select'}),
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 如果实例存在，则初始化email字段
+        if self.instance and self.instance.user:
+            self.fields['email'].initial = self.instance.user.email
 
 class TeacherCertificateForm(forms.ModelForm):
     """教师证书表单"""

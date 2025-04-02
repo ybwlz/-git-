@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}苗韵琴行管理系统{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar h5 {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar .nav-link:hover {
+                transform: none;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <button class="mobile-toggle btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            {% if teacher.avatar %}
+                <img src="{{ teacher.avatar.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ teacher.name|default:"苗韵琴行" }}</h5>
+            {% if teacher.job_title %}
+                <p class="text-light mb-0"><small>{{ teacher.job_title }}</small></p>
+            {% endif %}
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'teachers:dashboard' %}">
+                    <i class="fas fa-home"></i> 控制面板
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'students' %}active{% endif %}" href="{% url 'teachers:students' %}">
+                    <i class="fas fa-users"></i> 学生管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'piano_arrangement' %}active{% endif %}" href="{% url 'teachers:piano_arrangement' %}">
+                    <i class="fas fa-guitar"></i> 练琴安排
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'attendance' %}active{% endif %}" href="{% url 'teachers:attendance' %}">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'sheet_music' in request.path %}active{% endif %}" href="{% url 'teachers:sheet_music' %}">
+                    <i class="fas fa-music"></i> 曲谱管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'finance' %}active{% endif %}" href="{% url 'teachers:finance' %}">
+                    <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    <script>
+        // 确保DOM加载完成后再执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 移动端侧边栏切换
+            const mobileToggle = document.querySelector('.mobile-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (mobileToggle && sidebar && mainContent) {
+                mobileToggle.addEventListener('click', function() {
+                    if (sidebar.style.width === '280px') {
+                        sidebar.style.width = '0';
+                        mainContent.style.marginLeft = '0';
+                    } else {
+                        sidebar.style.width = '280px';
+                        mainContent.style.marginLeft = '280px';
+                    }
+                });
+            }
+            
+            // 添加系统时间显示功能
+            function updateSystemTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const currentTimeElement = document.getElementById('currentTime');
+                if (currentTimeElement) {
+                    currentTimeElement.textContent = `${hours}:${minutes}:${seconds}`;
+                }
+            }
+            
+            // 初始化并每秒更新一次
+            updateSystemTime();
+            setInterval(updateSystemTime, 1000);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

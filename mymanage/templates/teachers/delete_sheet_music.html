@@ -1,0 +1,94 @@
+{% extends "teachers/teacher_base.html" %}
+{% load static %}
+
+{% block title %}删除曲谱 - {{ sheet.title }}{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+    <!-- 正文内容 -->
+    <div class="container-fluid">
+        <!-- 面包屑导航 -->
+        <div class="row page-titles">
+            <div class="col-md-5 align-self-center">
+                <h4 class="text-themecolor">删除曲谱</h4>
+            </div>
+            <div class="col-md-7 align-self-center text-end">
+                <div class="d-flex justify-content-end align-items-center">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'teachers:dashboard' %}">首页</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'teachers:sheet_music' %}">曲谱管理</a></li>
+                        <li class="breadcrumb-item active">删除曲谱</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 删除确认内容 -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="text-center">
+                            <h3 class="card-title mb-4">确认删除曲谱</h3>
+                            
+                            <div class="alert alert-danger mb-4">
+                                <p>您确定要删除曲谱 <strong>{{ sheet.title }}</strong> 吗？</p>
+                                <p>此操作不可逆，删除后将无法恢复。</p>
+                            </div>
+                            
+                            <div class="row justify-content-center mb-4">
+                                <div class="col-md-6">
+                                    <div class="text-center">
+                                        {% if sheet.cover_image %}
+                                        <img src="{{ sheet.cover_image.url }}" alt="{{ sheet.title }}封面" class="img-fluid rounded" style="max-height: 300px;">
+                                        {% else %}
+                                        <img src="{% static 'img/sheet_music_default.jpg' %}" alt="默认曲谱封面" class="img-fluid rounded" style="max-height: 300px;">
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-lg-6 offset-lg-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">曲谱信息</h5>
+                                            <dl class="row mt-3">
+                                                <dt class="col-sm-4">标题：</dt>
+                                                <dd class="col-sm-8">{{ sheet.title }}</dd>
+                                                
+                                                <dt class="col-sm-4">作曲家：</dt>
+                                                <dd class="col-sm-8">{{ sheet.composer }}</dd>
+                                                
+                                                <dt class="col-sm-4">难度等级：</dt>
+                                                <dd class="col-sm-8">{{ sheet.difficulty }}</dd>
+                                                
+                                                <dt class="col-sm-4">上传时间：</dt>
+                                                <dd class="col-sm-8">{{ sheet.upload_time|date:"Y-m-d H:i" }}</dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="d-flex justify-content-center">
+                                    <a href="{% url 'teachers:sheet_music' %}" class="btn btn-secondary btn-lg mx-2">
+                                        取消
+                                    </a>
+                                    <button type="submit" class="btn btn-danger btn-lg mx-2">
+                                        确认删除
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %} 
