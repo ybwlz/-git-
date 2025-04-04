@@ -217,12 +217,17 @@ def scan_qrcode(request):
                 available_piano.is_occupied = True
                 available_piano.save()
                 
-                AttendanceRecord.objects.create(
+                # 使用当前时间创建考勤记录
+                current_time = timezone.now()
+                print(f"DEBUG - 创建考勤记录时间: {current_time}, 日期: {current_time.date()}")
+                record = AttendanceRecord.objects.create(
                     session=session,
                     student=student,
                     piano=available_piano,
-                    status='checked_in'
+                    status='checked_in',
+                    check_in_time=current_time  # 明确设置签到时间为当前时间
                 )
+                print(f"DEBUG - 创建的考勤记录ID: {record.id}, 时间: {record.check_in_time}, 日期: {record.check_in_time.date()}")
                 
                 return JsonResponse({
                     'success': True, 

@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 import uuid
 import qrcode
 from io import BytesIO
@@ -81,14 +82,15 @@ class AttendanceSession(models.Model):
         ('closed', '已关闭'),
     )
     
-    course = models.ForeignKey('courses.Course', on_delete=models.CASCADE, related_name='attendance_sessions')
-    schedule = models.ForeignKey('courses.CourseSchedule', on_delete=models.CASCADE, related_name='attendance_sessions')
-    qrcode = models.OneToOneField(QRCode, on_delete=models.SET_NULL, null=True, related_name='session')
+    course = models.ForeignKey('courses.Course', on_delete=models.CASCADE, related_name='attendance_sessions', null=True, blank=True)
+    schedule = models.ForeignKey('courses.CourseSchedule', on_delete=models.CASCADE, related_name='attendance_sessions', null=True, blank=True)
+    qrcode = models.OneToOneField(QRCode, on_delete=models.SET_NULL, null=True, blank=True, related_name='session')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_sessions')
     start_time = models.DateTimeField('开始时间', auto_now_add=True)
     end_time = models.DateTimeField('结束时间', null=True, blank=True)
     status = models.CharField('状态', max_length=10, choices=STATUS_CHOICES, default='active')
     description = models.TextField('描述', blank=True)
+    is_active = models.BooleanField('是否活跃', default=True)
     
     class Meta:
         verbose_name = '考勤会话'
@@ -96,11 +98,36 @@ class AttendanceSession(models.Model):
         ordering = ['-start_time']
     
     def __str__(self):
-        return f"{self.course.name} - {self.start_time.strftime('%Y-%m-%d %H:%M')}"
+        course_name = self.course.name if self.course else "未关联课程"
+        return f"{course_name} - {self.start_time.strftime('%Y-%m-%d %H:%M')}"
+    
+    def clean(self):
+        """验证数据的有效性"""
+        # 如果是新创建的会话，不做时间验证
+        if not self.pk:
+            return
+            
+        # 只对已存在的会话进行时间验证
+        if self.end_time and self.start_time and self.end_time <= self.start_time:
+            raise ValidationError({
+                'end_time': '结束时间必须在开始时间之后'
+            })
+    
+    def save(self, *args, **kwargs):
+        """重写save方法，确保结束时间晚于开始时间"""
+        # 如果是新创建的会话，直接保存
+        if not self.pk:
+            super().save(*args, **kwargs)
+            return
+            
+        # 对已存在的会话执行验证
+        self.clean()
+        super().save(*args, **kwargs)
     
     def close_session(self):
         """关闭考勤会话"""
         self.status = 'closed'
+        self.is_active = False
         self.end_time = timezone.now()
         self.save()
         
@@ -112,10 +139,10 @@ class AttendanceSession(models.Model):
     def check_and_close_expired_sessions(cls):
         """检查并关闭所有过期的考勤会话"""
         current_time = timezone.now()
-        # 获取所有活跃状态但二维码已过期的会话
+        # 获取所有活跃状态但已过期的会话
         expired_sessions = cls.objects.filter(
-            status='active',
-            qrcode__expires_at__lt=current_time
+            is_active=True,
+            end_time__lt=current_time
         )
         
         count = 0
@@ -141,8 +168,11 @@ class AttendanceRecord(models.Model):
     check_in_time = models.DateTimeField('签到时间', auto_now_add=True)
     check_out_time = models.DateTimeField('签退时间', null=True, blank=True)
     status = models.CharField('状态', max_length=20, choices=STATUS_CHOICES, default='checked_in')
-    duration = models.DurationField('学习时长', null=True, blank=True)
+    duration = models.FloatField('学习时长(小时)', null=True, blank=True)
+    duration_minutes = models.FloatField('学习时长(分钟)', null=True, blank=True)
     notes = models.TextField('备注', blank=True)
+    note = models.TextField('签到备注', blank=True)
+    check_in_method = models.CharField('签到方式', max_length=20, default='qrcode', blank=True)
     
     class Meta:
         verbose_name = '考勤记录'
@@ -159,7 +189,8 @@ class AttendanceRecord(models.Model):
             self.check_out_time = timezone.now()
             self.status = 'checked_out'
             # 计算学习时长
-            self.duration = self.check_out_time - self.check_in_time
+            self.duration = (self.check_out_time - self.check_in_time).total_seconds() / 3600
+            self.duration_minutes = self.duration * 60
             # 释放钢琴
             if self.piano:
                 self.piano.is_occupied = False

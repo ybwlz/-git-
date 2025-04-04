@@ -1,465 +1,302 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    {% load static %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>财务管理 - 苗韵琴行管理系统</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
-    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
-    <style>
-        :root {
-            --primary-color: #6c5ce7;
-            --secondary-color: #a29bfe;
-            --accent-color: #fd79a8;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fb;
-        }
-        
-        .sidebar {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            height: 100vh;
-            position: fixed;
-            width: 250px;
-            padding: 1rem;
-            overflow-y: auto;
-        }
-        
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.85);
-            padding: 0.8rem 1rem;
-            margin: 0.2rem 0;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-        }
-        
-        .sidebar .nav-link i {
-            width: 1.5rem;
-            margin-right: 0.8rem;
-            font-size: 1.1rem;
-            text-align: center;
-        }
-        
-        .sidebar .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            transform: translateX(5px);
-        }
-        
-        .sidebar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-weight: 600;
-        }
-        
-        .main-content {
-            margin-left: 250px;
-            padding: 2rem;
-        }
-        
-        .sidebar img.rounded-circle {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            padding: 3px;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        .sidebar h5 {
-            color: white;
-            margin-top: 1rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .sidebar .nav-link:hover {
-                transform: none;
-            }
-        }
-        
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-weight: 600;
-        }
-        
-        .finance-stats {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .finance-stats .stat-card {
-            flex: 1;
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            text-align: center;
-        }
-        
-        .finance-stats .stat-card .icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        
-        .finance-stats .stat-card .value {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 5px 0;
-        }
-        
-        .finance-stats .stat-card .label {
-            color: #6c757d;
-            font-size: 14px;
-        }
-        
-        .finance-filter {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .transaction-table th, .transaction-table td {
-            vertical-align: middle;
-        }
-        
-        .transaction-status {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-        }
-        
-        .status-paid {
-            background-color: #28a745;
-        }
-        
-        .status-pending {
-            background-color: #ffc107;
-        }
-        
-        .status-overdue {
-            background-color: #dc3545;
-        }
-        
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
-            
-            .sidebar .sidebar-header span, .sidebar .sidebar-menu span {
-                display: none;
-            }
-            
-            .sidebar-menu a {
-                padding: 15px 0;
-                justify-content: center;
-            }
-            
-            .sidebar-menu i {
-                margin-right: 0;
-                font-size: 18px;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .mobile-toggle {
-                display: block !important;
-            }
-        }
-        
-        .mobile-toggle {
-            display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 8px 12px;
-        }
-    </style>
-</head>
-<body>
-    <button class="mobile-toggle btn">
-        <i class="fas fa-bars"></i>
-    </button>
+{% extends "teachers/teacher_base.html" %}
+{% load static %}
+
+{% block title %}财务管理 | 苗韵琴行管理系统{% endblock %}
+
+{% block styles %}
+<style>
+    /* 数据卡片样式，与dashboard保持一致 */
+    .stat-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
     
-    <div class="sidebar col-md-3 col-lg-2 d-md-block">
-        <div class="text-center mb-4">
-            {% if teacher.avatar %}
-                <img src="{{ teacher.avatar.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
-            {% else %}
-                <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
-            {% endif %}
-            <h5 class="mt-2">{{ teacher.name|default:"苗韵琴行" }}</h5>
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        color: white;
+    }
+    
+    .bg-primary-soft {
+        background-color: rgba(108, 92, 231, 0.2);
+        color: #6c5ce7;
+    }
+    
+    .bg-success-soft {
+        background-color: rgba(46, 213, 115, 0.2);
+        color: #2ecc71;
+    }
+    
+    .bg-warning-soft {
+        background-color: rgba(255, 177, 66, 0.2);
+        color: #f39c12;
+    }
+    
+    .bg-info-soft {
+        background-color: rgba(55, 166, 246, 0.2);
+        color: #3498db;
+    }
+    
+    .stat-card .value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-card .label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .stat-card .d-flex {
+        display: flex;
+        align-items: center;
+    }
+    
+    .stat-card .change {
+        font-size: 0.8rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        margin-left: 0.5rem;
+    }
+    
+    .stat-card .change.positive {
+        background-color: rgba(46, 213, 115, 0.1);
+        color: #2ecc71;
+    }
+    
+    .stat-card .change.negative {
+        background-color: rgba(235, 59, 90, 0.1);
+        color: #eb3b5a;
+    }
+    
+    /* 图表容器样式 */
+    .chart-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        position: relative;
+        height: 350px;
+    }
+    
+    /* 表格样式 */
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .payment-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    /* 按钮样式 */
+    .btn-rounded {
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+    }
+    
+    /* 加载动画 */
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top-color: #6c5ce7;
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 添加CSRF令牌 -->
+    {% csrf_token %}
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">财务管理</h2>
+        <div>
+            <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
+            <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
+                <i class="fas fa-clock me-1"></i>
+                <span id="currentTime">00:00:00</span>
+            </div>
         </div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:dashboard' %}">
-                    <i class="fas fa-home"></i> 控制面板
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:profile' %}">
-                    <i class="fas fa-user"></i> 个人主页
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:students' %}">
-                    <i class="fas fa-users"></i> 学生管理
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:piano_arrangement' %}">
-                    <i class="fas fa-guitar"></i> 练琴安排
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:attendance' %}">
-                    <i class="fas fa-calendar-check"></i> 考勤记录
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:sheet_music' %}">
-                    <i class="fas fa-music"></i> 曲谱管理
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="{% url 'teachers:finance' %}">
-                    <i class="fas fa-money-bill"></i> 财务管理
-                </a>
-            </li>
-            <li class="nav-item mt-5">
-                <a class="nav-link" href="{% url 'logout' %}">
-                    <i class="fas fa-sign-out-alt"></i> 退出登录
-                </a>
-            </li>
-        </ul>
     </div>
     
-    <div class="main-content">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">财务管理</h2>
-                <div>
-                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
-                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
-                        <i class="fas fa-clock me-1"></i>
-                        <span id="currentTime">00:00:00</span>
+    <!-- 财务统计卡片 -->
+    <div class="row">
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-primary-soft">
+                        <i class="fas fa-calendar-alt"></i>
                     </div>
-                </div>
-            </div>
-            
-            <div class="row mb-4">
-                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <div class="display-4 mb-3 text-primary">
-                                <i class="fas fa-coins"></i>
-                            </div>
-                            <h5 class="card-title">本月收入</h5>
-                            <p class="card-text fs-2 fw-bold">¥{{ month_income|floatformat:2 }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <div class="display-4 mb-3 text-success">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <h5 class="card-title">年度收入</h5>
-                            <p class="card-text fs-2 fw-bold">¥{{ year_income|floatformat:2 }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <div class="display-4 mb-3 text-warning">
-                                <i class="fas fa-exclamation-circle"></i>
-                            </div>
-                            <h5 class="card-title">待收款项</h5>
-                            <p class="card-text fs-2 fw-bold">¥{{ pending_payments|floatformat:2 }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <div class="display-4 mb-3 text-danger">
-                                <i class="fas fa-file-invoice"></i>
-                            </div>
-                            <h5 class="card-title">逾期金额</h5>
-                            <p class="card-text fs-2 fw-bold">¥{{ overdue_payments|floatformat:2 }}</p>
+                    <div>
+                        <div class="value">¥<span id="month-income">{{ month_income }}</span></div>
+                        <div class="label">{{ current_month }}收入
+                            <span class="change {% if month_change_percentage >= 0 %}positive{% else %}negative{% endif %}">
+                                <i class="fas {% if month_change_percentage >= 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
+                                {{ month_change_percentage|floatformat:1 }}%
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="row mb-4">
-                <div class="col-md-7 mb-4 mb-md-0">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">收入统计</h5>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="timeRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{ selected_period|default:"当月" }}
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="timeRangeDropdown">
-                                    <li><a class="dropdown-item" href="?period=month">当月</a></li>
-                                    <li><a class="dropdown-item" href="?period=quarter">本季度</a></li>
-                                    <li><a class="dropdown-item" href="?period=year">本年</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="incomeChart" height="300"></canvas>
-                        </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-success-soft">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="mb-0">收入分类</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="categoryChart" height="300"></canvas>
-                        </div>
+                    <div>
+                        <div class="value">¥<span id="year-income">{{ year_income }}</span></div>
+                        <div class="label">{{ current_year }}年收入</div>
                     </div>
                 </div>
             </div>
-            
-            <div class="card">
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-warning-soft">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <div class="value">¥<span id="pending-amount">{{ total_pending }}</span></div>
+                        <div class="label">待收款项</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-info-soft">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="value"><span id="payment-rate">{{ paid_percentage|floatformat:1 }}</span>%</div>
+                        <div class="label">学生付款率 <span id="paid-students">{{ paid_students }}</span>/<span id="total-students">{{ total_students }}</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 图表和表格 -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">近期交易记录</h5>
-                    <a href="{% url 'teachers:payments' %}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-list me-1"></i>全部记录
-                    </a>
+                    <h5 class="mb-0">月度收入趋势 ({{ current_year }})</h5>
+                    <div>
+                        <a href="{% url 'finance:payment_list' %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-list me-1"></i>管理收款记录
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="incomeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">付款记录管理</h5>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0 transaction-table">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover payment-table mb-0">
                             <thead>
                                 <tr>
                                     <th>学生</th>
-                                    <th>交易项目</th>
+                                    <th>类别</th>
                                     <th>金额</th>
-                                    <th>日期</th>
                                     <th>状态</th>
+                                    <th>日期</th>
                                     <th>操作</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="recent-payments">
                                 {% for payment in recent_payments %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                {% if payment.student.avatar %}
-                                                    <img src="{{ payment.student.avatar.url }}" alt="{{ payment.student.name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                                {% else %}
-                                                    <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center me-2" style="width: 40px; height: 40px;">
-                                                        {{ payment.student.name|slice:":1" }}
-                                                    </div>
-                                                {% endif %}
-                                                <div>
-                                                    <div class="fw-bold">{{ payment.student.name }}</div>
-                                                    <small class="text-muted">{{ payment.student.phone|default:"无联系方式" }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>{{ payment.category.name }}</td>
-                                        <td class="fw-bold">¥{{ payment.amount|floatformat:2 }}</td>
-                                        <td>{{ payment.created_at|date:"Y-m-d" }}</td>
-                                        <td>
-                                            {% if payment.status == 'paid' %}
-                                                <span class="badge bg-success rounded-pill">
-                                                    <span class="transaction-status status-paid"></span>已支付
-                                                </span>
-                                            {% elif payment.status == 'pending' %}
-                                                <span class="badge bg-warning rounded-pill">
-                                                    <span class="transaction-status status-pending"></span>待支付
-                                                </span>
-                                            {% elif payment.status == 'overdue' %}
-                                                <span class="badge bg-danger rounded-pill">
-                                                    <span class="transaction-status status-overdue"></span>已逾期
-                                                </span>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if payment.student.avatar %}
+                                                <img src="{{ payment.student.avatar.url }}" class="avatar me-2" alt="学生头像" style="width:32px;height:32px;border-radius:50%;">
+                                            {% else %}
+                                                <div class="avatar me-2 bg-primary d-flex align-items-center justify-content-center text-white" style="width:32px;height:32px;border-radius:50%;">{{ payment.student.name|slice:":1" }}</div>
                                             {% endif %}
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a href="{% url 'teachers:edit_payment' payment.id %}" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button class="btn btn-sm btn-outline-success" onclick="markAsPaid({{ payment.id }})">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            <span>{{ payment.student.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ payment.category.name }}</td>
+                                    <td class="fw-bold">¥{{ payment.amount }}</td>
+                                    <td>
+                                        {% if payment.status == 'paid' %}
+                                        <span class="badge bg-success">已支付</span>
+                                        {% elif payment.status == 'pending' %}
+                                        <span class="badge bg-warning">待支付</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">其他</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ payment.payment_date|default:"-" }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            {% if payment.status == 'pending' %}
+                                            <button class="btn btn-sm btn-success mark-paid-btn" data-id="{{ payment.id }}" title="标记为已付">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            {% endif %}
+                                            <a href="{% url 'finance:payment_edit' payment.id %}" class="btn btn-sm btn-info" title="编辑">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'finance:payment_delete' payment.id %}" class="btn btn-sm btn-danger" title="删除">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
                                 {% empty %}
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">
-                                            <div class="text-muted mb-2">
-                                                <i class="fas fa-receipt fa-3x"></i>
-                                            </div>
-                                            <p>暂无交易记录</p>
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <div class="text-muted mb-2">
+                                            <i class="fas fa-receipt fa-3x"></i>
+                                        </div>
+                                        <p>暂无付款记录</p>
+                                    </td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -467,61 +304,184 @@
                 </div>
             </div>
         </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/skin/default/layer.js' %}"></script>
-    <script>
-        // 移动端侧边栏切换
-        document.querySelector('.mobile-toggle').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
-            
-            if (sidebar.style.width === '280px') {
-                sidebar.style.width = '0';
-                mainContent.style.marginLeft = '0';
-            } else {
-                sidebar.style.width = '280px';
-                mainContent.style.marginLeft = '280px';
-            }
-        });
         
-        // 添加系统时间显示功能
-        function updateSystemTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">收入分类</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <!-- 调试信息 -->
+                    {% if debug_mode %}
+                    <div class="mt-3 p-3 bg-light small">
+                        <h6>调试信息:</h6>
+                        <div>原始JSON: <code>{{ debug_category_json }}</code></div>
+                        <div>Python对象: <code>{{ debug_categories }}</code></div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">本月收款统计</h5>
+                </div>
+                <div class="card-body">
+                    {% if payment_by_category %}
+                        {% for item in payment_by_category %}
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>{{ item.category }}:</span>
+                            <span class="text-success">¥{{ item.amount }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">本月暂无收款记录</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">快速操作</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'finance:payment_export' %}" class="btn btn-success btn-rounded">
+                            <i class="fas fa-file-excel me-1"></i> 导出收款数据
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 加载Chart.js库 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    // 系统时间更新
+    function updateClock() {
+        var now = new Date();
+        var hours = now.getHours().toString().padStart(2, '0');
+        var minutes = now.getMinutes().toString().padStart(2, '0');
+        var seconds = now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('currentTime').textContent = hours + ':' + minutes + ':' + seconds;
+    }
+    
+    // 初始化时钟
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    // 解析后端传递的JSON数据
+    try {
+        var monthlyData = JSON.parse('{{ monthly_income_data|escapejs }}');
+        var categoryData = JSON.parse('{{ category_data|escapejs }}');
+        
+        console.log("月度数据:", monthlyData);
+        console.log("分类数据:", categoryData);
+        
+        if (!categoryData || !Array.isArray(categoryData) || categoryData.length === 0) {
+            console.log("分类数据为空或格式错误，使用默认空数组");
+            categoryData = [];
+            
+            // 如果分类数据为空，显示更友好的提示信息
+            document.addEventListener('DOMContentLoaded', function() {
+                var categoryContainer = document.getElementById('categoryChart').parentNode;
+                categoryContainer.innerHTML = '<div class="text-center p-4">' +
+                    '<i class="fas fa-chart-pie text-muted mb-3" style="font-size: 3rem;"></i>' +
+                    '<p class="text-muted">暂无收入分类数据</p>' +
+                    '<p class="small text-muted">您需要添加至少一笔带有分类的付款记录</p>' +
+                    '<a href="{% url "finance:payment_list" %}" class="btn btn-sm btn-outline-primary mt-2">' +
+                    '<i class="fas fa-plus-circle me-1"></i>添加付款记录</a>' +
+                    '</div>';
+            });
         }
         
-        // 初始化并每秒更新一次
-        updateSystemTime();
-        setInterval(updateSystemTime, 1000);
+        if (!monthlyData || !Array.isArray(monthlyData)) {
+            console.log("月度数据为空或格式错误，使用默认空数组");
+            monthlyData = [];
+        }
+    } catch (error) {
+        console.error("JSON解析错误:", error);
+        console.error("原始月度数据:", '{{ monthly_income_data|escapejs }}');
+        console.error("原始分类数据:", '{{ category_data|escapejs }}');
         
-        // 收入图表
-        const ctx = document.getElementById('incomeChart').getContext('2d');
-        const incomeChart = new Chart(ctx, {
+        // 出错时使用默认空数组
+        monthlyData = [];
+        categoryData = [];
+        
+        // 显示错误提示
+        document.addEventListener('DOMContentLoaded', function() {
+            var categoryContainer = document.getElementById('categoryChart').parentNode;
+            categoryContainer.innerHTML = '<div class="text-center p-4 text-danger">' +
+                '<i class="fas fa-exclamation-triangle mb-3" style="font-size: 3rem;"></i>' +
+                '<p>数据解析错误</p>' +
+                '<p class="small">请刷新页面或联系管理员</p>' +
+                '</div>';
+        });
+    }
+    
+    // 准备月度数据, 确保所有12个月都有数据
+    var allMonths = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+    var monthValues = Array(12).fill(0);
+    
+    // 将后端数据填充到对应月份
+    monthlyData.forEach(function(item) {
+        var monthIndex = allMonths.indexOf(item.month);
+        if (monthIndex !== -1) {
+            monthValues[monthIndex] = item.value;
+        }
+    });
+    
+    // 计算分类数据总额，用于百分比计算
+    var categoryTotal = 0;
+    if (categoryData && categoryData.length > 0) {
+        categoryTotal = categoryData.reduce(function(total, item) {
+            return total + (item.value || 0);
+        }, 0);
+    }
+    
+    // 页面加载完成后初始化图表
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. 绘制月度收入趋势图
+        var incomeCtx = document.getElementById('incomeChart').getContext('2d');
+        var incomeChart = new Chart(incomeCtx, {
             type: 'line',
             data: {
-                labels: {{ chart_labels|safe }},
+                labels: allMonths,
                 datasets: [{
-                    label: '收入（元）',
-                    data: {{ income_data|safe }},
+                    label: '收入(元)',
+                    data: monthValues,
                     backgroundColor: 'rgba(108, 92, 231, 0.2)',
                     borderColor: 'rgba(108, 92, 231, 1)',
                     borderWidth: 2,
-                    tension: 0.4,
                     pointBackgroundColor: 'rgba(108, 92, 231, 1)',
+                    pointBorderColor: '#fff',
+                    pointRadius: 5,
+                    tension: 0.3
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true,
+                        max: 20000, // 将Y轴最大值从10000增加到20000
+                        ticks: {
+                            stepSize: 4000, // 调整刻度步长为4000
+                            callback: function(value) {
+                                return '¥' + value;
+                            }
+                        },
                         grid: {
-                            drawBorder: false
+                            color: 'rgba(0, 0, 0, 0.05)'
                         }
                     },
                     x: {
@@ -533,78 +493,209 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '¥' + context.raw;
+                            }
+                        }
                     }
-                },
-                responsive: true,
-                maintainAspectRatio: false
+                }
             }
         });
         
-        // 收入分类饼图
-        const pieCtx = document.getElementById('categoryChart').getContext('2d');
-        const categoryChart = new Chart(pieCtx, {
-            type: 'doughnut',
-            data: {
-                labels: {{ category_labels|safe }},
-                datasets: [{
-                    data: {{ category_data|safe }},
-                    backgroundColor: [
-                        'rgba(108, 92, 231, 0.8)',
-                        'rgba(253, 121, 168, 0.8)',
-                        'rgba(162, 155, 254, 0.8)',
-                        'rgba(85, 239, 196, 0.8)',
-                        'rgba(250, 177, 160, 0.8)',
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
+        // 2. 绘制收入分类饼图
+        if (categoryData && categoryData.length > 0) {
+            var categoryLabels = categoryData.map(function(item) { return item.name; });
+            var categoryValues = categoryData.map(function(item) { return item.value; });
+            
+            // 添加百分比标签
+            var categoryLabelsWithPercent = categoryData.map(function(item) {
+                var percent = categoryTotal > 0 ? ((item.value / categoryTotal) * 100).toFixed(1) : 0;
+                return item.name + ' (' + percent + '%)';
+            });
+            
+            var categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            var categoryChart = new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryLabelsWithPercent,
+                    datasets: [{
+                        data: categoryValues,
+                        backgroundColor: [
+                            'rgba(108, 92, 231, 0.8)',
+                            'rgba(253, 121, 168, 0.8)', 
+                            'rgba(255, 177, 66, 0.8)',
+                            'rgba(46, 213, 115, 0.8)',
+                            'rgba(55, 166, 246, 0.8)',
+                            'rgba(131, 52, 113, 0.8)'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        hoverOffset: 10  // 鼠标悬停时突出显示
+                    }]
                 },
-                cutout: '70%'
-            }
-        });
-        
-        // 标记为已支付
-        function markAsPaid(paymentId) {
-            if (confirm('确定将此项标记为已支付吗？')) {
-                fetch(`/teachers/finance/payments/${paymentId}/mark-as-paid/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'Content-Type': 'application/json'
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 1000  // 动画持续时间
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 10,
+                                font: {
+                                    size: 11
+                                },
+                                generateLabels: function(chart) {
+                                    var data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map(function(label, i) {
+                                            var value = data.datasets[0].data[i];
+                                            var total = data.datasets[0].data.reduce(function(acc, val) {
+                                                return acc + val;
+                                            }, 0);
+                                            var percent = total > 0 ? Math.round((value / total) * 100) : 0;
+                                            return {
+                                                text: label,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].borderColor,
+                                                lineWidth: data.datasets[0].borderWidth,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var label = context.label || '';
+                                    var value = context.raw;
+                                    var percent = categoryTotal > 0 ? ((value / categoryTotal) * 100).toFixed(1) : 0;
+                                    return label + ': ¥' + value + ' (' + percent + '%)';
+                                }
+                            }
+                        }
                     }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        layer.msg('操作成功', {icon: 1, time: 2000});
-                        setTimeout(() => location.reload(), 2000);
-                    } else {
-                        layer.msg('操作失败：' + data.error, {icon: 2, time: 2000});
-                    }
-                })
-                .catch(error => {
-                    layer.msg('操作失败，请重试', {icon: 2, time: 2000});
-                });
-            }
+                }
+            });
+        } else {
+            // 如果没有分类数据，显示更友好的提示信息
+            var categoryContainer = document.getElementById('categoryChart').parentNode;
+            categoryContainer.innerHTML = '<div class="text-center p-4">' +
+                '<i class="fas fa-chart-pie text-muted mb-3" style="font-size: 3rem;"></i>' +
+                '<p class="text-muted">暂无收入分类数据</p>' +
+                '<p class="small text-muted">您需要添加至少一笔带有分类的付款记录</p>' +
+                '<a href="{% url "finance:payment_list" %}" class="btn btn-sm btn-outline-primary mt-2">' +
+                '<i class="fas fa-plus-circle me-1"></i>添加付款记录</a>' +
+                '</div>';
         }
         
-        // 显示成功消息
-        {% if messages %}
-            {% for message in messages %}
-                {% if message.tags == 'success' %}
-                    layer.msg('{{ message }}', {icon: 1, time: 2000});
-                {% else %}
-                    layer.msg('{{ message }}', {icon: 2, time: 2000});
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    </script>
-</body>
-</html> 
+        // 如果月度收入数据全为零，也显示友好提示
+        var hasMonthlyData = monthValues.some(function(value) { return value > 0; });
+        if (!hasMonthlyData) {
+            var incomeContainer = document.getElementById('incomeChart').parentNode;
+            incomeContainer.innerHTML = '<div class="text-center p-4">' +
+                '<i class="fas fa-chart-line text-muted mb-3" style="font-size: 3rem;"></i>' +
+                '<p class="text-muted">暂无月度收入数据</p>' +
+                '<p class="small text-muted">您需要添加至少一笔已付款的记录</p>' +
+                '<a href="{% url "finance:payment_list" %}" class="btn btn-sm btn-outline-primary mt-2">' +
+                '<i class="fas fa-plus-circle me-1"></i>添加付款记录</a>' +
+                '</div>';
+        }
+    });
+    
+    // 标记付款为已付
+    document.addEventListener('DOMContentLoaded', function() {
+        // 添加点击事件监听器
+        var markPaidButtons = document.querySelectorAll('.mark-paid-btn');
+        for (var i = 0; i < markPaidButtons.length; i++) {
+            markPaidButtons[i].addEventListener('click', function() {
+                var paymentId = this.getAttribute('data-id');
+                markAsPaid(paymentId, this);
+            });
+        }
+    });
+    
+    function markAsPaid(paymentId, button) {
+        if (confirm('确定将此付款标记为已支付吗？')) {
+            // 获取CSRF令牌
+            var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            
+            // 显示加载状态
+            var originalHTML = button.innerHTML;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            button.disabled = true;
+            
+            // 发送请求
+            fetch('/teachers/api/payments/' + paymentId + '/mark-as-paid/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.status === 'success') {
+                    alert('操作成功');
+                    location.reload();
+                } else {
+                    alert('操作失败: ' + data.message);
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                }
+            })
+            .catch(function(error) {
+                console.error('标记付款失败:', error);
+                alert('操作失败，请重试');
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            });
+        }
+    }
+    
+    // 定期刷新统计数据
+    function refreshStats() {
+        fetch('/teachers/api/payments/stats/')
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.status === 'success') {
+                    var stats = data.stats;
+                    
+                    // 更新统计卡片
+                    document.getElementById('month-income').textContent = stats.month_income;
+                    document.getElementById('year-income').textContent = stats.year_income;
+                    document.getElementById('pending-amount').textContent = stats.total_pending;
+                    document.getElementById('payment-rate').textContent = stats.paid_percentage.toFixed(1);
+                    document.getElementById('paid-students').textContent = stats.paid_students;
+                    document.getElementById('total-students').textContent = stats.total_students;
+                }
+            })
+            .catch(function(error) {
+                console.error('刷新统计数据失败:', error);
+            });
+    }
+    
+    // 每5分钟刷新一次统计数据
+    setInterval(refreshStats, 300000);
+    
+    // 输出调试信息
+    console.log('分类数据原始字符串:', '{{ debug_category_json|escapejs }}');
+    console.log('分类数据Python对象:', '{{ debug_categories|escapejs }}');
+</script>
+{% endblock %} 

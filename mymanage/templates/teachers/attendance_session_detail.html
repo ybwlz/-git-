@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考勤会话详情 - 苗韵琴行管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --text-color: #333;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+            color: var(--text-color);
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar h5 {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .badge-pill {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            {% if teacher.avatar %}
+                <img src="{{ teacher.avatar.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ teacher.name|default:"苗韵琴行" }}</h5>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:dashboard' %}">
+                    <i class="fas fa-home"></i> 控制面板
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:students' %}">
+                    <i class="fas fa-users"></i> 学生管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:piano_arrangement' %}">
+                    <i class="fas fa-guitar"></i> 练琴安排
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'teachers:attendance' %}">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:sheet_music' %}">
+                    <i class="fas fa-music"></i> 曲谱管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:finance' %}">
+                    <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'teachers:dashboard' %}">控制面板</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'teachers:attendance' %}">考勤记录</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">考勤详情</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-0">{{ session.course.name }} 考勤详情</h2>
+                    <p class="text-muted">{{ session.start_time|date:"Y年m月d日 H:i" }}</p>
+                </div>
+                <div>
+                    {% if session.status == 'active' %}
+                        <button class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#closeSessionModal">
+                            <i class="fas fa-times-circle me-1"></i> 结束考勤
+                        </button>
+                    {% endif %}
+                    <a href="{% url 'teachers:attendance' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> 返回列表
+                    </a>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">考勤信息</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">课程:</span>
+                                    <span class="fw-bold">{{ session.course.name }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">开始时间:</span>
+                                    <span>{{ session.start_time|date:"Y-m-d H:i" }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">结束时间:</span>
+                                    <span>{{ session.end_time|date:"Y-m-d H:i"|default:"进行中" }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">状态:</span>
+                                    <span>
+                                        {% if session.status == 'active' %}
+                                            <span class="badge bg-warning">进行中</span>
+                                        {% elif session.status == 'closed' %}
+                                            <span class="badge bg-secondary">已关闭</span>
+                                        {% else %}
+                                            <span class="badge bg-success">已完成</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">总学生数:</span>
+                                    <span>{{ total_students }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">出勤人数:</span>
+                                    <span>{{ attendance_count }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">出勤率:</span>
+                                    <div>
+                                        {% if total_students > 0 %}
+                                            <div class="progress" style="height: 6px; width: 80px; display: inline-block; vertical-align: middle;">
+                                                {% if attendance_rate >= 80 %}
+                                                    <div class="progress-bar bg-success" style="width: {{ attendance_rate }}%"></div>
+                                                {% elif attendance_rate >= 60 %}
+                                                    <div class="progress-bar bg-warning" style="width: {{ attendance_rate }}%"></div>
+                                                {% else %}
+                                                    <div class="progress-bar bg-danger" style="width: {{ attendance_rate }}%"></div>
+                                                {% endif %}
+                                            </div>
+                                            <span class="ms-2">{{ attendance_rate }}%</span>
+                                        {% else %}
+                                            <span>无数据</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">已签到学生 ({{ attendance_count }})</h5>
+                            <div>
+                                {% if session.status == 'active' %}
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#manualCheckInModal">
+                                        <i class="fas fa-user-plus me-1"></i> 手动签到
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>学生</th>
+                                            <th>签到时间</th>
+                                            <th>签退时间</th>
+                                            <th>时长</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for record in records %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if record.student.avatar %}
+                                                            <img src="{{ record.student.avatar.url }}" alt="{{ record.student.name }}" class="avatar me-2">
+                                                        {% else %}
+                                                            <div class="avatar me-2 bg-light d-flex align-items-center justify-content-center">
+                                                                <i class="fas fa-user text-muted"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                        <div>
+                                                            <div class="fw-bold">{{ record.student.name }}</div>
+                                                            <small class="text-muted">{{ record.student.phone_number }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ record.check_in_time|date:"H:i:s" }}</td>
+                                                <td>
+                                                    {% if record.check_out_time %}
+                                                        {{ record.check_out_time|date:"H:i:s" }}
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if record.duration_minutes %}
+                                                        {{ record.duration_minutes|floatformat:"0" }} 分钟
+                                                    {% else %}
+                                                        <span class="text-muted">进行中</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if record.status == 'checked_in' %}
+                                                        <span class="badge bg-success">已签到</span>
+                                                    {% elif record.status == 'checked_out' %}
+                                                        <span class="badge bg-info">已签退</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">{{ record.status }}</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if session.status == 'active' and record.status == 'checked_in' %}
+                                                        <button class="btn btn-sm btn-outline-danger checkout-btn" data-record-id="{{ record.id }}">
+                                                            签退
+                                                        </button>
+                                                    {% else %}
+                                                        <a href="{% url 'teachers:student_detail' record.student.id %}" class="btn btn-sm btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="6" class="text-center py-3">
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-users-slash fa-2x mb-2"></i>
+                                                        <p>尚无学生签到</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if absent_students.exists %}
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">未签到学生 ({{ absent_students.count }})</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>学生</th>
+                                            <th>联系方式</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for student in absent_students %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if student.avatar %}
+                                                            <img src="{{ student.avatar.url }}" alt="{{ student.name }}" class="avatar me-2">
+                                                        {% else %}
+                                                            <div class="avatar me-2 bg-light d-flex align-items-center justify-content-center">
+                                                                <i class="fas fa-user text-muted"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                        <div class="fw-bold">{{ student.name }}</div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ student.phone_number }}</td>
+                                                <td>
+                                                    {% if session.status == 'active' %}
+                                                        <button class="btn btn-sm btn-outline-success manual-checkin-btn" data-student-id="{{ student.id }}" data-student-name="{{ student.name }}">
+                                                            手动签到
+                                                        </button>
+                                                    {% else %}
+                                                        <a href="{% url 'teachers:student_detail' student.id %}" class="btn btn-sm btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 结束考勤会话模态框 -->
+    <div class="modal fade" id="closeSessionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">结束考勤会话</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要结束当前考勤会话吗？结束后所有未签退的学生将自动签退。</p>
+                    <p class="text-danger"><strong>注意:</strong> 此操作不可撤销！</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button id="closeSessionBtn" type="button" class="btn btn-warning">结束考勤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 手动签到模态框 -->
+    <div class="modal fade" id="manualCheckInModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">手动签到</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="manualCheckInForm">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">选择学生</label>
+                            <select id="student_id" name="student_id" class="form-select" required>
+                                <option value="">请选择学生</option>
+                                {% for student in absent_students %}
+                                    <option value="{{ student.id }}">{{ student.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">签到备注</label>
+                            <textarea name="note" class="form-control" rows="2" placeholder="可选"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-success">确认签到</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script>
+    /* 如果layer.js加载失败，创建一个简易版的layer对象 */
+    if (typeof layer === 'undefined') {
+        window.layer = {
+            msg: function(content, options, end) {
+                alert(content);
+                if (typeof end === 'function') end();
+            },
+            closeAll: function() {},
+            confirm: function(content, options, yes, cancel) {
+                if (window.confirm(content) && typeof yes === 'function') yes();
+                else if (typeof cancel === 'function') cancel();
+            }
+        };
+    }
+    </script>
+    <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // CSRF Token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        // 手动签到按钮
+        const manualCheckinBtns = document.querySelectorAll('.manual-checkin-btn');
+        manualCheckinBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const studentId = this.getAttribute('data-student-id');
+                const studentName = this.getAttribute('data-student-name');
+                // 预填充选择框
+                const studentSelect = document.getElementById('student_id');
+                if (studentSelect) {
+                    studentSelect.value = studentId;
+                }
+                // 显示模态框
+                const modal = new bootstrap.Modal(document.getElementById('manualCheckInModal'));
+                modal.show();
+            });
+        });
+        
+        // 手动签到表单提交
+        const manualCheckInForm = document.getElementById('manualCheckInForm');
+        if (manualCheckInForm) {
+            manualCheckInForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                formData.append('session_id', '{{ session.id }}');
+                
+                layer.msg('处理中，请稍候...', {icon: 16, time: 0});
+                
+                fetch('/teachers/attendance/checkin/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    layer.closeAll();
+                    if (data.success) {
+                        layer.msg('签到成功', {icon: 1, time: 1500}, function() {
+                            window.location.reload();
+                        });
+                    } else {
+                        layer.msg('签到失败: ' + data.message, {icon: 2});
+                    }
+                })
+                .catch(error => {
+                    layer.closeAll();
+                    layer.msg('操作失败，请重试', {icon: 2});
+                    console.error('错误:', error);
+                });
+            });
+        }
+        
+        // 签退按钮
+        const checkoutBtns = document.querySelectorAll('.checkout-btn');
+        checkoutBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const recordId = this.getAttribute('data-record-id');
+                
+                layer.confirm('确定要为该学生签退吗？', {
+                    btn: ['确定', '取消']
+                }, function() {
+                    layer.msg('处理中，请稍候...', {icon: 16, time: 0});
+                    
+                    fetch('/teachers/attendance/checkout/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            record_id: recordId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        layer.closeAll();
+                        if (data.success) {
+                            layer.msg('签退成功', {icon: 1, time: 1500}, function() {
+                                window.location.reload();
+                            });
+                        } else {
+                            layer.msg('签退失败: ' + data.message, {icon: 2});
+                        }
+                    })
+                    .catch(error => {
+                        layer.closeAll();
+                        layer.msg('操作失败，请重试', {icon: 2});
+                        console.error('错误:', error);
+                    });
+                });
+            });
+        });
+        
+        // 结束考勤会话
+        const closeSessionBtn = document.getElementById('closeSessionBtn');
+        if (closeSessionBtn) {
+            closeSessionBtn.addEventListener('click', function() {
+                layer.msg('处理中，请稍候...', {icon: 16, time: 0});
+                
+                fetch('/teachers/attendance/end-session/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        session_id: '{{ session.id }}'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    layer.closeAll();
+                    if (data.success) {
+                        layer.msg('考勤会话已结束', {icon: 1, time: 1500}, function() {
+                            window.location.href = '{% url "teachers:attendance" %}';
+                        });
+                    } else {
+                        layer.msg('操作失败: ' + data.message, {icon: 2});
+                    }
+                })
+                .catch(error => {
+                    layer.closeAll();
+                    layer.msg('操作失败，请重试', {icon: 2});
+                    console.error('错误:', error);
+                });
+            });
+        }
+    });
+    </script>
+</body>
+</html> 

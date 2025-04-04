@@ -85,7 +85,7 @@ class Course(models.Model):
 
 
 class CourseSchedule(models.Model):
-    """课程安排模型"""
+    """课程时间表模型（用于排课）"""
     WEEKDAY_CHOICES = [
         (0, '周一'),
         (1, '周二'),
@@ -96,29 +96,56 @@ class CourseSchedule(models.Model):
         (6, '周日'),
     ]
     
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='schedules')
-    weekday = models.IntegerField('星期几', choices=WEEKDAY_CHOICES)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='schedules', verbose_name='课程')
+    weekday = models.IntegerField('星期', choices=WEEKDAY_CHOICES)
     start_time = models.TimeField('开始时间')
     end_time = models.TimeField('结束时间')
+    location = models.CharField('地点', max_length=100, blank=True)
     is_active = models.BooleanField('是否有效', default=True)
-    is_temporary = models.BooleanField('是否临时', default=False)
+    is_temporary = models.BooleanField('临时排课', default=False)
     
     class Meta:
-        verbose_name = '课程安排'
-        verbose_name_plural = '课程安排'
+        verbose_name = '课程时间表'
+        verbose_name_plural = '课程时间表'
         ordering = ['weekday', 'start_time']
-        unique_together = ['course', 'weekday', 'start_time']
+        # 确保同一个课程在同一星期几没有时间冲突的排课
+        constraints = [
+            models.UniqueConstraint(
+                fields=['course', 'weekday', 'start_time'], 
+                name='unique_course_schedule'
+            )
+        ]
     
     def __str__(self):
         return f"{self.course.name} - {self.get_weekday_display()} {self.start_time.strftime('%H:%M')}-{self.end_time.strftime('%H:%M')}"
     
     def clean(self):
-        """验证结束时间在开始时间之后"""
-        if self.start_time and self.end_time and self.start_time >= self.end_time:
-            raise ValidationError('结束时间必须在开始时间之后')
+        """验证数据的有效性"""
+        # 如果是临时排课，跳过时间验证
+        if self.is_temporary:
+            return
+            
+        # 只对正式排课进行时间验证
+        if self.end_time <= self.start_time:
+            raise ValidationError({
+                'end_time': '结束时间必须在开始时间之后'
+            })
+        
+        # 检查同一时段是否有其他排课（忽略当前实例）
+        overlapping = CourseSchedule.objects.filter(
+            weekday=self.weekday,
+            is_active=True
+        ).exclude(pk=self.pk or 0)
+        
+        # 检查与其他课程的时间重叠
+        for schedule in overlapping:
+            if (self.start_time < schedule.end_time and self.end_time > schedule.start_time):
+                raise ValidationError(f'与 {schedule} 的时间有冲突')
     
     def save(self, *args, **kwargs):
-        self.clean()
+        # 对于临时排课，不执行时间验证
+        if not self.is_temporary:
+            self.clean()
         super().save(*args, **kwargs)
 
 

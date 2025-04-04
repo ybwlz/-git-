@@ -1,0 +1,122 @@
+{% extends "teachers/teacher_base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | 苗韵琴行管理系统{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ title }}</h5>
+                        <div>
+                            <a href="{% url 'finance:payment_list' %}" class="btn btn-sm btn-secondary me-2">
+                                <i class="fas fa-arrow-left"></i> 返回付款列表
+                            </a>
+                            <a href="{% url 'teachers:finance' %}" class="btn btn-sm btn-info">
+                                <i class="fas fa-chart-bar"></i> 返回财务概览
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- 添加隐藏字段记录来源页面 -->
+                        {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.student.id_for_label }}" class="form-control-label">{{ form.student.label }}</label>
+                                    {{ form.student }}
+                                    {% if form.student.errors %}
+                                    <div class="text-danger">{{ form.student.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.category.id_for_label }}" class="form-control-label">{{ form.category.label }}</label>
+                                    {{ form.category }}
+                                    {% if form.category.errors %}
+                                    <div class="text-danger">{{ form.category.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.amount.id_for_label }}" class="form-control-label">{{ form.amount.label }}</label>
+                                    {{ form.amount }}
+                                    {% if form.amount.errors %}
+                                    <div class="text-danger">{{ form.amount.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.status.id_for_label }}" class="form-control-label">支付状态</label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                    <div class="text-danger">{{ form.status.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.payment_date.id_for_label }}" class="form-control-label">支付日期</label>
+                                    {{ form.payment_date }}
+                                    {% if form.payment_date.errors %}
+                                    <div class="text-danger">{{ form.payment_date.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">如标记为已支付但未设置日期，将自动使用今天日期</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-control-label">备注</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                            <div class="text-danger">{{ form.notes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-primary">保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 当状态变为已支付时自动填充今日日期
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('{{ form.status.id_for_label }}');
+        const dateInput = document.getElementById('{{ form.payment_date.id_for_label }}');
+        
+        statusSelect.addEventListener('change', function() {
+            if (this.value === 'paid' && !dateInput.value) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.value = today;
+            }
+        });
+    });
+</script>
+{% endblock %} 

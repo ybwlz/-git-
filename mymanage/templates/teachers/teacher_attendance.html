@@ -428,6 +428,9 @@
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">考勤二维码</h5>
                             <div class="btn-group">
+                                <button id="manualAttendanceBtn" class="btn btn-sm btn-success me-2">
+                                    <i class="fas fa-user-plus me-1"></i>手动添加考勤
+                                </button>
                                 <button id="refreshQRCodeBtn" class="btn btn-sm btn-primary">
                                     <i class="fas fa-sync-alt me-1"></i>生成考勤码
                                 </button>
@@ -540,12 +543,6 @@
                                         <span class="fw-bold">{{ monthly_practice_time|floatformat:1 }}小时</span>
                                     </div>
                                 </div>
-                                
-                                <div class="mt-4 text-center">
-                                    <a href="{% url 'teachers:attendance_stats' %}" class="btn btn-sm btn-outline-primary">
-                                        查看详细统计 <i class="fas fa-arrow-right ms-1"></i>
-                                    </a>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -555,11 +552,6 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">近期考勤记录</h5>
-                    <div class="btn-group">
-                        <a href="{% url 'teachers:attendance_stats' %}" class="btn btn-sm btn-outline-primary">
-                            详细统计
-                        </a>
-                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -610,9 +602,9 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <a href="{% url 'teachers:session_detail' record.id %}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
+                                            <button class="btn btn-sm btn-success manual-attendance-btn" data-session-id="{{ record.id }}">
+                                                <i class="fas fa-user-plus"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 {% empty %}
@@ -697,6 +689,54 @@
         </div>
     </div>
     
+    <!-- 添加手动考勤模态框 -->
+    <div class="modal fade" id="manualAttendanceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">手动添加考勤</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="manualAttendanceForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">选择学生</label>
+                            <select id="student_id" name="student_id" class="form-select" required>
+                                <option value="">选择学生</option>
+                                {% for student in all_students %}
+                                    <option value="{{ student.id }}">{{ student.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">选择课程</label>
+                            <select id="course_id" name="course_id" class="form-select" required>
+                                <option value="">选择课程</option>
+                                {% for course in courses %}
+                                    <option value="{{ course.id }}">{{ course.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">考勤时间</label>
+                            <input type="datetime-local" id="check_in_time" name="check_in_time" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">备注</label>
+                            <textarea id="notes" name="notes" class="form-control" rows="2"></textarea>
+                        </div>
+                        <input type="hidden" id="session_id" name="session_id" value="">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" id="submitManualAttendanceBtn" class="btn btn-primary">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- 隐藏的表单字段，用于存储当前会话ID -->
     <input type="hidden" id="currentSessionId" value="">
     
@@ -711,6 +751,8 @@
         var refreshBtn = document.getElementById('refreshQRCodeBtn');  // 刷新按钮
         var downloadBtn = document.getElementById('downloadQRCodeBtn');  // 下载按钮
         var endSessionBtn = document.getElementById('endSessionBtn');  // 结束会话按钮
+        var manualAttendanceBtn = document.getElementById('manualAttendanceBtn'); // 手动考勤按钮
+        var submitManualAttendanceBtn = document.getElementById('submitManualAttendanceBtn'); // 提交手动考勤按钮
         
         // 更新系统时间
         function updateSystemTime() {
@@ -765,88 +807,183 @@
             var csrfToken = csrfTokenElement.value;
             
             // 显示加载提示
-            alert('正在生成考勤码，请稍候...');
+            var loadingMessage = document.createElement('div');
+            loadingMessage.id = 'qrcode-loading';
+            loadingMessage.className = 'text-center py-4';
+            loadingMessage.innerHTML = `
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p>正在生成考勤码，请稍候...</p>
+            `;
             
-            // 如果没有指定课程ID，使用GET请求（使用默认课程）
-            if (!courseId) {
-                try {
-                    // 使用fetch发送GET请求，而不是直接跳转，这样可以更好地处理错误
-                    fetch('/teachers/attendance/qrcode/', {
-                        method: 'GET',
-                        credentials: 'same-origin',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('服务器返回错误: ' + response.status);
-                        }
-                        
-                        // 由于GET请求会返回重定向，直接刷新页面
-                        window.location.href = '/teachers/attendance/';
-                    })
-                    .catch(error => {
-                        console.error('请求出错:', error);
-                        alert('生成考勤码失败: ' + error.message);
-                    });
-                } catch (e) {
-                    console.error('执行GET请求时出错:', e);
-                    // 如果fetch失败，尝试直接跳转
-                    window.location.href = '/teachers/attendance/';
+            // 获取二维码容器
+            var qrCodeContainer = document.querySelector('.card-body .text-center');
+            if (qrCodeContainer) {
+                // 保存原始内容用于出错时恢复
+                var originalContent = qrCodeContainer.innerHTML;
+                qrCodeContainer.innerHTML = '';
+                qrCodeContainer.appendChild(loadingMessage);
+            }
+            
+            // 调用异步API生成二维码
+            fetch('/teachers/attendance/qrcode/ajax/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
+            })
+            .then(response => {
+                // 无论成功与否，先解析JSON响应
+                return response.json().then(data => {
+                    // 将状态码附加到数据对象上
+                    data.status = response.status;
+                    return data;
+                });
+            })
+            .then(data => {
+                if (data.success) {
+                    // 更新二维码显示区域
+                    updateQRCodeDisplay(data);
+                } else {
+                    // 弹出详细的错误信息
+                    let errorMessage = '生成考勤码失败';
+                    if (data.message) {
+                        errorMessage += ': ' + data.message;
+                    }
+                    
+                    // 时间错误的特殊处理
+                    if (data.message && data.message.includes('结束时间必须在开始时间之后')) {
+                        errorMessage = '生成考勤码失败: 系统时间设置问题，请联系管理员';
+                        console.error('时间错误详情:', data.error_details);
+                    }
+                    
+                    throw new Error(errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('生成二维码时出错:', error);
+                
+                // 恢复原始内容
+                if (qrCodeContainer && originalContent) {
+                    qrCodeContainer.innerHTML = originalContent;
+                }
+                
+                // 显示更友好的错误信息
+                alert(error.message || '生成考勤码失败，请稍后重试');
+            });
+        }
+        
+        // 更新二维码显示区域
+        function updateQRCodeDisplay(data) {
+            const qrCodeContainer = document.querySelector('.card-body .text-center');
+            if (!qrCodeContainer) return;
+            
+            // 获取二维码数据
+            const qrcode = data.qrcode;
+            const session = data.session;
+            
+            // 确保二维码URL存在
+            if (!qrcode.image_url) {
+                alert('二维码图像生成失败，请重试');
                 return;
             }
             
-            // 有指定课程ID时，使用POST请求
-            var formData = new FormData();
-            formData.append('course_id', courseId);
-            // 计算当前时间和结束时间
-            var now = new Date();
-            var end = new Date(now.getTime() + hours * 60 * 60 * 1000);
+            // 构建二维码HTML
+            const qrHtml = `
+                <div class="qr-display mb-4">
+                    <img src="${qrcode.image_url}" class="img-fluid rounded border p-2 shadow-sm" style="max-width: 280px;">
+                </div>
+                <div class="qr-info mb-4">
+                    <h6 class="mb-3">扫码签到</h6>
+                    <div class="alert alert-info">
+                        <p class="mb-1"><i class="fas fa-book me-2"></i>课程: ${qrcode.course_name}</p>
+                        <p class="mb-1"><i class="fas fa-clock me-2"></i>有效期至: ${qrcode.expires_at}</p>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-primary" id="downloadQRCodeBtn">
+                            <i class="fas fa-download me-1"></i>下载二维码
+                        </button>
+                        <a href="/teachers/attendance/session/${session.id}/" class="btn btn-outline-success ms-2">
+                            <i class="fas fa-users me-1"></i>查看签到情况
+                        </a>
+                    </div>
+                </div>
+            `;
             
-            // 格式化时间为HH:MM格式
-            var formatTime = function(date) {
-                var hours = date.getHours().toString().padStart(2, '0');
-                var minutes = date.getMinutes().toString().padStart(2, '0');
-                return hours + ':' + minutes;
-            };
+            // 更新二维码容器
+            qrCodeContainer.innerHTML = qrHtml;
             
-            formData.append('start_time', formatTime(now));
-            formData.append('end_time', formatTime(end));
-            formData.append('description', '通过考勤页面生成的二维码');
+            // 隐藏"暂无考勤码"容器
+            const noQRCodeContainer = document.getElementById('noQRCodeContainer');
+            if (noQRCodeContainer) {
+                noQRCodeContainer.classList.add('d-none');
+            }
             
-            // 发送请求
-            fetch('/teachers/attendance/qrcode/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken
-                },
-                body: formData
-            })
-            .then(function(response) {
-                if (response.redirected) {
-                    // 如果响应是重定向，直接跳转
-                    window.location.href = response.url;
-                    return null;
-                }
-                return response.json();
-            })
-            .then(function(data) {
-                if (data) {
-                    if (data.success) {
-                        alert('考勤码生成成功！页面将刷新以显示新的考勤码。');
-                        window.location.reload();
+            // 重新绑定下载按钮事件
+            const newDownloadBtn = document.getElementById('downloadQRCodeBtn');
+            if (newDownloadBtn) {
+                newDownloadBtn.addEventListener('click', function() {
+                    // 查找二维码图片
+                    var imgElement = document.querySelector('.qr-display img');
+                    if (imgElement) {
+                        var a = document.createElement('a');
+                        a.href = imgElement.src;
+                        a.download = qrcode.course_name + '_考勤码.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
                     } else {
-                        alert('错误: ' + data.message);
-                        console.error(data);
+                        alert('找不到二维码图片');
                     }
-                }
-            })
-            .catch(function(error) {
-                console.error('生成二维码时出错:', error);
-                alert('生成考勤码失败，请重试');
-            });
+                });
+            }
+            
+            // 更新会话状态表格
+            updateSessionTable(session);
+        }
+        
+        // 更新会话状态表格
+        function updateSessionTable(newSession) {
+            const tableBody = document.querySelector('.table tbody');
+            if (!tableBody) return;
+            
+            // 创建新的会话行
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${newSession.start_time.split(' ')[0]}</td>
+                <td>${newSession.course_name || "通用考勤"}</td>
+                <td>${newSession.start_time.split(' ')[1]} - ${newSession.end_time.split(' ')[1]}</td>
+                <td>0/0</td>
+                <td><small>无数据</small></td>
+                <td><span class="badge bg-warning">进行中</span></td>
+                <td>
+                    <button class="btn btn-sm btn-success manual-attendance-btn" data-session-id="${newSession.id}">
+                        <i class="fas fa-user-plus"></i>
+                    </button>
+                </td>
+            `;
+            
+            // 如果表格中有"暂无考勤记录"行，则移除它
+            const emptyRow = tableBody.querySelector('tr td[colspan="7"]');
+            if (emptyRow) {
+                tableBody.innerHTML = '';
+            }
+            
+            // 将新行添加到表格顶部
+            if (tableBody.firstChild) {
+                tableBody.insertBefore(newRow, tableBody.firstChild);
+            } else {
+                tableBody.appendChild(newRow);
+            }
+            
+            // 如果行数超过10个，移除最后一行
+            const rows = tableBody.querySelectorAll('tr');
+            if (rows.length > 10) {
+                tableBody.removeChild(rows[rows.length - 1]);
+            }
         }
         
         // 模态框中的生成按钮
@@ -923,42 +1060,89 @@
             });
         }
         
-        // 显示Django消息
-        var djangoMessages = [];
-        // 从预处理的数据中获取消息
-        var messagesContainer = document.getElementById('django-messages-data');
-        if (messagesContainer) {
-            try {
-                var rawContent = messagesContainer.textContent.trim();
-                // 检查是否有实际内容，避免解析空数组
-                if (rawContent && rawContent !== '[]' && rawContent !== '[\n]') {
-                    djangoMessages = JSON.parse(rawContent);
-                }
-            } catch (e) {
-                console.error('解析Django消息时出错:', e);
-                // 显示友好的错误消息，但不阻止其他功能
-                console.log('原始内容:', messagesContainer.textContent);
-            }
+        // 手动考勤按钮点击事件
+        if (manualAttendanceBtn) {
+            manualAttendanceBtn.addEventListener('click', function() {
+                // 设置当前时间为默认值
+                var now = new Date();
+                var datetimeStr = now.getFullYear() + '-' + 
+                                  String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                                  String(now.getDate()).padStart(2, '0') + 'T' + 
+                                  String(now.getHours()).padStart(2, '0') + ':' + 
+                                  String(now.getMinutes()).padStart(2, '0');
+                document.getElementById('check_in_time').value = datetimeStr;
+                
+                // 清除session_id，表示创建新的考勤会话
+                document.getElementById('session_id').value = '';
+                
+                // 显示模态框
+                var modal = new bootstrap.Modal(document.getElementById('manualAttendanceModal'));
+                modal.show();
+            });
         }
         
-        if (djangoMessages && djangoMessages.length > 0) {
-            for (var i = 0; i < djangoMessages.length; i++) {
-                if (djangoMessages[i] && djangoMessages[i].text) {
-                    alert(djangoMessages[i].text);
-                }
-            }
+        // 表格中的手动考勤按钮点击事件
+        var manualAttendanceBtns = document.querySelectorAll('.manual-attendance-btn');
+        manualAttendanceBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var sessionId = this.getAttribute('data-session-id');
+                document.getElementById('session_id').value = sessionId;
+                
+                // 设置当前时间为默认值
+                var now = new Date();
+                var datetimeStr = now.getFullYear() + '-' + 
+                                  String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                                  String(now.getDate()).padStart(2, '0') + 'T' + 
+                                  String(now.getHours()).padStart(2, '0') + ':' + 
+                                  String(now.getMinutes()).padStart(2, '0');
+                document.getElementById('check_in_time').value = datetimeStr;
+                
+                // 显示模态框
+                var modal = new bootstrap.Modal(document.getElementById('manualAttendanceModal'));
+                modal.show();
+            });
+        });
+        
+        // 提交手动考勤
+        if (submitManualAttendanceBtn) {
+            submitManualAttendanceBtn.addEventListener('click', function() {
+                var form = document.getElementById('manualAttendanceForm');
+                var formData = new FormData(form);
+                
+                // 获取CSRF令牌
+                var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                
+                // 发送请求
+                fetch('/teachers/attendance/manual-checkin/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        alert('考勤记录添加成功');
+                        // 关闭模态框
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('manualAttendanceModal'));
+                        modal.hide();
+                        // 刷新页面
+                        window.location.reload();
+                    } else {
+                        alert('添加失败: ' + data.message);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('添加考勤记录时出错:', error);
+                    alert('操作失败，请重试');
+                });
+            });
         }
     });
-    </script>
-    
-    <!-- 存储Django消息的隐藏元素 -->
-    <script type="text/template" id="django-messages-data">
-    [{% if messages %}{% for message in messages %}
-        {
-            "text": "{{ message|escapejs }}",
-            "tags": "{{ message.tags|escapejs }}"
-        }{% if not forloop.last %},{% endif %}
-    {% endfor %}{% endif %}]
     </script>
 </body>
 </html> 

@@ -9,6 +9,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
     <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
+    <!-- 先引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <!-- 再引入layer.js -->
+    <script src="{% static 'js/skin/default/layer.js' %}"></script>
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -420,7 +424,6 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/skin/default/layer.js' %}"></script>
     <!-- 使用json_script标签安全地传递数据到JavaScript -->
     {% if student_levels %}
         {{ student_levels|json_script:"student-levels-data" }}
@@ -542,10 +545,10 @@
         // 添加系统时间显示功能
         function updateSystemTime() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+            const timeElement = document.getElementById('currentTime');
+            if(timeElement) {
+                timeElement.textContent = now.toTimeString().substring(0, 8);
+            }
         }
         
         // 初始化并每秒更新一次

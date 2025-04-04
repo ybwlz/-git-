@@ -31,8 +31,11 @@ urlpatterns = [
     # 考勤管理
     path('attendance/', views.teacher_attendance, name='attendance'),
     path('attendance/qrcode/', views.generate_qrcode, name='generate_qrcode'),
+    path('attendance/qrcode/ajax/', views.generate_qrcode_ajax, name='generate_qrcode_ajax'),
     path('attendance/session/<int:session_id>/', views.attendance_session_detail, name='session_detail'),
-    path('attendance/stats/', views.attendance_stats, name='attendance_stats'),
+    path('attendance/manual-checkin/', views.manual_checkin, name='manual_checkin'),
+    path('attendance/checkout/', views.attendance_checkout, name='attendance_checkout'),
+    path('attendance/end-session/', views.end_session, name='end_session'),
     
     # 曲谱管理
     path('sheet-music/', views.teacher_sheet_music, name='sheet_music'),
@@ -44,4 +47,11 @@ urlpatterns = [
     # 财务管理
     path('finance/', views.teacher_finance, name='finance'),
     path('finance/payments/', views.teacher_payments, name='payments'),
+    
+    # API接口
+    path('api/students/', views.get_students_api, name='get_students_api'),
+    path('api/payment-categories/', views.get_payment_categories_api, name='get_payment_categories_api'),
+    path('api/payments/add/', views.add_payment_api, name='add_payment_api'),
+    path('api/payments/<int:payment_id>/mark-as-paid/', views.mark_payment_as_paid_api, name='mark_payment_as_paid_api'),
+    path('api/payments/stats/', views.get_payment_stats_api, name='get_payment_stats_api'),
 ]

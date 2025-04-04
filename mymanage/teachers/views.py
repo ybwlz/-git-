@@ -12,6 +12,10 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 import json
 from django.urls import reverse
+from django.db import connection
+from django.core.exceptions import ValidationError
+import logging
+import uuid as uuid_lib
 
 from mymanage.users.decorators import teacher_required
 from .models import TeacherProfile, TeacherCertificate, PrivacySetting
@@ -20,6 +24,9 @@ from mymanage.students.models import Student, PracticeRecord
 from mymanage.courses.models import Course, CourseSchedule, SheetMusic, PianoLevel, Piano
 from mymanage.attendance.models import AttendanceRecord, AttendanceSession, QRCode, WaitingQueue
 from mymanage.finance.models import Payment, PaymentCategory, Fee
+
+# 设置日志记录器
+logger = logging.getLogger(__name__)
 
 @login_required
 @teacher_required
@@ -36,9 +43,30 @@ def teacher_dashboard(request):
     
     # 获取今日考勤记录数
     today = timezone.now().date()
-    attendance_today = AttendanceRecord.objects.filter(
-        check_in_time__date=today
-    ).count()
+    today_str = today.strftime('%Y-%m-%d')
+    
+    # 使用原始SQL查询确保准确匹配日期字符串
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT COUNT(DISTINCT ar.student_id) 
+            FROM attendance_attendancerecord ar
+            JOIN attendance_attendancesession ats ON ar.session_id = ats.id
+            JOIN courses_course cc ON ats.course_id = cc.id
+            WHERE DATE(ar.check_in_time) = %s
+        """, [today_str])
+        attendance_today = cursor.fetchone()[0]
+    
+    # 使用ORM查询
+    today_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+    today_end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
+    attendance_today_orm = AttendanceRecord.objects.filter(
+        check_in_time__gte=today_start,
+        check_in_time__lte=today_end
+    ).values('student').distinct().count()
+    
+    print(f"DEBUG - 今日日期: {today}")
+    print(f"DEBUG - 实际签到学生数: {attendance_today}")
+    
     
     # 获取本月收入
     today = timezone.now()
@@ -350,6 +378,34 @@ def teacher_students(request):
     # 最近加入的5名学生
     recent_students = students.order_by('-created_at')[:5]
     
+    # 检查会话是否包含学生更新消息，如果有，将其转换为消息并清除会话变量
+    student_updated = request.session.pop('student_updated', None)
+    if student_updated:
+        messages.success(request, f'学生"{student_updated["name"]}"信息已更新')
+    
+    # 获取今日开始时间
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # 计算平均出勤率
+    # 获取所有课程的学生总人数
+    enrolled_students = Student.objects.filter(courses__teacher=teacher).distinct().count()
+    
+    # 获取有出勤记录的学生数量
+    attended_students = AttendanceRecord.objects.filter(
+        session__course__teacher=teacher
+    ).values('student').distinct().count()
+    
+    # 计算出勤率，避免除以零错误
+    attendance_rate = 0
+    if enrolled_students > 0:
+        attendance_rate = (attended_students / enrolled_students) * 100
+    
+    # 获取今日练琴人数
+    today_attendance = AttendanceRecord.objects.filter(
+        check_in_time__gte=today_start,
+        session__course__teacher=teacher
+    ).values('student').distinct().count()
+    
     context = {
         'teacher': teacher,  # 添加教师信息到上下文
         'students': students,
@@ -359,6 +415,8 @@ def teacher_students(request):
         'recent_students': recent_students,
         'search_query': search_query,
         'unread_notifications_count': 0,  # 为模板提供默认值
+        'attendance_rate': attendance_rate,  # 添加真实的平均出勤率
+        'today_attendance': today_attendance  # 添加真实的今日练琴人数
     }
     
     return render(request, 'teachers/teacher_students.html', context)
@@ -467,7 +525,13 @@ def edit_student(request, student_id):
             student.target_level = int(target_level)
             
         student.save()
-        messages.success(request, f'学生"{student.name}"信息已更新')
+        
+        # 使用会话变量而不是消息框架保存学生信息更新的消息
+        # 这样消息只会在学生管理页面显示，不会影响考勤记录界面
+        request.session['student_updated'] = {
+            'name': student.name,
+            'timestamp': str(timezone.now())
+        }
         
         # AJAX请求返回JSON响应
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -580,16 +644,50 @@ def teacher_attendance(request):
         status='active'
     ).order_by('-start_time')
     
-    # 获取最近的考勤会话
-    recent_sessions = AttendanceSession.objects.filter(
+    # 获取最近的考勤会话，确保活跃会话显示在前面
+    all_recent_sessions = AttendanceSession.objects.filter(
         course__teacher=teacher
-    ).order_by('-start_time')[:10]
+    ).order_by('-start_time')
+
+    # 先获取活跃会话，然后获取非活跃的最近会话，合并为一个列表
+    active_recent = list(all_recent_sessions.filter(status='active'))
+    closed_recent = list(all_recent_sessions.filter(status='closed'))[:10-len(active_recent)]
+    recent_sessions = active_recent + closed_recent
+    
+    # 确保不超过10条记录
+    if len(recent_sessions) > 10:
+        recent_sessions = recent_sessions[:10]
+    
+    # 为每个会话计算实际出勤人数和总学生数
+    for session in recent_sessions:
+        if session.course:
+            session.total_students = session.course.students.count()
+            session.attendance_count = AttendanceRecord.objects.filter(session=session).count()
+        else:
+            session.total_students = 0
+            session.attendance_count = 0
     
     # 检查URL中是否有qrcode参数
     qrcode_uuid = request.GET.get('qrcode')
+    session_id = request.GET.get('session_id')
     qrcode_to_display = None
     
-    if qrcode_uuid:
+    # 如果有会话ID，确保它在最近会话列表中的第一位
+    if session_id:
+        try:
+            session = AttendanceSession.objects.get(id=session_id, course__teacher=teacher)
+            # 如果在近期会话列表中找到该会话，将其移到列表首位
+            if session in recent_sessions:
+                recent_sessions.remove(session)
+            recent_sessions.insert(0, session)
+            
+            # 如果该会话有关联的二维码，显示它
+            if hasattr(session, 'qrcode') and session.qrcode:
+                qrcode_to_display = session.qrcode
+        except AttendanceSession.DoesNotExist:
+            pass
+    
+    if qrcode_uuid and not qrcode_to_display:
         try:
             qrcode_to_display = QRCode.objects.get(code=qrcode_uuid)
         except QRCode.DoesNotExist:
@@ -600,90 +698,6 @@ def teacher_attendance(request):
         active_session = active_sessions.first()
         if hasattr(active_session, 'qrcode') and active_session.qrcode:
             qrcode_to_display = active_session.qrcode
-    
-    # 如果没有活跃二维码，则自动生成一个
-    if not qrcode_to_display:
-        try:
-            # 先获取或创建一个有效的钢琴级别
-            try:
-                # 尝试获取第一个现有级别
-                piano_level = PianoLevel.objects.first()
-                if not piano_level:
-                    # 如果没有钢琴级别，先创建一个默认级别
-                    piano_level = PianoLevel.objects.create(
-                        level=1,
-                        description="初级"
-                    )
-            except Exception as e:
-                # 如果获取级别失败，创建一个新级别
-                piano_level = PianoLevel.objects.create(
-                    level=1,
-                    description="初级"
-                )
-            
-            # 检查是否已存在默认课程
-            default_course = Course.objects.filter(
-                code="DEFAULT",
-                teacher=teacher
-            ).first()
-            
-            if default_course:
-                course = default_course
-            else:
-                # 创建新的默认课程
-                course = Course.objects.create(
-                    name="通用考勤",
-                    code="DEFAULT",
-                    teacher=teacher,
-                    description='自动生成的通用考勤课程',
-                    level=piano_level  # 确保提供有效的级别
-                )
-            
-            # 创建二维码，有效期24小时
-            expires_at = current_time + timezone.timedelta(hours=24)
-            import uuid
-            qrcode_uuid = str(uuid.uuid4())
-            qrcode_to_display = QRCode.objects.create(
-                course=course,
-                uuid=uuid.UUID(qrcode_uuid),
-                code=qrcode_uuid,
-                expires_at=expires_at
-            )
-            
-            # 创建考勤会话
-            weekday = current_time.weekday()
-            schedule, created = CourseSchedule.objects.get_or_create(
-                course=course,
-                weekday=weekday,
-                defaults={
-                    'start_time': current_time.time(),
-                    'end_time': expires_at.time(),
-                    'is_temporary': True
-                }
-            )
-            
-            # 创建考勤会话
-            session = AttendanceSession.objects.create(
-                course=course,
-                schedule=schedule,
-                qrcode=qrcode_to_display,
-                created_by=request.user,
-                start_time=current_time,
-                end_time=expires_at,
-                description=f"自动生成的考勤 - {current_time.strftime('%Y-%m-%d %H:%M')}",
-                status='active'
-            )
-            
-            # 刷新活跃会话列表
-            active_sessions = AttendanceSession.objects.filter(
-                course__teacher=teacher,
-                status='active'
-            ).order_by('-start_time')
-            
-        except Exception as e:
-            import traceback
-            error_traceback = traceback.format_exc()
-            messages.error(request, f"自动生成考勤码时出错: {str(e)}\n{error_traceback}")
     
     # 统计今日出勤率
     today_sessions = AttendanceSession.objects.filter(
@@ -774,11 +788,36 @@ def teacher_attendance(request):
     # 获取总学生数
     total_students = Student.objects.filter(courses__teacher=teacher).distinct().count()
     
+    # 获取所有学生（用于手动添加考勤）
+    all_students = Student.objects.filter(courses__teacher=teacher).distinct().order_by('name')
+    
     # 今日考勤人数
-    attendance_today = AttendanceRecord.objects.filter(
-        session__course__teacher=teacher,
-        check_in_time__date=current_time.date()
-    ).count()
+    today = current_time.date()
+    today_str = today.strftime('%Y-%m-%d')
+    
+    # 使用原始SQL查询确保准确匹配日期字符串
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT COUNT(DISTINCT ar.student_id) 
+            FROM attendance_attendancerecord ar
+            JOIN attendance_attendancesession ats ON ar.session_id = ats.id
+            JOIN courses_course cc ON ats.course_id = cc.id
+            WHERE DATE(ar.check_in_time) = %s
+        """, [today_str])
+        attendance_today = cursor.fetchone()[0]
+    
+    # 使用ORM查询
+    attendance_today_orm = AttendanceRecord.objects.filter(
+        check_in_time__gte=today_start,
+        check_in_time__lte=today_end
+    ).values('student').distinct().count()
+    
+    print(f"DEBUG - 今日日期: {today}")
+    print(f"DEBUG - SQL查询结果: {attendance_today}")
+    print(f"DEBUG - ORM查询结果: {attendance_today_orm}")
+    
+    # 使用SQL查询结果
+    attendance_today = attendance_today
     
     context = {
         'teacher': teacher,
@@ -796,7 +835,8 @@ def teacher_attendance(request):
         'courses': courses,
         'total_students': total_students,
         'attendance_today': attendance_today,
-        'qrcode_to_display': qrcode_to_display
+        'qrcode_to_display': qrcode_to_display,
+        'all_students': all_students  # 添加所有学生到上下文
     }
     
     return render(request, 'teachers/teacher_attendance.html', context)
@@ -873,7 +913,8 @@ def generate_qrcode(request):
             
             # 重定向到考勤页面，并显示二维码
             messages.success(request, '考勤二维码已生成')
-            return redirect(f'/teachers/attendance/?qrcode={qrcode_uuid}')
+            return redirect(f'/teachers/attendance/?qrcode={qrcode_uuid}&session_id={session.id}')
+            
             
         except Exception as e:
             messages.error(request, f'生成二维码时发生错误：{str(e)}')
@@ -960,7 +1001,7 @@ def generate_qrcode(request):
         
         # 重定向到考勤页面，并显示二维码
         messages.success(request, '考勤二维码已生成')
-        return redirect(f'/teachers/attendance/?qrcode={qrcode_uuid}')
+        return redirect(f'/teachers/attendance/?qrcode={qrcode_uuid}&session_id={session.id}')
     
     return redirect('teachers:attendance')
 
@@ -1107,6 +1148,9 @@ def sheet_music_detail(request, sheet_id):
 @teacher_required
 def add_sheet_music(request):
     """添加曲谱"""
+    # 获取所有钢琴等级
+    levels = PianoLevel.objects.all()
+    
     if request.method == 'POST':
         title = request.POST.get('title')
         composer = request.POST.get('composer')
@@ -1125,6 +1169,11 @@ def add_sheet_music(request):
             is_public=request.POST.get('is_public') == 'on'
         )
         
+        # 添加其他字段
+        sheet.difficulty = request.POST.get('difficulty', '中级')
+        sheet.style = request.POST.get('style', '古典')
+        sheet.period = request.POST.get('period', '古典主义')
+        
         if 'cover_image' in request.FILES:
             sheet.cover_image = request.FILES['cover_image']
         
@@ -1132,7 +1181,9 @@ def add_sheet_music(request):
         messages.success(request, '曲谱添加成功')
         return redirect('teachers:sheet_music')
     
-    return render(request, 'teachers/add_sheet_music.html')
+    return render(request, 'teachers/add_sheet_music.html', {
+        'levels': levels
+    })
 
 
 @login_required
@@ -1141,12 +1192,20 @@ def edit_sheet_music(request, sheet_id):
     """编辑曲谱"""
     sheet = get_object_or_404(SheetMusic, id=sheet_id, uploaded_by=request.user)
     
+    # 获取所有钢琴等级
+    levels = PianoLevel.objects.all()
+    
     if request.method == 'POST':
         sheet.title = request.POST.get('title')
         sheet.composer = request.POST.get('composer')
         sheet.level_id = request.POST.get('level')
         sheet.description = request.POST.get('description')
         sheet.is_public = request.POST.get('is_public') == 'on'
+        
+        # 更新其他字段
+        sheet.difficulty = request.POST.get('difficulty', '中级')
+        sheet.style = request.POST.get('style', '古典')
+        sheet.period = request.POST.get('period', '古典主义')
         
         if 'file' in request.FILES:
             sheet.file = request.FILES['file']
@@ -1158,7 +1217,10 @@ def edit_sheet_music(request, sheet_id):
         messages.success(request, '曲谱更新成功')
         return redirect('teachers:sheet_music_detail', sheet_id=sheet.id)
     
-    return render(request, 'teachers/edit_sheet_music.html', {'sheet': sheet})
+    return render(request, 'teachers/edit_sheet_music.html', {
+        'sheet': sheet,
+        'levels': levels
+    })
 
 
 @login_required
@@ -1181,150 +1243,177 @@ def teacher_finance(request):
     """财务管理"""
     teacher = request.user.teacher_profile
     
-    # 获取时间段参数
-    period = request.GET.get('period', 'month')
-    
     # 获取当前日期
     today = timezone.now().date()
+    current_month = today.month
+    current_year = today.year
+    
+    # 计算本月和上月的起止日期
+    first_day_of_month = today.replace(day=1)
+    last_month = (first_day_of_month - timezone.timedelta(days=1)).replace(day=1)
     
     # 获取本月收入
-    first_day_of_month = today.replace(day=1)
-    month_income = Payment.objects.filter(
+    month_payments = Payment.objects.filter(
         student__courses__teacher=teacher,
         status='paid',
-        created_at__gte=first_day_of_month,
-        created_at__lte=today
+        payment_date__year=current_year,
+        payment_date__month=current_month
+    )
+    month_income = month_payments.aggregate(total=Sum('amount'))['total'] or 0
+    
+    # 获取上月收入（比较数据）
+    last_month_income = Payment.objects.filter(
+        student__courses__teacher=teacher,
+        status='paid',
+        payment_date__year=last_month.year,
+        payment_date__month=last_month.month
     ).aggregate(total=Sum('amount'))['total'] or 0
     
+    # 计算同比变化
+    month_change_percentage = 0
+    if last_month_income > 0:
+        month_change_percentage = ((month_income - last_month_income) / last_month_income) * 100
+    
     # 获取年度收入
-    first_day_of_year = today.replace(month=1, day=1)
     year_income = Payment.objects.filter(
         student__courses__teacher=teacher,
         status='paid',
-        created_at__gte=first_day_of_year,
-        created_at__lte=today
+        payment_date__year=current_year
     ).aggregate(total=Sum('amount'))['total'] or 0
     
     # 获取待收款项
     pending_payments = Payment.objects.filter(
         student__courses__teacher=teacher,
         status='pending'
-    ).aggregate(total=Sum('amount'))['total'] or 0
+    )
+    total_pending = pending_payments.aggregate(total=Sum('amount'))['total'] or 0
     
-    # 获取逾期金额
-    overdue_payments = Payment.objects.filter(
-        student__courses__teacher=teacher,
-        status='overdue'
-    ).aggregate(total=Sum('amount'))['total'] or 0
-    
-    # 获取近期交易记录
+    # 获取最近10条付款记录
     recent_payments = Payment.objects.filter(
         student__courses__teacher=teacher
     ).order_by('-created_at')[:10]
     
-    # 准备图表数据
-    chart_labels = []
-    income_data = []
-    
-    if period == 'month':
-        # 当月收入统计（按天）
-        days_in_month = (today.replace(month=today.month % 12 + 1, day=1) - timezone.timedelta(days=1)).day
-        for day in range(1, days_in_month + 1):
-            date = today.replace(day=day)
-            chart_labels.append(f"{day}日")
-            
-            daily_income = Payment.objects.filter(
-                student__courses__teacher=teacher,
-                status='paid',
-                created_at__date=date
-            ).aggregate(total=Sum('amount'))['total'] or 0
-            
-            income_data.append(daily_income)
-            
-        selected_period = "当月"
-    elif period == 'quarter':
-        # 本季度收入统计（按周）
-        quarter_start_month = ((today.month - 1) // 3) * 3 + 1
-        quarter_start = today.replace(month=quarter_start_month, day=1)
-        
-        # 按周统计
-        current_date = quarter_start
-        week_number = 1
-        
-        while current_date <= today:
-            week_end = min(current_date + timezone.timedelta(days=6), today)
-            chart_labels.append(f"第{week_number}周")
-            
-            weekly_income = Payment.objects.filter(
-                student__courses__teacher=teacher,
-                status='paid',
-                created_at__date__gte=current_date,
-                created_at__date__lte=week_end
-            ).aggregate(total=Sum('amount'))['total'] or 0
-            
-            income_data.append(weekly_income)
-            
-            current_date = week_end + timezone.timedelta(days=1)
-            week_number += 1
-            
-        selected_period = "本季度"
-    else:  # year
-        # 本年收入统计（按月）
-        for month in range(1, 13):
-            month_start = today.replace(month=month, day=1)
-            if month == 12:
-                month_end = month_start.replace(year=month_start.year + 1, month=1, day=1) - timezone.timedelta(days=1)
-            else:
-                month_end = month_start.replace(month=month + 1, day=1) - timezone.timedelta(days=1)
-                
-            # 如果是未来月份，则跳过
-            if month_start > today:
-                continue
-                
-            chart_labels.append(f"{month}月")
-            
-            monthly_income = Payment.objects.filter(
-                student__courses__teacher=teacher,
-                status='paid',
-                created_at__date__gte=month_start,
-                created_at__date__lte=min(month_end, today)
-            ).aggregate(total=Sum('amount'))['total'] or 0
-            
-            income_data.append(monthly_income)
-            
-        selected_period = "本年"
-    
-    # 收入分类饼图数据
+    # 按类别统计收入数据（饼图）
     categories = PaymentCategory.objects.all()
-    category_labels = []
     category_data = []
     
+    # 生成分类数据（仅使用实际数据）
     for category in categories:
         category_total = Payment.objects.filter(
             student__courses__teacher=teacher,
             status='paid',
             category=category,
-            created_at__gte=first_day_of_year,
-            created_at__lte=today
+            payment_date__year=current_year
         ).aggregate(total=Sum('amount'))['total'] or 0
         
-        if category_total > 0:
-            category_labels.append(category.name)
-            category_data.append(category_total)
+        # 即使金额为0也添加到分类数据中，以确保所有分类都显示
+        category_data.append({
+            'name': category.name,
+            'value': float(category_total)
+        })
+    
+    # 过滤掉金额为0的分类（可选，如果希望显示所有分类可以注释掉）
+    category_data = [item for item in category_data if item['value'] > 0]
+    
+    # 确保JSON数据格式正确
+    try:
+        category_data_json = json.dumps(category_data, ensure_ascii=False)
+        print(f"DEBUG: 分类数据 JSON: {category_data_json}")
+    except Exception as e:
+        print(f"ERROR: JSON序列化分类数据失败: {e}")
+        category_data_json = '[]'  # 失败时提供默认空数组
+    
+    # 移除备用测试数据逻辑
+    # 如果没有数据，显示空图表
+    
+    # 按月统计本年度收入（折线图）
+    monthly_income_data = []
+    month_names = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+    
+    # 生成月度数据（仅使用实际数据）
+    for month in range(1, 13):
+        monthly_total = Payment.objects.filter(
+            student__courses__teacher=teacher,
+            status='paid',
+            payment_date__year=current_year,
+            payment_date__month=month
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        monthly_income_data.append({
+            'month': month_names[month-1],
+            'value': float(monthly_total)
+        })
+    
+    # 移除测试数据逻辑
+    
+    # 按支付类型统计本月收入
+    payment_by_category = []
+    for category in categories:
+        category_month_total = Payment.objects.filter(
+            student__courses__teacher=teacher,
+            status='paid',
+            category=category,
+            payment_date__year=current_year,
+            payment_date__month=current_month
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # 移除测试数据逻辑，只使用真实数据
+        if category_month_total > 0:
+            payment_by_category.append({
+                'category': category.name,
+                'amount': float(category_month_total)
+            })
+    
+    # 移除备用测试数据逻辑
+    
+    # 统计学生人数和已付款学生比例
+    total_students = Student.objects.filter(courses__teacher=teacher).distinct().count()
+    paid_students = Student.objects.filter(
+        courses__teacher=teacher,
+        payments__status='paid',
+        payments__payment_date__year=current_year,
+        payments__payment_date__month=current_month
+    ).distinct().count()
+    
+    paid_percentage = 0
+    if total_students > 0:
+        paid_percentage = (paid_students / total_students) * 100
+    
+    # 为了兼容原有模板
+    chart_labels = json.dumps([item['month'] for item in monthly_income_data])
+    income_data = json.dumps([item['value'] for item in monthly_income_data])
+    category_labels = json.dumps([item['name'] for item in category_data])
+    category_data_values = json.dumps([item['value'] for item in category_data])
     
     context = {
         'teacher': teacher,
         'month_income': month_income,
         'year_income': year_income,
+        'month_change_percentage': month_change_percentage,
+        'total_pending': total_pending,
         'pending_payments': pending_payments,
-        'overdue_payments': overdue_payments,
         'recent_payments': recent_payments,
-        'chart_labels': json.dumps(chart_labels),
-        'income_data': json.dumps(income_data),
-        'category_labels': json.dumps(category_labels),
-        'category_data': json.dumps(category_data),
-        'selected_period': selected_period,
-        'unread_notifications_count': 0,  # 为模板提供默认值
+        'category_data': category_data_json,
+        'monthly_income_data': json.dumps(monthly_income_data, ensure_ascii=False),
+        'payment_by_category': payment_by_category,
+        'total_students': total_students,
+        'paid_students': paid_students,
+        'paid_percentage': paid_percentage,
+        'current_month': month_names[current_month-1],
+        'current_year': current_year,
+        'finance_module_url': reverse('finance:payment_list'),
+        # 删除冲突的category_data字段，避免与上面的category_data_json冲突
+        'chart_labels': chart_labels,
+        'income_data': income_data,
+        'category_labels': category_labels,
+        'category_values': category_data_values,
+        'selected_period': '当月',
+        'unread_notifications_count': 0,
+        # 添加原始数据用于调试
+        'debug_categories': str(category_data),
+        'debug_category_json': category_data_json,
+        # 关闭调试模式
+        'debug_mode': False,
     }
     
     return render(request, 'teachers/teacher_finance.html', context)
@@ -1458,7 +1547,17 @@ def piano_arrangement(request):
         session__status='active'
     ).order_by('join_time')
     
+    # 统计今日签到人数
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+    checked_in_today = AttendanceRecord.objects.filter(
+        check_in_time__gte=today_start,
+        check_in_time__lt=today_end,
+        session__course__teacher=teacher
+    ).values('student').distinct().count()
+    
     print(f"等待队列学生数量: {active_waiters.count()}")
+    print(f"今日已签到学生数量: {checked_in_today}")
     for waiter in active_waiters:
         waiting_time = int((current_time - waiter.join_time).total_seconds() / 60)
         estimated_start = waiter.join_time + timedelta(minutes=waiter.estimated_wait_time)
@@ -1480,14 +1579,8 @@ def piano_arrangement(request):
         check_in_time__date=current_time.date()
     ).order_by('-check_in_time')
     
-    print(f"今日签到记录数: {today_records.count()}")
-    for record in today_records:
-        print(f"签到记录: {record.student.name} - 状态: {record.status} - 钢琴: {record.piano.number if record.piano else '无'}")
-    
-    # 计算统计信息
-    checked_in_today = AttendanceRecord.objects.filter(
-        check_in_time__date=current_time.date()
-    ).count()
+    # 已经计算了checked_in_today，不需要再次赋值为固定的2
+    # checked_in_today = 2
     
     # 钢琴使用率
     total_pianos = Piano.objects.filter(is_active=True).count()
@@ -1897,3 +1990,692 @@ def student_detail_ajax(request, student_id):
             'success': False,
             'message': f'获取学生信息失败: {str(e)}'
         })
+
+
+@login_required
+@teacher_required
+def manual_checkin(request):
+    """手动添加考勤记录"""
+    if request.method == 'POST':
+        try:
+            teacher = request.user.teacher_profile
+            student_id = request.POST.get('student_id')
+            course_id = request.POST.get('course_id')
+            check_in_time_str = request.POST.get('check_in_time')
+            notes = request.POST.get('notes', '')
+            session_id = request.POST.get('session_id', '')
+            
+            # 验证必填字段
+            if not student_id or not course_id:
+                return JsonResponse({
+                    'success': False,
+                    'message': '学生和课程为必填项'
+                }, status=400)
+            
+            # 获取学生和课程
+            student = get_object_or_404(Student, id=student_id)
+            course = get_object_or_404(Course, id=course_id, teacher=teacher)
+            
+            # 处理考勤时间
+            if check_in_time_str:
+                check_in_time = timezone.make_aware(datetime.fromisoformat(check_in_time_str))
+            else:
+                check_in_time = timezone.now()
+            
+            # 设置结束时间（24小时后）
+            check_out_time = check_in_time + timezone.timedelta(hours=24)
+            
+            # 获取或创建考勤会话
+            session = None
+            if session_id:
+                try:
+                    session = AttendanceSession.objects.get(id=session_id, course__teacher=teacher)
+                except AttendanceSession.DoesNotExist:
+                    pass
+            
+            if not session:
+                # 获取或创建课程时间表
+                weekday = check_in_time.weekday()
+                schedule, created = CourseSchedule.objects.get_or_create(
+                    course=course,
+                    weekday=weekday,
+                    defaults={
+                        'start_time': check_in_time.time(),
+                        'end_time': check_out_time.time(),
+                        'is_temporary': True
+                    }
+                )
+                
+                # 创建考勤会话
+                session = AttendanceSession.objects.create(
+                    course=course,
+                    schedule=schedule,
+                    created_by=request.user,
+                    start_time=check_in_time,
+                    end_time=check_out_time,
+                    description=f"手动添加的考勤 - {check_in_time.strftime('%Y-%m-%d %H:%M')}",
+                    status='active',
+                    is_active=True
+                )
+            
+            # 检查是否已存在相同的考勤记录
+            existing_record = AttendanceRecord.objects.filter(
+                session=session,
+                student=student
+            ).first()
+            
+            if existing_record:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'该学生已有考勤记录，创建于 {existing_record.check_in_time.strftime("%Y-%m-%d %H:%M")}'
+                }, status=400)
+            
+            # 创建考勤记录
+            record = AttendanceRecord.objects.create(
+                session=session,
+                student=student,
+                check_in_time=check_in_time,
+                status='checked_in',
+                note=notes
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'message': '考勤记录添加成功',
+                'record': {
+                    'id': record.id,
+                    'student_name': student.name,
+                    'course_name': course.name,
+                    'check_in_time': check_in_time.strftime('%Y-%m-%d %H:%M:%S')
+                }
+            })
+            
+        except Exception as e:
+            import traceback
+            error_traceback = traceback.format_exc()
+            return JsonResponse({
+                'success': False,
+                'message': f'添加考勤记录时出错: {str(e)}',
+                'traceback': error_traceback
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': '仅支持POST请求'
+    }, status=405)
+
+
+@login_required
+@teacher_required
+def attendance_checkout(request):
+    """为学生签退"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': '请求方法不正确'})
+    
+    try:
+        data = json.loads(request.body)
+        record_id = data.get('record_id')
+        
+        if not record_id:
+            return JsonResponse({'success': False, 'message': '参数不完整'})
+        
+        # 获取考勤记录
+        record = get_object_or_404(AttendanceRecord, id=record_id)
+        
+        # 验证权限
+        if record.session.course.teacher.user != request.user and not request.user.is_superuser:
+            return JsonResponse({'success': False, 'message': '没有权限执行此操作'})
+        
+        # 如果记录已经签退，返回错误
+        if record.status == 'checked_out':
+            return JsonResponse({'success': False, 'message': '该记录已经签退'})
+        
+        # 更新签退时间和状态
+        record.check_out_time = timezone.now()
+        record.status = 'checked_out'
+        
+        # 计算持续时间
+        if record.check_in_time:
+            duration = record.check_out_time - record.check_in_time
+            record.duration = duration.total_seconds() / 3600  # 转换为小时
+            record.duration_minutes = duration.total_seconds() / 60  # 转换为分钟
+        
+        record.save()
+        
+        # 更新学生的总练琴时长
+        student = record.student
+        practice_time_hours = getattr(student, 'total_practice_time', 0) or 0
+        student.total_practice_time = practice_time_hours + (record.duration or 0)
+        student.save()
+        
+        # 更新练琴记录
+        try:
+            from mymanage.courses.models import PracticeRecord
+            practice = PracticeRecord.objects.filter(
+                student=student,
+                status='active'
+            ).order_by('-start_time').first()
+            
+            if practice:
+                practice.end_time = timezone.now()
+                practice.duration = record.duration_minutes  # 使用分钟作为单位
+                practice.status = 'completed'
+                practice.save()
+        except (ImportError, Exception) as e:
+            print(f"更新练琴记录时出错: {str(e)}")
+        
+        return JsonResponse({
+            'success': True, 
+            'message': '签退成功',
+            'duration': f"{record.duration_minutes:.0f} 分钟" if record.duration_minutes else "0 分钟"
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': '请求数据格式错误'})
+    except AttendanceRecord.DoesNotExist:
+        return JsonResponse({'success': False, 'message': '考勤记录不存在'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'签退失败: {str(e)}'})
+
+
+@login_required
+@teacher_required
+def end_session(request):
+    """结束考勤会话"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': '请求方法不正确'})
+    
+    try:
+        data = json.loads(request.body)
+        session_id = data.get('session_id')
+        
+        if not session_id:
+            return JsonResponse({'success': False, 'message': '参数不完整'})
+        
+        # 获取考勤会话
+        session = get_object_or_404(AttendanceSession, id=session_id)
+        
+        # 验证权限
+        if session.created_by != request.user and not request.user.is_superuser:
+            return JsonResponse({'success': False, 'message': '没有权限执行此操作'})
+        
+        # 如果会话已经关闭，返回错误
+        if session.status != 'active':
+            return JsonResponse({'success': False, 'message': '该考勤会话已经关闭'})
+        
+        # 关闭会话
+        session.close_session()
+        
+        # 为所有未签退的学生自动签退
+        active_records = AttendanceRecord.objects.filter(session=session, status='checked_in')
+        for record in active_records:
+            record.check_out_time = timezone.now()
+            record.status = 'checked_out'
+            
+            # 计算持续时间
+            if record.check_in_time:
+                duration = record.check_out_time - record.check_in_time
+                record.duration = duration.total_seconds() / 3600  # 转换为小时
+                record.duration_minutes = duration.total_seconds() / 60  # 转换为分钟
+            
+            record.save()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': '考勤会话已结束',
+            'closed_records': active_records.count()
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': '请求数据格式错误'})
+    except AttendanceSession.DoesNotExist:
+        return JsonResponse({'success': False, 'message': '考勤会话不存在'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'操作失败: {str(e)}'})
+
+@login_required
+@teacher_required
+def get_students_api(request):
+    """获取教师的学生数据API"""
+    teacher = request.user.teacher_profile
+    students = Student.objects.filter(courses__teacher=teacher).distinct()
+    
+    # 构建学生数据
+    students_data = [{
+        'id': student.id,
+        'name': student.name,
+        'phone': student.phone
+    } for student in students]
+    
+    return JsonResponse({
+        'status': 'success',
+        'students': students_data
+    })
+
+@login_required
+@teacher_required
+def get_payment_categories_api(request):
+    """获取付款类别API"""
+    categories = PaymentCategory.objects.all()
+    
+    categories_data = [{
+        'id': category.id,
+        'name': category.name
+    } for category in categories]
+    
+    return JsonResponse({
+        'status': 'success',
+        'categories': categories_data
+    })
+
+@login_required
+@teacher_required
+def add_payment_api(request):
+    """添加付款记录API"""
+    if request.method != 'POST':
+        return JsonResponse({
+            'status': 'error',
+            'message': '仅支持POST请求'
+        }, status=405)
+    
+    try:
+        # 从请求中获取数据
+        data = json.loads(request.body)
+        student_id = data.get('student_id')
+        category_id = data.get('category_id')
+        amount = data.get('amount')
+        status = data.get('status', 'pending')
+        payment_date = data.get('payment_date')
+        notes = data.get('notes', '')
+        
+        # 验证必填字段
+        if not all([student_id, category_id, amount]):
+            return JsonResponse({
+                'status': 'error',
+                'message': '缺少必要字段'
+            }, status=400)
+        
+        # 获取相关对象
+        teacher = request.user.teacher_profile
+        
+        try:
+            student = Student.objects.get(id=student_id)
+            category = PaymentCategory.objects.get(id=category_id)
+        except (Student.DoesNotExist, PaymentCategory.DoesNotExist):
+            return JsonResponse({
+                'status': 'error',
+                'message': '学生或付款类别不存在'
+            }, status=404)
+        
+        # 验证学生是否属于当前教师
+        if not student.courses.filter(teacher=teacher).exists():
+            return JsonResponse({
+                'status': 'error',
+                'message': '您无权为此学生添加付款记录'
+            }, status=403)
+        
+        # 处理支付日期
+        if status == 'paid' and not payment_date:
+            payment_date = timezone.now().date()
+        elif payment_date:
+            try:
+                payment_date = timezone.datetime.strptime(payment_date, '%Y-%m-%d').date()
+            except ValueError:
+                payment_date = None
+        
+        # 创建支付记录
+        payment = Payment.objects.create(
+            student=student,
+            category=category,
+            amount=amount,
+            status=status,
+            payment_date=payment_date,
+            notes=notes
+        )
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': '付款记录添加成功',
+            'payment': {
+                'id': payment.id,
+                'student_name': student.name,
+                'category_name': category.name,
+                'amount': float(payment.amount),
+                'status': payment.status,
+                'payment_date': payment.payment_date.strftime('%Y-%m-%d') if payment.payment_date else None,
+                'created_at': payment.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+        })
+    
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'处理请求时出错: {str(e)}'
+        }, status=500)
+
+@login_required
+@teacher_required
+def mark_payment_as_paid_api(request, payment_id):
+    """标记付款状态为已付API"""
+    if request.method != 'POST':
+        return JsonResponse({
+            'status': 'error',
+            'message': '仅支持POST请求'
+        }, status=405)
+    
+    teacher = request.user.teacher_profile
+    
+    try:
+        # 获取支付记录
+        payment = Payment.objects.get(id=payment_id)
+        
+        # 验证学生是否属于当前教师
+        if not payment.student.courses.filter(teacher=teacher).exists():
+            return JsonResponse({
+                'status': 'error',
+                'message': '您无权修改此付款记录'
+            }, status=403)
+        
+        # 更新支付状态
+        payment.status = 'paid'
+        
+        # 如果没有支付日期，设置为当前日期
+        if not payment.payment_date:
+            payment.payment_date = timezone.now().date()
+        
+        payment.save()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': '付款状态已更新',
+            'payment': {
+                'id': payment.id,
+                'status': payment.status,
+                'payment_date': payment.payment_date.strftime('%Y-%m-%d')
+            }
+        })
+    
+    except Payment.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': '付款记录不存在'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'处理请求时出错: {str(e)}'
+        }, status=500)
+
+@login_required
+@teacher_required
+def get_payment_stats_api(request):
+    """获取付款统计数据API"""
+    teacher = request.user.teacher_profile
+    
+    # 获取当前日期
+    today = timezone.now().date()
+    current_month = today.month
+    current_year = today.year
+    
+    # 计算本月和上月的起止日期
+    first_day_of_month = today.replace(day=1)
+    last_month = (first_day_of_month - timezone.timedelta(days=1)).replace(day=1)
+    
+    # 获取本月收入
+    month_income = Payment.objects.filter(
+        student__courses__teacher=teacher,
+        status='paid',
+        payment_date__year=current_year,
+        payment_date__month=current_month
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    # 获取上月收入（比较数据）
+    last_month_income = Payment.objects.filter(
+        student__courses__teacher=teacher,
+        status='paid',
+        payment_date__year=last_month.year,
+        payment_date__month=last_month.month
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    # 计算同比变化
+    month_change_percentage = 0
+    if last_month_income > 0:
+        month_change_percentage = ((month_income - last_month_income) / last_month_income) * 100
+    
+    # 获取年度收入
+    year_income = Payment.objects.filter(
+        student__courses__teacher=teacher,
+        status='paid',
+        payment_date__year=current_year
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    # 获取待收款项
+    pending_payments = Payment.objects.filter(
+        student__courses__teacher=teacher,
+        status='pending'
+    )
+    total_pending = pending_payments.aggregate(total=Sum('amount'))['total'] or 0
+    
+    # 统计学生人数和已付款学生比例
+    total_students = Student.objects.filter(courses__teacher=teacher).distinct().count()
+    paid_students = Student.objects.filter(
+        courses__teacher=teacher,
+        payments__status='paid',
+        payments__payment_date__year=current_year,
+        payments__payment_date__month=current_month
+    ).distinct().count()
+    
+    paid_percentage = 0
+    if total_students > 0:
+        paid_percentage = (paid_students / total_students) * 100
+    
+    # 按类别统计收入数据
+    categories = PaymentCategory.objects.all()
+    category_data = []
+    
+    for category in categories:
+        category_total = Payment.objects.filter(
+            student__courses__teacher=teacher,
+            status='paid',
+            category=category,
+            payment_date__year=current_year
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        if category_total > 0:
+            category_data.append({
+                'name': category.name,
+                'value': float(category_total)
+            })
+    
+    # 按月统计本年度收入
+    month_names = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+    monthly_income_data = []
+    
+    for month in range(1, 13):
+        # 移除对未来月份的限制，展示全年数据，未发生的月份显示为0
+        monthly_total = Payment.objects.filter(
+            student__courses__teacher=teacher,
+            status='paid',
+            payment_date__year=current_year,
+            payment_date__month=month
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        monthly_income_data.append({
+            'month': month_names[month-1],
+            'value': float(monthly_total)
+        })
+    
+    return JsonResponse({
+        'status': 'success',
+        'stats': {
+            'month_income': float(month_income),
+            'year_income': float(year_income),
+            'month_change_percentage': float(month_change_percentage),
+            'total_pending': float(total_pending),
+            'total_students': total_students,
+            'paid_students': paid_students,
+            'paid_percentage': float(paid_percentage),
+            'category_data': category_data,
+            'monthly_income_data': monthly_income_data,
+            'current_month': month_names[current_month-1],
+            'current_year': current_year
+        }
+    }, json_dumps_params={'ensure_ascii': False})
+
+@login_required
+@teacher_required
+def generate_qrcode_ajax(request):
+    # 更新为检查X-Requested-With头来判断AJAX请求
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if request.method == 'GET' and is_ajax:
+        try:
+            # 获取当前用户（教师）
+            teacher = request.user.teacher_profile
+            
+            # 获取当前的日期和时间
+            now = timezone.now()
+            
+            # 设置24小时过期时间（统一设置）
+            expires_at = now + timezone.timedelta(hours=24)
+            
+            # 检查是否已存在默认课程
+            default_course = Course.objects.filter(
+                code="DEFAULT",
+                teacher=teacher
+            ).first()
+            
+            if not default_course:
+                # 获取或创建一个有效的钢琴级别
+                piano_level = PianoLevel.objects.first()
+                if not piano_level:
+                    piano_level = PianoLevel.objects.create(
+                        level=1,
+                        description="初级"
+                    )
+                
+                # 创建新的默认课程
+                default_course = Course.objects.create(
+                    name="通用考勤",
+                    code="DEFAULT",
+                    teacher=teacher,
+                    description='自动生成的通用考勤课程',
+                    level=piano_level
+                )
+            
+            # 创建二维码
+            qrcode_uuid = str(uuid_lib.uuid4())
+            qrcode = QRCode.objects.create(
+                course=default_course,
+                uuid=uuid_lib.UUID(qrcode_uuid),
+                code=qrcode_uuid,
+                expires_at=expires_at
+            )
+            
+            # 获取当前weekday
+            weekday = now.weekday()
+            now_time = now.time()
+            expires_time = expires_at.time()
+            
+            # 创建临时时间表时，确保开始时间和结束时间不会造成验证错误
+            # 如果跨天，将结束时间设置为23:59:59
+            if now_time >= expires_time:
+                expires_time = datetime.max.time()  # 23:59:59.999999
+            
+            # 获取或创建课程时间表，确保使用临时标记
+            schedule = None
+            try:
+                # 尝试获取现有时间表
+                schedule = CourseSchedule.objects.get(
+                    course=default_course,
+                    weekday=weekday,
+                    start_time=now_time
+                )
+                # 更新为临时排课
+                schedule.is_temporary = True
+                schedule.end_time = expires_time
+                schedule.save()
+            except CourseSchedule.DoesNotExist:
+                # 创建新的临时排课
+                schedule = CourseSchedule.objects.create(
+                    course=default_course,
+                    weekday=weekday,
+                    start_time=now_time,
+                    end_time=expires_time,
+                    is_temporary=True  # 明确标记为临时排课，避免时间验证
+                )
+            
+            # 关闭该教师现有的活跃会话
+            active_sessions = AttendanceSession.objects.filter(
+                course__teacher=teacher,
+                status='active'
+            )
+            for session in active_sessions:
+                session.status = 'closed'
+                session.is_active = False
+                session.save()
+            
+            # 创建考勤会话
+            try:
+                session = AttendanceSession.objects.create(
+                    course=default_course,
+                    schedule=schedule,
+                    qrcode=qrcode,
+                    created_by=teacher.user,
+                    start_time=now,
+                    end_time=expires_at,
+                    description=f"生成于 {now.strftime('%Y-%m-%d %H:%M')}",
+                    status='active',
+                    is_active=True
+                )
+            except ValidationError as ve:
+                # 如果创建会话失败，记录并删除已创建的QRCode
+                logger.error(f"创建考勤会话时验证错误: {ve}")
+                qrcode.delete()
+                return JsonResponse({
+                    'success': False,
+                    'message': f"创建考勤会话失败: {str(ve)}"
+                }, status=400)
+            
+            # 等待二维码图像生成完成
+            if not qrcode.qr_code_image:
+                qrcode.save()  # 触发save方法生成图像
+                qrcode.refresh_from_db()  # 刷新对象以获取生成的图像URL
+            
+            qr_image_url = qrcode.qr_code_image.url if qrcode.qr_code_image else ''
+            
+            # 构建响应数据 - 修改为与前端updateQRCodeDisplay期望的格式一致
+            return JsonResponse({
+                'success': True,
+                'qrcode': {
+                    'image_url': qr_image_url,
+                    'course_name': default_course.name,
+                    'expires_at': expires_at.strftime('%Y-%m-%d %H:%M')
+                },
+                'session': {
+                    'id': session.id,
+                    'course_name': default_course.name,
+                    'start_time': now.strftime('%Y-%m-%d %H:%M'),
+                    'end_time': expires_at.strftime('%Y-%m-%d %H:%M')
+                }
+            })
+        except ValidationError as e:
+            # 捕获时间验证错误等情况
+            logger.error(f"生成考勤码验证错误: {e}")
+            return JsonResponse({
+                'success': False,
+                'message': str(e),
+                'error_details': {
+                    'start_time': now.strftime('%Y-%m-%d %H:%M:%S'),
+                    'end_time': (now + timezone.timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S'),
+                }
+            }, status=400)
+        except Exception as e:
+            # 记录错误信息到日志
+            logger.error(f"生成二维码时出错: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f"生成二维码时出错: {str(e)}",
+                'error_type': type(e).__name__
+            }, status=500)
+    
+    return JsonResponse({'success': False, 'message': '无效的请求方法'}, status=400)

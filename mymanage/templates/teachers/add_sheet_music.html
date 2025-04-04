@@ -1,0 +1,170 @@
+{% extends "teachers/teacher_base.html" %}
+{% load static %}
+
+{% block title %}添加曲谱{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+    <!-- 正文内容 -->
+    <div class="container-fluid">
+        <!-- 面包屑导航 -->
+        <div class="row page-titles mb-3">
+            <div class="col-md-5 align-self-center">
+                <h4 class="text-themecolor">添加曲谱</h4>
+            </div>
+            <div class="col-md-7 align-self-center text-end">
+                <div class="d-flex justify-content-end align-items-center">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'teachers:dashboard' %}">首页</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'teachers:sheet_music' %}">曲谱管理</a></li>
+                        <li class="breadcrumb-item active">添加曲谱</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加曲谱表单 -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">添加新曲谱</h4>
+                        
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="title" class="form-label">曲谱标题 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="title" name="title" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="composer" class="form-label">作曲家 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="composer" name="composer" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="level" class="form-label">难度等级 <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="level" name="level" required>
+                                            <option value="">请选择难度等级</option>
+                                            {% for level in levels %}
+                                                <option value="{{ level.id }}">{{ level.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="difficulty" class="form-label">难度分类</label>
+                                        <select class="form-select" id="difficulty" name="difficulty">
+                                            <option value="入门级">入门级</option>
+                                            <option value="初级">初级</option>
+                                            <option value="中级" selected>中级</option>
+                                            <option value="高级">高级</option>
+                                            <option value="专业级">专业级</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="style" class="form-label">曲风</label>
+                                        <select class="form-select" id="style" name="style">
+                                            <option value="古典" selected>古典</option>
+                                            <option value="浪漫">浪漫</option>
+                                            <option value="现代">现代</option>
+                                            <option value="爵士">爵士</option>
+                                            <option value="流行">流行</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="period" class="form-label">时期</label>
+                                        <select class="form-select" id="period" name="period">
+                                            <option value="巴洛克">巴洛克</option>
+                                            <option value="古典主义" selected>古典主义</option>
+                                            <option value="浪漫主义">浪漫主义</option>
+                                            <option value="现代主义">现代主义</option>
+                                            <option value="当代">当代</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="description" class="form-label">曲谱描述</label>
+                                <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="file" class="form-label">曲谱文件 <span class="text-danger">*</span></label>
+                                        <input type="file" class="form-control" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required>
+                                        <small class="form-text text-muted">支持PDF和图片格式</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="cover_image" class="form-label">封面图片</label>
+                                        <input type="file" class="form-control" id="cover_image" name="cover_image" accept="image/*">
+                                        <small class="form-text text-muted">建议上传一张可代表曲谱的封面图</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="is_public" name="is_public" checked>
+                                <label class="form-check-label" for="is_public">
+                                    公开曲谱（让所有人都能看到）
+                                </label>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a href="{% url 'teachers:sheet_music' %}" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times"></i> 取消
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> 添加曲谱
+                                </button>
+                            </div>
+                        </form>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // 表单验证
+        $('form').on('submit', function(e) {
+            var title = $('#title').val();
+            var composer = $('#composer').val();
+            var level = $('#level').val();
+            var file = $('#file').val();
+            
+            if (!title || !composer || !level || !file) {
+                e.preventDefault();
+                alert('请填写所有必填字段并上传曲谱文件');
+            }
+        });
+    });
+</script>
+{% endblock %} 

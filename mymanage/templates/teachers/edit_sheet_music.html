@@ -1,0 +1,173 @@
+{% extends "teachers/teacher_base.html" %}
+{% load static %}
+
+{% block title %}编辑曲谱 - {{ sheet.title }}{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+    <!-- 正文内容 -->
+    <div class="container-fluid">
+        <!-- 面包屑导航 -->
+        <div class="row page-titles mb-3">
+            <div class="col-md-5 align-self-center">
+                <h4 class="text-themecolor">编辑曲谱</h4>
+            </div>
+            <div class="col-md-7 align-self-center text-end">
+                <div class="d-flex justify-content-end align-items-center">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'teachers:dashboard' %}">首页</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'teachers:sheet_music' %}">曲谱管理</a></li>
+                        <li class="breadcrumb-item active">编辑曲谱</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 编辑曲谱表单 -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">编辑曲谱信息</h4>
+                        
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="title" class="form-label">曲谱标题 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="title" name="title" value="{{ sheet.title }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="composer" class="form-label">作曲家 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="composer" name="composer" value="{{ sheet.composer }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="level" class="form-label">难度等级 <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="level" name="level" required>
+                                            <option value="">请选择难度等级</option>
+                                            {% for level in levels %}
+                                                <option value="{{ level.id }}" {% if sheet.level_id == level.id %}selected{% endif %}>{{ level.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="difficulty" class="form-label">难度分类</label>
+                                        <select class="form-select" id="difficulty" name="difficulty">
+                                            <option value="入门级" {% if sheet.difficulty == '入门级' %}selected{% endif %}>入门级</option>
+                                            <option value="初级" {% if sheet.difficulty == '初级' %}selected{% endif %}>初级</option>
+                                            <option value="中级" {% if sheet.difficulty == '中级' %}selected{% endif %}>中级</option>
+                                            <option value="高级" {% if sheet.difficulty == '高级' %}selected{% endif %}>高级</option>
+                                            <option value="专业级" {% if sheet.difficulty == '专业级' %}selected{% endif %}>专业级</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="style" class="form-label">曲风</label>
+                                        <select class="form-select" id="style" name="style">
+                                            <option value="古典" {% if sheet.style == '古典' %}selected{% endif %}>古典</option>
+                                            <option value="浪漫" {% if sheet.style == '浪漫' %}selected{% endif %}>浪漫</option>
+                                            <option value="现代" {% if sheet.style == '现代' %}selected{% endif %}>现代</option>
+                                            <option value="爵士" {% if sheet.style == '爵士' %}selected{% endif %}>爵士</option>
+                                            <option value="流行" {% if sheet.style == '流行' %}selected{% endif %}>流行</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="period" class="form-label">时期</label>
+                                        <select class="form-select" id="period" name="period">
+                                            <option value="巴洛克" {% if sheet.period == '巴洛克' %}selected{% endif %}>巴洛克</option>
+                                            <option value="古典主义" {% if sheet.period == '古典主义' %}selected{% endif %}>古典主义</option>
+                                            <option value="浪漫主义" {% if sheet.period == '浪漫主义' %}selected{% endif %}>浪漫主义</option>
+                                            <option value="现代主义" {% if sheet.period == '现代主义' %}selected{% endif %}>现代主义</option>
+                                            <option value="当代" {% if sheet.period == '当代' %}selected{% endif %}>当代</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="description" class="form-label">曲谱描述</label>
+                                <textarea class="form-control" id="description" name="description" rows="4">{{ sheet.description }}</textarea>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="file" class="form-label">更新曲谱文件</label>
+                                        <input type="file" class="form-control" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png">
+                                        {% if sheet.file %}
+                                            <small class="form-text text-muted">当前文件: {{ sheet.file.name }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="cover_image" class="form-label">更新封面图片</label>
+                                        <input type="file" class="form-control" id="cover_image" name="cover_image" accept="image/*">
+                                        {% if sheet.cover_image %}
+                                            <small class="form-text text-muted">当前图片: {{ sheet.cover_image.name }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="is_public" name="is_public" {% if sheet.is_public %}checked{% endif %}>
+                                <label class="form-check-label" for="is_public">
+                                    公开曲谱（让所有人都能看到）
+                                </label>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a href="{% url 'teachers:sheet_music_detail' sheet.id %}" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times"></i> 取消
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 保存修改
+                                </button>
+                            </div>
+                        </form>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // 表单验证
+        $('form').on('submit', function(e) {
+            var title = $('#title').val();
+            var composer = $('#composer').val();
+            var level = $('#level').val();
+            
+            if (!title || !composer || !level) {
+                e.preventDefault();
+                alert('请填写必填字段：曲谱标题、作曲家和难度等级');
+            }
+        });
+    });
+</script>
+{% endblock %} 

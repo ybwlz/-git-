@@ -1,1 +1,65 @@
-// Empty CSS file 
+/* layer皮肤 */
+.layui-layer {
+    border-radius: 5px;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+}
+
+.layui-layer-title {
+    padding: 0 80px 0 20px;
+    height: 50px;
+    line-height: 50px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+    color: #333;
+    overflow: hidden;
+    background-color: #fff;
+    border-radius: 5px 5px 0 0;
+}
+
+.layui-layer-setwin {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    font-size: 0;
+    line-height: initial;
+}
+
+.layui-layer-btn {
+    text-align: right;
+    padding: 0 15px 12px;
+    background-color: #fff;
+    border-radius: 0 0 5px 5px;
+}
+
+.layui-layer-btn a {
+    height: 32px;
+    line-height: 32px;
+    margin: 5px 5px 0;
+    padding: 0 15px;
+    border: 1px solid #dedede;
+    background-color: #fff;
+    color: #333;
+    border-radius: 3px;
+    font-weight: 400;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.layui-layer-btn .layui-layer-btn0 {
+    border-color: #1E9FFF;
+    background-color: #1E9FFF;
+    color: #fff;
+}
+
+.layui-layer-content {
+    position: relative;
+    padding: 20px;
+    line-height: 24px;
+    word-break: break-all;
+    overflow: auto;
+    font-size: 14px;
+    overflow-x: hidden;
+    overflow-y: auto;
+} 
