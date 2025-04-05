@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from mymanage.users import views as user_views
 
 urlpatterns = [
@@ -17,14 +17,16 @@ urlpatterns = [
     path('password-reset/', user_views.password_reset_view, name='password_reset'),
     
     # 应用模块
-    path('', TemplateView.as_view(template_name='index.html'), name='home'),
-    path('teachers/', include('mymanage.teachers.urls')),
+    path('', RedirectView.as_view(url='/login/')),
+    path('', include('mymanage.users.urls')),
     path('students/', include('mymanage.students.urls')),
+    path('teachers/', include('mymanage.teachers.urls')),
     path('courses/', include('mymanage.courses.urls')),
     path('attendance/', include('mymanage.attendance.urls')),
     path('finance/', include('mymanage.finance.urls')),
 ]
 
-# 在开发环境中提供媒体文件支持
+# 开发环境下添加静态文件和媒体文件的访问URL
 if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

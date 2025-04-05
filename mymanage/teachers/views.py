@@ -31,9 +31,43 @@ logger = logging.getLogger(__name__)
 @login_required
 @teacher_required
 def teacher_dashboard(request):
-    """教师控制面板视图"""
+    """教师仪表板"""
     teacher = request.user.teacher_profile
-    current_time = timezone.now()  # 获取当前时间
+    
+    # 自动关闭过期的考勤会话
+    from mymanage.attendance.models import AttendanceSession
+    current_time = timezone.now()
+    
+    # 1. 关闭所有已过期但仍标记为活跃的会话
+    expired_sessions = AttendanceSession.objects.filter(
+        status='active',
+        end_time__lt=current_time
+    )
+    for session in expired_sessions:
+        session.status = 'closed'
+        session.is_active = False
+        session.save()
+    
+    # 2. 确保每个老师只有一个活跃会话
+    active_sessions = AttendanceSession.objects.filter(
+        created_by=request.user,
+        status='active'
+    ).order_by('-start_time')
+    
+    # 如果有多个活跃会话，保留最新的一个，关闭其他的
+    if active_sessions.count() > 1:
+        keep_session = active_sessions.first()
+        for session in active_sessions[1:]:
+            session.status = 'closed'
+            session.is_active = False
+            session.end_time = current_time
+            session.save()
+    
+    # 查询最近活跃的考勤会话
+    active_sessions = AttendanceSession.objects.filter(
+        created_by=request.user,
+        status='active'
+    ).order_by('-start_time')[:5]
     
     # 获取所有学生数量（修改为获取所有学生）
     students_count = Student.objects.count()
@@ -90,7 +124,29 @@ def teacher_dashboard(request):
         status='pending'
     ).aggregate(total=Sum('amount'))
     
-    # 最近的考勤会话
+    # 最近的考勤会话 - 确保不包含重复或异常会话
+    # 先关闭任何异常的会话（开始时间相同的会话）
+    duplicate_sessions = AttendanceSession.objects.values('start_time').filter(
+        course__teacher=teacher
+    ).annotate(count=Count('id')).filter(count__gt=1)
+    
+    for dup in duplicate_sessions:
+        dup_time = dup['start_time']
+        dup_sessions = AttendanceSession.objects.filter(
+            course__teacher=teacher,
+            start_time=dup_time
+        ).order_by('-id')
+        
+        # 保留最新的一个，关闭其他的
+        if dup_sessions.count() > 1:
+            keep_session = dup_sessions.first()
+            for session in dup_sessions[1:]:  # 跳过第一个
+                session.status = 'closed'
+                session.is_active = False
+                session.save()
+                print(f"DEBUG - 关闭重复会话: ID={session.id}, 课程={session.course.name}")
+    
+    # 获取最近的考勤会话（确保获取的都是有效的）
     recent_sessions = AttendanceSession.objects.filter(
         course__teacher=teacher
     ).order_by('-start_time')[:5]
@@ -116,7 +172,7 @@ def teacher_dashboard(request):
             'count': count
         })
     
-    # 获取活跃的考勤会话及二维码
+    # 重新获取活跃的考勤会话及二维码（在关闭过期会话后）
     active_sessions = AttendanceSession.objects.filter(
         course__teacher=teacher,
         status='active'
@@ -386,25 +442,48 @@ def teacher_students(request):
     # 获取今日开始时间
     today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
     
-    # 计算平均出勤率
-    # 获取所有课程的学生总人数
-    enrolled_students = Student.objects.filter(courses__teacher=teacher).distinct().count()
+    # 计算今日出勤率而不是平均出勤率
+    # 获取今日应该出勤的学生总数（所有与教师相关的学生）
+    today_enrolled_students = Student.objects.filter(courses__teacher=teacher).distinct().count()
     
-    # 获取有出勤记录的学生数量
-    attended_students = AttendanceRecord.objects.filter(
+    # 获取今日有出勤记录的学生数量
+    today_attended_students = AttendanceRecord.objects.filter(
+        check_in_time__gte=today_start,
         session__course__teacher=teacher
     ).values('student').distinct().count()
     
-    # 计算出勤率，避免除以零错误
-    attendance_rate = 0
-    if enrolled_students > 0:
-        attendance_rate = (attended_students / enrolled_students) * 100
+    # 计算今日出勤率，避免除以零错误
+    today_attendance_rate = 0
+    if today_enrolled_students > 0:
+        today_attendance_rate = (today_attended_students / today_enrolled_students) * 100
     
     # 获取今日练琴人数
     today_attendance = AttendanceRecord.objects.filter(
         check_in_time__gte=today_start,
         session__course__teacher=teacher
     ).values('student').distinct().count()
+    
+    # 为每个学生添加练琴统计数据
+    for student in students:
+        # 计算总练琴时长（分钟）
+        total_minutes = PracticeRecord.objects.filter(
+            student=student
+        ).aggregate(total=Sum('duration'))['total'] or 0
+        
+        # 将分钟转换为小时
+        student.total_practice_time = round(total_minutes / 60, 1)
+        
+        # 获取最后练琴时间
+        last_practice = PracticeRecord.objects.filter(
+            student=student
+        ).order_by('-date').first()
+        
+        student.last_practice = last_practice.date if last_practice else None
+        
+        # 计算学习进度（假设每个级别需要60小时练习，当前级别已完成的百分比）
+        hours_needed_per_level = 60
+        progress_percentage = min(100, (student.total_practice_time / hours_needed_per_level) * 100)
+        student.progress = round(progress_percentage, 1)
     
     context = {
         'teacher': teacher,  # 添加教师信息到上下文
@@ -415,7 +494,7 @@ def teacher_students(request):
         'recent_students': recent_students,
         'search_query': search_query,
         'unread_notifications_count': 0,  # 为模板提供默认值
-        'attendance_rate': attendance_rate,  # 添加真实的平均出勤率
+        'attendance_rate': round(today_attendance_rate, 1),  # 使用今日出勤率，并保留一位小数
         'today_attendance': today_attendance  # 添加真实的今日练琴人数
     }
     
@@ -659,13 +738,27 @@ def teacher_attendance(request):
         recent_sessions = recent_sessions[:10]
     
     # 为每个会话计算实际出勤人数和总学生数
+    attendance_data = {}
     for session in recent_sessions:
         if session.course:
-            session.total_students = session.course.students.count()
-            session.attendance_count = AttendanceRecord.objects.filter(session=session).count()
+            total_students_count = session.course.students.count()
+            attendance_count = AttendanceRecord.objects.filter(session=session).count()
+            # 将这些数据存储在字典中
+            attendance_data[session.id] = {
+                'total_students_count': total_students_count,
+                'attendance_count': attendance_count
+            }
+            # 使用自定义属性名称避免与模型属性冲突
+            session.actual_attendance_count = attendance_count
+            session.actual_total_students_count = total_students_count
         else:
-            session.total_students = 0
-            session.attendance_count = 0
+            attendance_data[session.id] = {
+                'total_students_count': 0,
+                'attendance_count': 0
+            }
+            # 使用自定义属性名称避免与模型属性冲突
+            session.actual_attendance_count = 0
+            session.actual_total_students_count = 0
     
     # 检查URL中是否有qrcode参数
     qrcode_uuid = request.GET.get('qrcode')
@@ -699,6 +792,11 @@ def teacher_attendance(request):
         if hasattr(active_session, 'qrcode') and active_session.qrcode:
             qrcode_to_display = active_session.qrcode
     
+    # 定义二维码URL变量，避免未定义错误
+    qrcode_url = None
+    if qrcode_to_display and qrcode_to_display.qr_code_image:
+        qrcode_url = qrcode_to_display.qr_code_image.url
+
     # 统计今日出勤率
     today_sessions = AttendanceSession.objects.filter(
         course__teacher=teacher,
@@ -823,20 +921,22 @@ def teacher_attendance(request):
         'teacher': teacher,
         'active_sessions': active_sessions,
         'recent_sessions': recent_sessions,
+        'qrcode_to_display': qrcode_to_display,
+        'qrcode_url': qrcode_url,
         'today_attendance_rate': today_attendance_rate,
         'weekly_attendance_rate': weekly_attendance_rate,
         'monthly_attendance_rate': monthly_attendance_rate,
         'today_practice_time': today_practice_time,
-        'weekly_practice_time': weekly_practice_time,
-        'monthly_practice_time': monthly_practice_time,
         'today_practice_percentage': today_practice_percentage,
+        'weekly_practice_time': weekly_practice_time,
         'weekly_practice_percentage': weekly_practice_percentage,
+        'monthly_practice_time': monthly_practice_time,
         'monthly_practice_percentage': monthly_practice_percentage,
-        'courses': courses,
-        'total_students': total_students,
-        'attendance_today': attendance_today,
-        'qrcode_to_display': qrcode_to_display,
-        'all_students': all_students  # 添加所有学生到上下文
+        'attendance_data': attendance_data,  # 添加出勤数据字典到上下文
+        'courses': courses,  # 添加课程列表
+        'total_students': total_students,  # 添加总学生数
+        'all_students': all_students,  # 添加所有学生
+        'attendance_today': attendance_today  # 添加今日考勤人数
     }
     
     return render(request, 'teachers/teacher_attendance.html', context)
@@ -1020,13 +1120,30 @@ def attendance_session_detail(request, session_id):
     registered_student_ids = records.values_list('student__id', flat=True)
     absent_students = session.course.students.exclude(id__in=registered_student_ids)
     
+    # 计算每个学生的练习时长总和（来自PracticeRecord而不是AttendanceRecord）
+    from mymanage.students.models import PracticeRecord
+    from django.db.models import Sum
+    
+    for record in records:
+        # 获取学生的所有练习记录，并计算总时长
+        total_practice_time = PracticeRecord.objects.filter(
+            student=record.student
+        ).aggregate(total=Sum('duration'))['total'] or 0
+        
+        # 将总时长添加到记录对象上（不存储到数据库）
+        record.total_practice_time = total_practice_time
+    
+    # 计算出勤率（使用属性方法）
+    attendance_rate = 0
+    if session.total_students > 0:
+        attendance_rate = (session.attendance_count / session.total_students) * 100
+    
     context = {
         'teacher': teacher,
         'session': session,
         'records': records,
         'absent_students': absent_students,
-        'total_students': session.course.students.count(),
-        'attendance_count': records.count()
+        'attendance_rate': attendance_rate
     }
     
     return render(request, 'teachers/attendance_session_detail.html', context)
@@ -1166,7 +1283,7 @@ def add_sheet_music(request):
             description=description,
             file=file,
             uploaded_by=request.user,
-            is_public=request.POST.get('is_public') == 'on'
+            is_public=True  # 默认设置为公开
         )
         
         # 添加其他字段
@@ -1200,7 +1317,7 @@ def edit_sheet_music(request, sheet_id):
         sheet.composer = request.POST.get('composer')
         sheet.level_id = request.POST.get('level')
         sheet.description = request.POST.get('description')
-        sheet.is_public = request.POST.get('is_public') == 'on'
+        sheet.is_public = True  # 默认设置为公开
         
         # 更新其他字段
         sheet.difficulty = request.POST.get('difficulty', '中级')
@@ -2079,6 +2196,25 @@ def manual_checkin(request):
                 note=notes
             )
             
+            # 同步创建学生端的考勤记录
+            from mymanage.students.models import Attendance
+            
+            # 检查是否已存在当天的考勤记录
+            existing_attendance = Attendance.objects.filter(
+                student=student,
+                date=check_in_time.date()
+            ).first()
+            
+            if not existing_attendance:
+                # 创建学生端考勤记录
+                Attendance.objects.create(
+                    student=student,
+                    date=check_in_time.date(),
+                    check_in_time=check_in_time,
+                    check_out_time=None,  # 稍后可以更新
+                    status='present'
+                )
+            
             return JsonResponse({
                 'success': True,
                 'message': '考勤记录添加成功',
@@ -2148,34 +2284,52 @@ def attendance_checkout(request):
         student.total_practice_time = practice_time_hours + (record.duration or 0)
         student.save()
         
-        # 更新练琴记录
+        # 同步更新学生端的考勤记录
+        from mymanage.students.models import Attendance
         try:
-            from mymanage.courses.models import PracticeRecord
-            practice = PracticeRecord.objects.filter(
+            # 查找同一天的考勤记录
+            attendance = Attendance.objects.filter(
                 student=student,
-                status='active'
-            ).order_by('-start_time').first()
+                date=record.check_in_time.date()
+            ).first()
             
-            if practice:
-                practice.end_time = timezone.now()
-                practice.duration = record.duration_minutes  # 使用分钟作为单位
-                practice.status = 'completed'
-                practice.save()
-        except (ImportError, Exception) as e:
-            print(f"更新练琴记录时出错: {str(e)}")
+            if attendance:
+                # 更新签退时间
+                attendance.check_out_time = record.check_out_time
+                attendance.save()
+        except Exception as e:
+            print(f"更新学生考勤记录失败: {str(e)}")
+        
+        # 同步添加练习记录
+        from mymanage.students.models import PracticeRecord
+        try:
+            # 添加练习记录
+            PracticeRecord.objects.create(
+                student=student,
+                date=record.check_in_time.date(),
+                start_time=record.check_in_time,
+                end_time=record.check_out_time,
+                duration=int(record.duration_minutes) if record.duration_minutes else 0,
+                piano_number=record.piano.number if record.piano else 1
+            )
+        except Exception as e:
+            print(f"添加练习记录失败: {str(e)}")
         
         return JsonResponse({
-            'success': True, 
+            'success': True,
             'message': '签退成功',
-            'duration': f"{record.duration_minutes:.0f} 分钟" if record.duration_minutes else "0 分钟"
+            'record': {
+                'id': record.id,
+                'status': record.status,
+                'check_out_time': record.check_out_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'duration': record.duration
+            }
         })
         
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'message': '请求数据格式错误'})
-    except AttendanceRecord.DoesNotExist:
-        return JsonResponse({'success': False, 'message': '考勤记录不存在'})
     except Exception as e:
-        return JsonResponse({'success': False, 'message': f'签退失败: {str(e)}'})
+        return JsonResponse({'success': False, 'message': f'操作失败: {str(e)}'})
 
 
 @login_required
@@ -2208,8 +2362,14 @@ def end_session(request):
         
         # 为所有未签退的学生自动签退
         active_records = AttendanceRecord.objects.filter(session=session, status='checked_in')
+        now = timezone.now()
+        
+        # 导入学生模型
+        from mymanage.students.models import Attendance, PracticeRecord
+        
         for record in active_records:
-            record.check_out_time = timezone.now()
+            student = record.student
+            record.check_out_time = now
             record.status = 'checked_out'
             
             # 计算持续时间
@@ -2219,6 +2379,40 @@ def end_session(request):
                 record.duration_minutes = duration.total_seconds() / 60  # 转换为分钟
             
             record.save()
+            
+            # 同步更新学生端考勤记录
+            try:
+                # 查找当天的考勤记录
+                attendance = Attendance.objects.filter(
+                    student=student,
+                    date=record.check_in_time.date()
+                ).first()
+                
+                if attendance:
+                    # 更新签退时间
+                    attendance.check_out_time = record.check_out_time
+                    attendance.save()
+                else:
+                    # 如果没有考勤记录，创建一个
+                    Attendance.objects.create(
+                        student=student,
+                        date=record.check_in_time.date(),
+                        check_in_time=record.check_in_time,
+                        check_out_time=record.check_out_time,
+                        status='present'
+                    )
+                
+                # 添加练习记录
+                PracticeRecord.objects.create(
+                    student=student,
+                    date=record.check_in_time.date(),
+                    start_time=record.check_in_time,
+                    end_time=record.check_out_time,
+                    duration=int(record.duration_minutes) if record.duration_minutes else 0,
+                    piano_number=record.piano.number if record.piano else 1
+                )
+            except Exception as e:
+                print(f"同步学生记录失败: {str(e)}")
         
         return JsonResponse({
             'success': True, 
@@ -2228,10 +2422,8 @@ def end_session(request):
         
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'message': '请求数据格式错误'})
-    except AttendanceSession.DoesNotExist:
-        return JsonResponse({'success': False, 'message': '考勤会话不存在'})
     except Exception as e:
-        return JsonResponse({'success': False, 'message': f'操作失败: {str(e)}'})
+        return JsonResponse({'success': False, 'message': f'结束会话失败: {str(e)}'})
 
 @login_required
 @teacher_required
@@ -2525,6 +2717,9 @@ def get_payment_stats_api(request):
 @login_required
 @teacher_required
 def generate_qrcode_ajax(request):
+    # 创建日志记录器
+    logger = logging.getLogger(__name__)
+    
     # 更新为检查X-Requested-With头来判断AJAX请求
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == 'GET' and is_ajax:
@@ -2537,6 +2732,24 @@ def generate_qrcode_ajax(request):
             
             # 设置24小时过期时间（统一设置）
             expires_at = now + timezone.timedelta(hours=24)
+            
+            # 1. 首先关闭该教师所有现有的活跃会话 - 这一步放在最前面确保清理
+            active_sessions = AttendanceSession.objects.filter(
+                Q(course__teacher=teacher) | Q(created_by=request.user),
+                status='active'
+            )
+            
+            if active_sessions.exists():
+                for session in active_sessions:
+                    session.status = 'closed'
+                    session.is_active = False
+                    
+                    # 确保会话有结束时间
+                    if not session.end_time or session.end_time > now:
+                        session.end_time = now
+                        
+                    session.save()
+                    logger.info(f"已关闭会话ID={session.id}, 课程={session.course.name}")
             
             # 检查是否已存在默认课程
             default_course = Course.objects.filter(
@@ -2604,15 +2817,7 @@ def generate_qrcode_ajax(request):
                     is_temporary=True  # 明确标记为临时排课，避免时间验证
                 )
             
-            # 关闭该教师现有的活跃会话
-            active_sessions = AttendanceSession.objects.filter(
-                course__teacher=teacher,
-                status='active'
-            )
-            for session in active_sessions:
-                session.status = 'closed'
-                session.is_active = False
-                session.save()
+            # 注意：我们已经在前面关闭了所有活跃会话，所以这里不再需要重复关闭
             
             # 创建考勤会话
             try:

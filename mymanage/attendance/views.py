@@ -378,6 +378,18 @@ def generate_qrcode(request):
             teacher = request.user.teacher_profile
             course = None
             
+            # 先结束该教师的所有活跃会话
+            current_time = timezone.now()
+            active_sessions = AttendanceSession.objects.filter(
+                created_by=request.user,
+                status='active'
+            )
+            for session in active_sessions:
+                session.status = 'closed'
+                session.is_active = False
+                session.end_time = current_time
+                session.save()
+                
             try:
                 # 尝试获取指定的课程
                 if course_id:
@@ -385,7 +397,7 @@ def generate_qrcode(request):
             except Course.DoesNotExist:
                 # 如果未找到课程，使用默认课程
                 course = None
-                
+            
             # 如果没有找到课程或没有提供课程ID，则创建一个默认课程
             if not course:
                 # 先获取或创建一个有效的钢琴级别
@@ -425,7 +437,6 @@ def generate_qrcode(request):
                     )
             
             # 设置二维码过期时间
-            current_time = timezone.now()
             expires_at = current_time + datetime.timedelta(hours=hours)
             
             # 创建二维码
@@ -491,44 +502,45 @@ def generate_qrcode(request):
     })
 
 
-@login_required
 @teacher_required
-def end_qrcode_session(request):
-    """结束二维码考勤会话"""
+def end_session(request):
+    """结束考勤会话"""
     if request.method == 'POST':
         try:
-            data = json.loads(request.body) if request.body else request.POST
+            data = json.loads(request.body)
             session_id = data.get('session_id')
             
-            if not session_id:
+            # 获取会话
+            session = get_object_or_404(AttendanceSession, id=session_id)
+            
+            # 验证权限
+            if session.created_by != request.user and not request.user.is_staff:
                 return JsonResponse({
                     'success': False,
-                    'message': '请提供会话ID'
-                })
-            
-            # 获取会话
-            session = get_object_or_404(
-                AttendanceSession, 
-                id=session_id, 
-                course__teacher=request.user.teacher_profile,
-                status='active'
-            )
+                    'message': '您没有权限结束此考勤会话'
+                }, status=403)
             
             # 关闭会话
-            session.close_session()
+            session.status = 'closed'
+            session.is_active = False
+            
+            # 确保会话有结束时间
+            if not session.end_time:
+                session.end_time = timezone.now()
+                
+            session.save()
             
             return JsonResponse({
                 'success': True,
-                'message': '考勤会话已成功关闭'
+                'message': '考勤会话已结束'
             })
-            
         except Exception as e:
             return JsonResponse({
                 'success': False,
-                'message': f'关闭会话时出错: {str(e)}'
-            })
+                'message': f'发生错误: {str(e)}'
+            }, status=500)
     
     return JsonResponse({
         'success': False,
         'message': '仅支持POST请求'
-    })
+    }, status=405)

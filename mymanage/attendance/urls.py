@@ -27,5 +27,5 @@ urlpatterns = [
     
     # 添加新的URL
     path('generate-qrcode/', views.generate_qrcode, name='generate_qrcode'),
-    path('end-session/', views.end_qrcode_session, name='end_qrcode_session'),
+    path('end-session/', views.end_session, name='end_qrcode_session'),
 ]

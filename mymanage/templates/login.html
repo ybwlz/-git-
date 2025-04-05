@@ -271,6 +271,25 @@
         
         // 初始化设置学生为默认角色
         selectRole('student');
+        
+        // 设置消息提示5秒后自动消失
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    // 使用Bootstrap的dismiss方法关闭提示
+                    const closeButton = alert.querySelector('.btn-close');
+                    if (closeButton) {
+                        closeButton.click();
+                    } else {
+                        alert.classList.remove('show');
+                        setTimeout(function() {
+                            alert.remove();
+                        }, 150); // 淡出动画后移除
+                    }
+                }, 5000); // 5秒后自动关闭
+            });
+        });
     </script>
 </body>
 </html> 

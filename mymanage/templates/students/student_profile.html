@@ -27,34 +27,64 @@
         }
         
         .sidebar {
-            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             height: 100vh;
             position: fixed;
-            padding-top: 20px;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
         }
         
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.85);
-            border-radius: 5px;
-            margin: 5px 10px;
-            transition: all 0.3s;
-        }
-        
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
         }
         
         .sidebar .nav-link i {
-            margin-right: 10px;
-            width: 20px;
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
             text-align: center;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
         }
         
         .main-content {
             margin-left: 250px;
-            padding: 20px;
+            padding: 2rem;
+        }
+        
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar h5 {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
         
         @media (max-width: 768px) {
@@ -62,11 +92,14 @@
                 width: 100%;
                 height: auto;
                 position: relative;
-                padding-top: 0;
             }
             
             .main-content {
                 margin-left: 0;
+            }
+            
+            .sidebar .nav-link:hover {
+                transform: none;
             }
         }
         
@@ -206,8 +239,12 @@
     <!-- 侧边栏 -->
     <div class="sidebar col-md-3 col-lg-2 d-md-block">
         <div class="text-center mb-4">
-            <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
-            <h5 class="mt-2">苗韵琴行</h5>
+            {% if student.user.avatar %}
+                <img src="{{ student.user.avatar.url }}" alt="{{ student.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/default-avatar.jpg' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ student.name }}</h5>
         </div>
         <ul class="nav flex-column">
             <li class="nav-item">
@@ -231,7 +268,7 @@
                 </a>
             </li>
             <li class="nav-item mt-5">
-                <a class="nav-link" href="{% url '..logout' %}">
+                <a class="nav-link" href="{% url 'logout' %}">
                     <i class="fas fa-sign-out-alt"></i> 退出登录
                 </a>
             </li>
@@ -241,44 +278,18 @@
     <!-- 主要内容 -->
     <div class="main-content">
         <div class="container-fluid">
-            <!-- 顶部导航 -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-white rounded-3 shadow-sm mb-4">
-                <div class="container-fluid">
-                    <span class="navbar-brand mb-0 h1">个人主页</span>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <i class="fas fa-bell"></i>
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        {{ notifications_count|default:"0" }}
-                                    </span>
-                                </a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                    {% if student.user.avatar %}
-                                    <img src="{{ student.user.avatar.url }}" class="rounded-circle" width="30" height="30">
-                                    {% else %}
-                                    <img src="{% static 'img/default-avatar.jpg' %}" class="rounded-circle" width="30" height="30">
-                                    {% endif %}
-                                    <span class="ms-1">{{ student.name }}</span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="{% url 'students:profile' %}"><i class="fas fa-user me-2"></i>个人资料</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'students:profile' %}"><i class="fas fa-cog me-2"></i>账号设置</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
-                                </ul>
-                            </li>
-                        </ul>
+            <!-- 添加新的顶部栏 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">个人主页</h2>
+                <div>
+                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
+                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime">00:00:00</span>
                     </div>
                 </div>
-            </nav>
-
+            </div>
+            
             <!-- 个人资料头部 -->
             <div class="profile-header">
                 <div class="row align-items-center">
@@ -313,8 +324,8 @@
                         <div class="profile-stat-label">考勤打卡</div>
                     </div>
                     <div class="profile-stat-item">
-                        <div class="profile-stat-value">{{ this_month_practice|default:"0" }}</div>
-                        <div class="profile-stat-label">本月练习(分钟)</div>
+                        <div class="profile-stat-value">{{ attendance_rate|default:"0" }}%</div>
+                        <div class="profile-stat-label">出勤率</div>
                     </div>
                 </div>
             </div>
@@ -390,31 +401,107 @@
                         <h3 class="profile-card-title"><i class="fas fa-graduation-cap"></i>学习信息</h3>
                         <div class="profile-info-item">
                             <div class="profile-info-label">当前级别</div>
-                            <div class="profile-info-value">钢琴四级</div>
+                            <div class="profile-info-value">{{ student.get_level_display }}</div>
                         </div>
                         <div class="profile-info-item">
                             <div class="profile-info-label">指导老师</div>
-                            <div class="profile-info-value">张老师</div>
+                            <div class="profile-info-value">{{ teacher_name }}</div>
                         </div>
                         <div class="profile-info-item">
                             <div class="profile-info-label">课程类型</div>
-                            <div class="profile-info-value">一对一钢琴课</div>
+                            <div class="profile-info-value">{{ course_type }}</div>
+                        </div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">课程级别</div>
+                            <div class="profile-info-value">{{ course_level }}</div>
                         </div>
                         <div class="profile-info-item">
                             <div class="profile-info-label">课程频率</div>
-                            <div class="profile-info-value">每周两次</div>
+                            <div class="profile-info-value">{{ course_frequency }}</div>
                         </div>
                         <div class="profile-info-item">
                             <div class="profile-info-label">上课时间</div>
-                            <div class="profile-info-value">周二 17:00-18:00, 周六 10:00-11:00</div>
+                            <div class="profile-info-value">{{ class_times }}</div>
                         </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">剩余课时</div>
-                            <div class="profile-info-value">24课时</div>
+                    </div>
+                </div>
+
+                <!-- 练琴统计 -->
+                <div class="col-md-6 mt-4">
+                    <div class="profile-card">
+                        <div class="profile-card-title">
+                            <i class="fas fa-chart-bar"></i> 练琴统计
                         </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">下次考级</div>
-                            <div class="profile-info-value">2023-12-15</div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">练习总时长</div>
+                                    <div class="profile-info-value">{{ total_practice_time|default:"0" }}分钟</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">本月练习</div>
+                                    <div class="profile-info-value">{{ this_month_practice|default:"0" }}分钟</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">最近一周</div>
+                                    <div class="profile-info-value">{{ last_week_practice|default:"0" }}分钟</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">单次最长</div>
+                                    <div class="profile-info-value">{{ max_practice_duration|default:"0" }}分钟</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">平均练习</div>
+                                    <div class="profile-info-value">{{ avg_practice_duration|default:"0" }}分钟/次</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">考勤打卡</div>
+                                    <div class="profile-info-value">{{ total_attendance|default:"0" }}次</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'students:practice' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-music me-1"></i> 去练琴
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 考勤统计 -->
+                <div class="col-md-6 mt-4">
+                    <div class="profile-card">
+                        <div class="profile-card-title">
+                            <i class="fas fa-calendar-check"></i> 考勤统计
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">总考勤次数</div>
+                                    <div class="profile-info-value">{{ total_attendance|default:"0" }}次</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-label">出勤率</div>
+                                    <div class="profile-info-value">{{ attendance_rate|default:"0" }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'students:attendance' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-calendar-check me-1"></i> 查看考勤
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -477,6 +564,12 @@
                                         <span class="text-warning">迟到</span>
                                         {% elif attendance.status == 'early_leave' %}
                                         <span class="text-warning">早退</span>
+                                        {% elif attendance.status == 'checked_in' %}
+                                        <span class="text-warning">已签到</span>
+                                        {% elif attendance.status == 'checked_out' %}
+                                        <span class="text-success">已签退</span>
+                                        {% else %}
+                                        <span class="text-secondary">{{ attendance.status }}</span>
                                         {% endif %}
                                     </div>
                                     <div class="activity-info">
@@ -493,7 +586,7 @@
                                         --:--
                                         {% endif %}
                                     </div>
-                                    <div class="activity-time">{{ attendance.date|date:"Y年m月d日" }}</div>
+                                    <div class="activity-time">{{ attendance.check_in_time|date:"Y年m月d日" }}</div>
                                 </div>
                             </div>
                             {% endfor %}
@@ -518,5 +611,20 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    
+    <script>
+        // 添加系统时间显示功能
+        function updateSystemTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('currentTime');
+            if(timeElement) {
+                timeElement.textContent = now.toTimeString().substring(0, 8);
+            }
+        }
+        
+        // 初始化并每秒更新一次
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
+    </script>
 </body>
 </html> 

@@ -558,63 +558,51 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead>
                                 <tr>
-                                    <th>日期</th>
                                     <th>课程</th>
                                     <th>时间</th>
-                                    <th>出勤人数</th>
-                                    <th>出勤率</th>
                                     <th>状态</th>
+                                    <th>出勤人数</th>
                                     <th>操作</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for record in recent_sessions %}
-                                    <tr>
-                                        <td>{{ record.start_time|date:"Y-m-d" }}</td>
-                                        <td>{{ record.course.name }}</td>
-                                        <td>{{ record.start_time|date:"H:i" }} - {{ record.end_time|date:"H:i" }}</td>
-                                        <td>{{ record.attendance_count }}/{{ record.total_students }}</td>
+                                {% for session in recent_sessions %}
+                                    <tr class="{% if session.status == 'active' %}table-success{% endif %}">
+                                        <td>{{ session.course.name }}</td>
+                                        <td>{{ session.start_time|date:"Y-m-d H:i" }}</td>
                                         <td>
-                                            {% if record.total_students > 0 %}
-                                                {% with attendance_rate=record.attendance_count|percentage:record.total_students %}
-                                                    <div class="progress" style="height: 6px; width: 80px;">
-                                                        {% if attendance_rate >= 80 %}
-                                                            <div class="progress-bar bg-success" style="width: {{ attendance_rate }}%"></div>
-                                                        {% elif attendance_rate >= 60 %}
-                                                            <div class="progress-bar bg-warning" style="width: {{ attendance_rate }}%"></div>
-                                                        {% else %}
-                                                            <div class="progress-bar bg-danger" style="width: {{ attendance_rate }}%"></div>
-                                                        {% endif %}
-                                                    </div>
-                                                    <small>{{ attendance_rate|floatformat:0 }}%</small>
-                                                {% endwith %}
-                                            {% else %}
-                                                <small>无数据</small>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if record.status == 'completed' %}
-                                                <span class="badge bg-success">已完成</span>
-                                            {% elif record.status == 'active' %}
-                                                <span class="badge bg-warning">进行中</span>
+                                            {% if session.status == 'active' %}
+                                                <span class="badge bg-success">进行中</span>
                                             {% else %}
                                                 <span class="badge bg-secondary">已关闭</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <button class="btn btn-sm btn-success manual-attendance-btn" data-session-id="{{ record.id }}">
-                                                <i class="fas fa-user-plus"></i>
-                                            </button>
+                                            {% with attendance_count=session.actual_attendance_count %}
+                                            {% with total_count=session.actual_total_students_count %}
+                                            {{ attendance_count }}/{{ total_count }}
+                                            {% endwith %}
+                                            {% endwith %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{% url 'teachers:session_detail' session.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if session.status == 'active' %}
+                                                    <button class="btn btn-sm btn-outline-danger end-session-btn" data-session-id="{{ session.id }}">
+                                                        <i class="fas fa-stop"></i>
+                                                    </button>
+                                                {% endif %}
+                                                <button class="btn btn-sm btn-outline-success manual-btn" data-session-id="{{ session.id }}">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="7" class="text-center py-4">
-                                            <div class="text-muted mb-2">
-                                                <i class="fas fa-calendar-xmark fa-2x"></i>
-                                            </div>
-                                            <p>暂无考勤记录</p>
-                                        </td>
+                                        <td colspan="5" class="text-center py-3">暂无考勤记录</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -766,6 +754,49 @@
         // 初始化并每秒更新一次
         updateSystemTime();
         setInterval(updateSystemTime, 1000);
+        
+        // 为表格中的所有结束会话按钮添加点击事件
+        var endSessionBtns = document.querySelectorAll('.end-session-btn');
+        endSessionBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var sessionId = this.getAttribute('data-session-id');
+                if (!sessionId) {
+                    alert('找不到考勤会话ID');
+                    return;
+                }
+                
+                if (confirm('确定要结束此考勤会话吗？结束后将不能继续签到。')) {
+                    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    
+                    fetch('/teachers/attendance/end-session/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            session_id: sessionId
+                        })
+                    })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (data.success) {
+                            alert('考勤会话已成功结束');
+                            window.location.reload();
+                        } else {
+                            alert('错误: ' + (data.message || '操作失败'));
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('结束会话时出错:', error);
+                        alert('操作失败，请重试');
+                    });
+                }
+            });
+        });
         
         // 下载二维码功能
         if (downloadBtn) {
@@ -953,21 +984,27 @@
             // 创建新的会话行
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-                <td>${newSession.start_time.split(' ')[0]}</td>
                 <td>${newSession.course_name || "通用考勤"}</td>
                 <td>${newSession.start_time.split(' ')[1]} - ${newSession.end_time.split(' ')[1]}</td>
-                <td>0/0</td>
-                <td><small>无数据</small></td>
                 <td><span class="badge bg-warning">进行中</span></td>
+                <td>0/0</td>
                 <td>
-                    <button class="btn btn-sm btn-success manual-attendance-btn" data-session-id="${newSession.id}">
-                        <i class="fas fa-user-plus"></i>
-                    </button>
+                    <div class="btn-group">
+                        <a href="/teachers/attendance/session/${newSession.id}/" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger end-session-btn" data-session-id="${newSession.id}">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success manual-btn" data-session-id="${newSession.id}">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                    </div>
                 </td>
             `;
             
             // 如果表格中有"暂无考勤记录"行，则移除它
-            const emptyRow = tableBody.querySelector('tr td[colspan="7"]');
+            const emptyRow = tableBody.querySelector('tr td[colspan="5"]');
             if (emptyRow) {
                 tableBody.innerHTML = '';
             }
@@ -1008,55 +1045,18 @@
         // 内联生成按钮
         if (inlineBtn) {
             inlineBtn.addEventListener('click', function() {
-                createQRCode('', 2);  // 使用默认值
+                // 显示考勤选择模态框
+                var modal = new bootstrap.Modal(document.getElementById('generateQRCodeModal'));
+                modal.show();
             });
         }
         
         // 刷新按钮
         if (refreshBtn) {
             refreshBtn.addEventListener('click', function() {
-                createQRCode('', 2);  // 使用默认值
-            });
-        }
-        
-        // 结束会话按钮
-        if (endSessionBtn) {
-            endSessionBtn.addEventListener('click', function() {
-                var sessionId = document.getElementById('currentSessionId').value;
-                if (!sessionId) {
-                    alert('找不到活跃的考勤会话');
-                    return;
-                }
-                
-                if (confirm('确定要结束此考勤会话吗？')) {
-                    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                    
-                    fetch('/attendance/end-session/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrfToken
-                        },
-                        body: JSON.stringify({
-                            session_id: sessionId
-                        })
-                    })
-                    .then(function(response) {
-                        return response.json();
-                    })
-                    .then(function(data) {
-                        if (data.success) {
-                            alert(data.message);
-                            window.location.reload();
-                        } else {
-                            alert('错误: ' + data.message);
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error('结束会话时出错:', error);
-                        alert('操作失败，请重试');
-                    });
-                }
+                // 显示考勤选择模态框
+                var modal = new bootstrap.Modal(document.getElementById('generateQRCodeModal'));
+                modal.show();
             });
         }
         
@@ -1082,7 +1082,7 @@
         }
         
         // 表格中的手动考勤按钮点击事件
-        var manualAttendanceBtns = document.querySelectorAll('.manual-attendance-btn');
+        var manualAttendanceBtns = document.querySelectorAll('.manual-btn');
         manualAttendanceBtns.forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var sessionId = this.getAttribute('data-session-id');

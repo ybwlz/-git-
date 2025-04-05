@@ -31,34 +31,64 @@
         }
         
         .sidebar {
-            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             height: 100vh;
             position: fixed;
-            padding-top: 20px;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
         }
         
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.85);
-            border-radius: 5px;
-            margin: 5px 10px;
-            transition: all 0.3s;
-        }
-        
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
         }
         
         .sidebar .nav-link i {
-            margin-right: 10px;
-            width: 20px;
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
             text-align: center;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
         }
         
         .main-content {
             margin-left: 250px;
-            padding: 20px;
+            padding: 2rem;
+        }
+        
+        .sidebar img.rounded-circle {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar h5 {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
         
         @media (max-width: 768px) {
@@ -66,11 +96,14 @@
                 width: 100%;
                 height: auto;
                 position: relative;
-                padding-top: 0;
             }
             
             .main-content {
                 margin-left: 0;
+            }
+            
+            .sidebar .nav-link:hover {
+                transform: none;
             }
         }
         
@@ -256,32 +289,36 @@
     <!-- 侧边栏 -->
     <div class="sidebar col-md-3 col-lg-2 d-md-block">
         <div class="text-center mb-4">
-            <img src="../static/img/logo.jpg" alt="苗韵琴行" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
-            <h5 class="mt-2">苗韵琴行</h5>
+            {% if student.user.avatar %}
+                <img src="{{ student.user.avatar.url }}" alt="{{ student.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/default-avatar.jpg' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ student.name }}</h5>
         </div>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link" href="student_profile.html">
+                <a class="nav-link" href="{% url 'students:profile' %}">
                     <i class="fas fa-user"></i> 个人主页
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="student_practice.html">
+                <a class="nav-link" href="{% url 'students:practice' %}">
                     <i class="fas fa-music"></i> 今日练琴
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" href="student_attendance.html">
+                <a class="nav-link active" href="{% url 'students:attendance' %}">
                     <i class="fas fa-calendar-check"></i> 考勤记录
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="sheet_music.html">
+                <a class="nav-link" href="{% url 'students:sheet_music' %}">
                     <i class="fas fa-file-alt"></i> 在线曲谱
                 </a>
             </li>
             <li class="nav-item mt-5">
-                <a class="nav-link" href="../login.html">
+                <a class="nav-link" href="{% url 'logout' %}">
                     <i class="fas fa-sign-out-alt"></i> 退出登录
                 </a>
             </li>
@@ -291,39 +328,17 @@
     <!-- 主要内容 -->
     <div class="main-content">
         <div class="container-fluid">
-            <!-- 顶部导航 -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-white rounded-3 shadow-sm mb-4">
-                <div class="container-fluid">
-                    <span class="navbar-brand mb-0 h1">考勤记录</span>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <i class="fas fa-bell"></i>
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        2
-                                    </span>
-                                </a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                    <img src="https://img.51miz.com/Element/00/88/05/53/c1f2b1e3_E880553_a4a3d5d9.jpg" class="rounded-circle" width="30" height="30">
-                                    <span class="ms-1">王小明</span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="student_profile.html"><i class="fas fa-user me-2"></i>个人资料</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>账号设置</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="../login.html"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
-                                </ul>
-                            </li>
-                        </ul>
+            <!-- 添加新的顶部栏 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">考勤记录</h2>
+                <div>
+                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
+                    <div class="btn btn-sm btn-outline-secondary system-time" id="systemTime">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime">00:00:00</span>
                     </div>
                 </div>
-            </nav>
+            </div>
 
             <!-- 统计数据 -->
             <div class="stats-container">
@@ -331,29 +346,29 @@
                     <div class="stat-icon">
                         <i class="fas fa-calendar-check"></i>
                     </div>
-                    <div class="stat-value">87</div>
+                    <div class="stat-value">{{ total_days|default:"0" }}</div>
                     <div class="stat-label">累计练习天数</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <div class="stat-value">256</div>
+                    <div class="stat-value">{{ total_practice_time|default:"0" }}</div>
                     <div class="stat-label">累计练习小时</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-percentage"></i>
                     </div>
-                    <div class="stat-value">92%</div>
+                    <div class="stat-value">{{ attendance_rate|floatformat:0 }}%</div>
                     <div class="stat-label">出勤率</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-award"></i>
                     </div>
-                    <div class="stat-value">12</div>
-                    <div class="stat-label">掌握曲目</div>
+                    <div class="stat-value">{{ month_attendances|default:"0" }}</div>
+                    <div class="stat-label">本月出勤</div>
                 </div>
             </div>
 
@@ -435,9 +450,11 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../static/js/skin/default/layer.js"></script>
+    <!-- Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/skin/default/layer.js' %}"></script>
     <!-- FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/zh-cn.js"></script>
@@ -646,6 +663,19 @@
                     practiceChart.update();
                 });
             });
+            
+            // 添加系统时间显示功能
+            function updateSystemTime() {
+                const now = new Date();
+                const timeElement = document.getElementById('currentTime');
+                if(timeElement) {
+                    timeElement.textContent = now.toTimeString().substring(0, 8);
+                }
+            }
+            
+            // 初始化并每秒更新一次
+            updateSystemTime();
+            setInterval(updateSystemTime, 1000);
         });
     </script>
 </body>

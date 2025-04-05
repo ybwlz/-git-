@@ -397,11 +397,11 @@
                                         <small class="text-muted">{{ session.start_time|date:"Y-m-d H:i" }} - {{ session.end_time|date:"H:i" }}</small>
                                     </div>
                                     <span class="badge 
-                                        {% if session.end_time < current_time %}bg-secondary
-                                        {% elif session.start_time <= current_time and session.end_time >= current_time %}bg-success
+                                        {% if session.status == 'closed' or session.end_time < current_time %}bg-secondary
+                                        {% elif session.status == 'active' and session.start_time <= current_time and session.end_time >= current_time %}bg-success
                                         {% else %}bg-primary{% endif %}">
-                                        {% if session.end_time < current_time %}已结束
-                                        {% elif session.start_time <= current_time and session.end_time >= current_time %}进行中
+                                        {% if session.status == 'closed' %}已结束
+                                        {% elif session.status == 'active' and session.start_time <= current_time and session.end_time >= current_time %}进行中
                                         {% else %}待开始{% endif %}
                                     </span>
                                 </div>

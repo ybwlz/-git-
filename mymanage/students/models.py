@@ -40,12 +40,19 @@ def add_student_to_default_course(sender, instance, created, **kwargs):
             print(f"学生 {instance.name} 已自动添加到 {course.name} 课程")
 
 class PracticeRecord(models.Model):
+    STATUS_CHOICES = [
+        ('active', '练琴中'),
+        ('completed', '已完成'),
+        ('cancelled', '已取消')
+    ]
+    
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='practice_records', verbose_name='学生')
     date = models.DateField(verbose_name='练习日期')
     start_time = models.DateTimeField(verbose_name='开始时间')
-    end_time = models.DateTimeField(verbose_name='结束时间')
-    duration = models.IntegerField(verbose_name='练习时长(分钟)')
+    end_time = models.DateTimeField(null=True, blank=True, verbose_name='结束时间')
+    duration = models.IntegerField(null=True, blank=True, verbose_name='练习时长(分钟)')
     piano_number = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(7)], verbose_name='钢琴编号')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name='状态')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
     class Meta:

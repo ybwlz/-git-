@@ -258,20 +258,20 @@
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">总学生数:</span>
-                                    <span>{{ total_students }}</span>
+                                    <span>{{ session.total_students }}</span>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">出勤人数:</span>
-                                    <span>{{ attendance_count }}</span>
+                                    <span>{{ session.attendance_count }}</span>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">出勤率:</span>
                                     <div>
-                                        {% if total_students > 0 %}
+                                        {% if session.total_students > 0 %}
                                             <div class="progress" style="height: 6px; width: 80px; display: inline-block; vertical-align: middle;">
                                                 {% if attendance_rate >= 80 %}
                                                     <div class="progress-bar bg-success" style="width: {{ attendance_rate }}%"></div>
@@ -295,7 +295,7 @@
                 <div class="col-md-8">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">已签到学生 ({{ attendance_count }})</h5>
+                            <h5 class="mb-0">已签到学生 ({{ session.attendance_count }})</h5>
                             <div>
                                 {% if session.status == 'active' %}
                                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#manualCheckInModal">
@@ -312,7 +312,8 @@
                                             <th>学生</th>
                                             <th>签到时间</th>
                                             <th>签退时间</th>
-                                            <th>时长</th>
+                                            <th>考勤时长</th>
+                                            <th>练习总时长</th>
                                             <th>状态</th>
                                             <th>操作</th>
                                         </tr>
@@ -349,6 +350,9 @@
                                                     {% else %}
                                                         <span class="text-muted">进行中</span>
                                                     {% endif %}
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ record.total_practice_time|default:"0" }} 分钟</span>
                                                 </td>
                                                 <td>
                                                     {% if record.status == 'checked_in' %}

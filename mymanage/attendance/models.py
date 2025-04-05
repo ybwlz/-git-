@@ -45,17 +45,23 @@ class QRCode(models.Model):
         # 生成二维码图片
         if not self.qr_code_image:
             qr = qrcode.QRCode(
-                version=1,
-                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                version=4,  # 更高的版本支持更多数据
+                error_correction=qrcode.constants.ERROR_CORRECT_M,  # 提高纠错级别
                 box_size=10,
                 border=4,
             )
-            qr.add_data(str(self.uuid))
+            
+            # 使用更明确的数据格式，确保包含UUID和其他信息
+            qr_data = str(self.uuid)
+            qr.add_data(qr_data)
             qr.make(fit=True)
             
             img = qr.make_image(fill_color="black", back_color="white")
+            
+            # 使用BytesIO作为临时文件
             buffer = BytesIO()
-            img.save(buffer, format="PNG")
+            # 保存为高质量图片
+            img.save(buffer, format="PNG", quality=95)
             
             # 使用当前时间代替self.created_at，因为created_at可能为None
             current_time = timezone.now()
@@ -100,6 +106,18 @@ class AttendanceSession(models.Model):
     def __str__(self):
         course_name = self.course.name if self.course else "未关联课程"
         return f"{course_name} - {self.start_time.strftime('%Y-%m-%d %H:%M')}"
+    
+    @property
+    def attendance_count(self):
+        """获取考勤人数"""
+        return self.records.count()
+    
+    @property
+    def total_students(self):
+        """获取总学生数"""
+        if self.course:
+            return self.course.students.count()
+        return 0
     
     def clean(self):
         """验证数据的有效性"""

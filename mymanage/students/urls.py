@@ -13,7 +13,11 @@ urlpatterns = [
     path('practice/check-in/', views.check_in, name='check_in'),
     path('practice/check-out/', views.check_out, name='check_out'),
     path('practice/scan-qrcode/', views.scan_qrcode, name='scan_qrcode'),
-    path('practice/status/', views.practice_status, name='practice_status'),
+    path('practice/status/', views.check_practice_status, name='practice_status'),
+    path('practice/start/', views.start_practice, name='start_practice'),
+    path('practice/join-waiting/', views.join_waiting_queue, name='join_waiting'),
+    path('practice/end/', views.end_practice, name='end_practice'),
+    path('practice/check-status/', views.check_practice_status, name='check_practice_status'),
     
     # 考勤记录
     path('attendance/', views.attendance, name='attendance'),
