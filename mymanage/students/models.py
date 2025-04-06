@@ -40,6 +40,10 @@ def add_student_to_default_course(sender, instance, created, **kwargs):
             print(f"学生 {instance.name} 已自动添加到 {course.name} 课程")
 
 class PracticeRecord(models.Model):
+    """
+    练琴记录模型，作为系统的主要考勤记录。
+    这个模型既记录学生的练琴时间，又作为考勤记录使用。
+    """
     STATUS_CHOICES = [
         ('active', '练琴中'),
         ('completed', '已完成'),
@@ -54,7 +58,14 @@ class PracticeRecord(models.Model):
     piano_number = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(7)], verbose_name='钢琴编号')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name='状态')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
-
+    
+    # 新增字段，用于关联考勤会话
+    attendance_session = models.ForeignKey('attendance.AttendanceSession', 
+                                          on_delete=models.SET_NULL, 
+                                          related_name='practice_records', 
+                                          null=True, blank=True, 
+                                          verbose_name='关联考勤会话')
+    
     class Meta:
         verbose_name = '练琴记录'
         verbose_name_plural = '练琴记录'
@@ -63,7 +74,27 @@ class PracticeRecord(models.Model):
     def __str__(self):
         return f"{self.student.name} - {self.date}"
 
+    @property
+    def check_in_time(self):
+        """兼容AttendanceRecord API，返回开始时间"""
+        return self.start_time
+    
+    @property
+    def check_out_time(self):
+        """兼容AttendanceRecord API，返回结束时间"""
+        return self.end_time
+    
+    @property
+    def duration_minutes(self):
+        """兼容AttendanceRecord API，返回时长（分钟）"""
+        return self.duration
+
+# 以下是原来的Attendance模型，仅作为兼容保留，不再主动使用
 class Attendance(models.Model):
+    """
+    旧版考勤记录，仅为兼容性保留，不再主动使用。
+    新的考勤记录应该使用PracticeRecord。
+    """
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances', verbose_name='学生')
     date = models.DateField(verbose_name='考勤日期')
     check_in_time = models.DateTimeField(verbose_name='签到时间')
@@ -77,8 +108,8 @@ class Attendance(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
     class Meta:
-        verbose_name = '考勤记录'
-        verbose_name_plural = '考勤记录'
+        verbose_name = '旧版考勤记录'
+        verbose_name_plural = '旧版考勤记录'
         ordering = ['-date', '-check_in_time']
 
     def __str__(self):

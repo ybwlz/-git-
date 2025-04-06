@@ -242,7 +242,7 @@
             {% if student.user.avatar %}
                 <img src="{{ student.user.avatar.url }}" alt="{{ student.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
             {% else %}
-                <img src="{% static 'img/default-avatar.jpg' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+                <img src="{% static 'img/anime_boy.jpg' %}?v={% now 'U' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
             {% endif %}
             <h5 class="mt-2">{{ student.name }}</h5>
         </div>
@@ -297,7 +297,7 @@
                         {% if student.user.avatar %}
                         <img src="{{ student.user.avatar.url }}" class="profile-avatar">
                         {% else %}
-                        <img src="{% static 'img/default-avatar.jpg' %}" class="profile-avatar">
+                        <img src="{% static 'img/anime_boy.jpg' %}?v={% now 'U' %}" class="profile-avatar">
                         {% endif %}
                     </div>
                     <div class="col-md-9">
@@ -395,39 +395,8 @@
                     </div>
                 </div>
 
-                <!-- 学习信息 -->
-                <div class="col-md-6">
-                    <div class="profile-card">
-                        <h3 class="profile-card-title"><i class="fas fa-graduation-cap"></i>学习信息</h3>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">当前级别</div>
-                            <div class="profile-info-value">{{ student.get_level_display }}</div>
-                        </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">指导老师</div>
-                            <div class="profile-info-value">{{ teacher_name }}</div>
-                        </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">课程类型</div>
-                            <div class="profile-info-value">{{ course_type }}</div>
-                        </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">课程级别</div>
-                            <div class="profile-info-value">{{ course_level }}</div>
-                        </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">课程频率</div>
-                            <div class="profile-info-value">{{ course_frequency }}</div>
-                        </div>
-                        <div class="profile-info-item">
-                            <div class="profile-info-label">上课时间</div>
-                            <div class="profile-info-value">{{ class_times }}</div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- 练琴统计 -->
-                <div class="col-md-6 mt-4">
+                <div class="col-md-6">
                     <div class="profile-card">
                         <div class="profile-card-title">
                             <i class="fas fa-chart-bar"></i> 练琴统计
@@ -473,34 +442,6 @@
                         <div class="text-center mt-3">
                             <a href="{% url 'students:practice' %}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-music me-1"></i> 去练琴
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 考勤统计 -->
-                <div class="col-md-6 mt-4">
-                    <div class="profile-card">
-                        <div class="profile-card-title">
-                            <i class="fas fa-calendar-check"></i> 考勤统计
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="profile-info-item">
-                                    <div class="profile-info-label">总考勤次数</div>
-                                    <div class="profile-info-value">{{ total_attendance|default:"0" }}次</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="profile-info-item">
-                                    <div class="profile-info-label">出勤率</div>
-                                    <div class="profile-info-value">{{ attendance_rate|default:"0" }}%</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center mt-3">
-                            <a href="{% url 'students:attendance' %}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-calendar-check me-1"></i> 查看考勤
                             </a>
                         </div>
                     </div>

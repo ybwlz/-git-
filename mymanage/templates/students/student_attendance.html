@@ -564,6 +564,23 @@
             border-radius: 3px;
             margin: 1px 0;
         }
+
+        /* 添加日历日期样式修改 */
+        .fc-col-header-cell-cushion,
+        .fc-daygrid-day-number {
+            text-decoration: none !important;
+            color: #333 !important;
+        }
+
+        /* 金秋风格主题调整 */
+        .calendar-theme-gold-style .fc-col-header-cell-cushion {
+            color: white !important;
+        }
+
+        .calendar-theme-gold-style .fc-daygrid-day-number {
+            color: #333 !important;
+            text-decoration: none !important;
+        }
     </style>
 </head>
 <body>
@@ -573,7 +590,7 @@
             {% if student.user.avatar %}
                 <img src="{{ student.user.avatar.url }}" alt="{{ student.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
             {% else %}
-                <img src="{% static 'img/default-avatar.jpg' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+                <img src="{% static 'img/anime_boy.jpg' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
             {% endif %}
             <h5 class="mt-2">{{ student.name }}</h5>
         </div>
@@ -621,6 +638,9 @@
                 </div>
             </div>
 
+            <!-- 显示当前考勤状态部分 -->
+            <!-- 删除当前考勤状态部分的卡片 -->
+
             <!-- 统计数据卡片 -->
             <div class="stats-container">
                 <div class="stat-card" data-lazy>
@@ -642,7 +662,7 @@
                         <i class="fas fa-percentage"></i>
                     </div>
                     <div class="stat-value">{{ attendance_rate|floatformat:0 }}%</div>
-                    <div class="stat-label">出勤率</div>
+                    <div class="stat-label">本周出勤率</div>
                 </div>
             </div>
 
@@ -651,18 +671,6 @@
                 <div class="attendance-header">
                     <h2>考勤日历</h2>
                     <p>查看您的考勤记录和练琴时间</p>
-                </div>
-                
-                <!-- 日历主题选择器 -->
-                <div class="calendar-theme-selector mb-3">
-                    <div class="d-flex align-items-center">
-                        <span class="me-2">选择日历风格：</span>
-                        <div class="theme-option default active" data-theme="default" title="默认风格"></div>
-                        <div class="theme-option blue-style" data-theme="blue-style" title="蓝色经典"></div>
-                        <div class="theme-option green-style" data-theme="green-style" title="翠竹青风"></div>
-                        <div class="theme-option gold-style" data-theme="gold-style" title="金秋风格"></div>
-                        <div class="theme-option purple-style" data-theme="purple-style" title="紫气东来"></div>
-                    </div>
                 </div>
                 
                 <div class="calendar-container" id="calendar"></div>
@@ -690,12 +698,21 @@
                 </div>
                 
                 <div class="attendance-list">
+                    <!-- 删除调试信息 -->
+                    
                     {% if attendances %}
+                        <div class="d-flex justify-content-end mb-3">
+                            <a href="{% url 'students:attendance_detail' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-list-alt"></i> 详细记录
+                            </a>
+                        </div>
+                    
                         {% for record in attendances %}
                             <div class="attendance-item">
                                 <div class="attendance-info">
                                     <div class="attendance-date">
                                         {{ record.check_in_time|date:"Y年m月d日" }}
+                                        <small class="text-muted">(ID: {{ record.id }})</small>
                                     </div>
                                     <div class="attendance-time">
                                         签到: {{ record.check_in_time|time:"H:i:s" }}
@@ -827,70 +844,16 @@
                     week: '周',
                     list: '列表'
                 },
-                events: {% autoescape off %}{{ calendar_data }}{% endautoescape %},
+                events: {{ calendar_data|safe }},
                 eventClick: function(info) {
                     alert(info.event.title);
                 }
             });
             calendar.render();
             
-            // 日历主题切换功能
-            const themeOptions = document.querySelectorAll('.theme-option');
+            // 直接应用橙色主题，不需要选择器
             const calendarCard = document.querySelector('.calendar-container').closest('.attendance-card');
-            
-            // 保存用户主题选择到localStorage
-            const savedTheme = localStorage.getItem('calendarTheme') || 'default';
-            
-            // 初始化主题
-            if (savedTheme !== 'default') {
-                applyTheme(savedTheme);
-                
-                // 更新活动状态
-                themeOptions.forEach(option => {
-                    option.classList.remove('active');
-                    if (option.dataset.theme === savedTheme) {
-                        option.classList.add('active');
-                    }
-                });
-            }
-            
-            // 主题切换事件监听
-            themeOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    const theme = this.dataset.theme;
-                    
-                    // 移除所有主题类
-                    themeOptions.forEach(opt => opt.classList.remove('active'));
-                    
-                    // 添加当前主题类
-                    this.classList.add('active');
-                    
-                    // 应用所选主题
-                    applyTheme(theme);
-                    
-                    // 保存到localStorage
-                    localStorage.setItem('calendarTheme', theme);
-                });
-            });
-            
-            // 应用主题函数
-            function applyTheme(theme) {
-                // 移除所有主题类
-                calendarCard.classList.remove(
-                    'calendar-theme-blue-style',
-                    'calendar-theme-green-style',
-                    'calendar-theme-gold-style',
-                    'calendar-theme-purple-style'
-                );
-                
-                // 添加所选主题类
-                if (theme !== 'default') {
-                    calendarCard.classList.add('calendar-theme-' + theme);
-                }
-                
-                // 触发窗口调整事件以重新渲染日历
-                window.dispatchEvent(new Event('resize'));
-            }
+            calendarCard.classList.add('calendar-theme-gold-style');
             
             // 添加系统时间显示功能
             function updateSystemTime() {

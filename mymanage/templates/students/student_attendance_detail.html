@@ -1,0 +1,283 @@
+{% extends "students/student_base.html" %}
+{% load static %}
+
+{% block title %}详细考勤记录 | 苗韵琴行管理系统{% endblock %}
+
+{% block styles %}
+<style>
+    /* 筛选区域样式 */
+    .filter-section {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    /* 表格样式 */
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    /* Excel风格表格 */
+    .excel-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    
+    .excel-table th, .excel-table td {
+        border: 1px solid #e0e0e0;
+        padding: 8px 12px;
+    }
+    
+    .excel-table th {
+        background-color: #f1f1f1;
+        color: #333;
+        font-weight: 600;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .excel-table tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+    
+    .excel-table tr:hover {
+        background-color: #f0f7ff;
+    }
+    
+    /* 统计卡片样式 */
+    .stat-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #4e73df;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #858796;
+        font-size: 0.9rem;
+    }
+    
+    /* 状态标签样式 */
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .status-completed {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+    
+    .status-active {
+        background-color: #fff8e1;
+        color: #f57f17;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>详细考勤记录</h2>
+        <div>
+            <a href="{% url 'students:attendance' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> 返回考勤概览
+            </a>
+        </div>
+    </div>
+    
+    <!-- 筛选区域 -->
+    <div class="filter-section">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="year" class="form-label">选择年份</label>
+                <select name="year" id="year" class="form-select">
+                    {% for y in years %}
+                        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}年</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="month" class="form-label">选择月份</label>
+                <select name="month" id="month" class="form-select">
+                    {% for m in months %}
+                        <option value="{{ m.value }}" {% if m.value == selected_month %}selected{% endif %}>{{ m.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter"></i> 应用筛选
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- 当前筛选提示 -->
+    <div class="alert alert-info" role="alert">
+        <i class="fas fa-filter"></i> 当前显示: {{ selected_year }}年 
+        {% if selected_month > 0 %}
+            {% for m in months %}
+                {% if m.value == selected_month %}{{ m.name }}{% endif %}
+            {% endfor %}
+        {% else %}
+            全年
+        {% endif %} 
+        的考勤记录，共 {{ total_records }} 条
+    </div>
+    
+    <!-- 统计卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-value">{{ distinct_days }}</div>
+                <div class="stat-label">不同练习天数</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_practice_time }}</div>
+                <div class="stat-label">累计练习时长(小时)</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-value">{{ avg_practice_time }}</div>
+                <div class="stat-label">平均练习时长(分钟)</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 详细记录表格 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">考勤详细记录</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive" style="min-height: 500px;">
+                <table class="table excel-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>开始时间</th>
+                            <th>结束时间</th>
+                            <th>状态</th>
+                            <th>练习时长(分钟)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td class="text-center">{{ record.date|date:"Y-m-d" }}</td>
+                            <td class="text-center">{{ record.start_time|time:"H:i:s" }}</td>
+                            <td class="text-center">
+                                {% if record.end_time %}
+                                    {{ record.end_time|time:"H:i:s" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if record.status == 'completed' %}
+                                    <span class="status-badge status-completed">已完成</span>
+                                {% elif record.status == 'active' %}
+                                    <span class="status-badge status-active">练习中</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ record.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if record.duration %}
+                                    {{ record.duration|floatformat:0 }}
+                                {% else %}
+                                    {% if record.status == 'active' %}
+                                        进行中
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                <p class="mb-0">没有找到符合条件的考勤记录</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分页控件 -->
+            {% if records.has_other_pages %}
+            <div class="d-flex justify-content-center mt-4 mb-3">
+                <nav>
+                    <ul class="pagination">
+                        {% if records.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?year={{ selected_year }}&month={{ selected_month }}&page={{ records.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in records.paginator.page_range %}
+                            {% if records.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > records.number|add:'-3' and num < records.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?year={{ selected_year }}&month={{ selected_month }}&page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if records.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?year={{ selected_year }}&month={{ selected_month }}&page={{ records.next_page_number }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

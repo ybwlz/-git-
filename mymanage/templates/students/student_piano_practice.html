@@ -1,0 +1,976 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钢琴练习中 - 苗韵琴行管理系统</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 自定义CSS -->
+    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #20bf6b;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .practice-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .practice-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .practice-header h2 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .practice-header p {
+            color: #777;
+            font-size: 16px;
+        }
+        
+        .large-timer {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--success-color), #0fb9b1);
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timer-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.2' d='M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+        }
+        
+        .timer-value {
+            font-size: 5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .timer-label {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .piano-info {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .piano-info h4 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .piano-info h4 i {
+            margin-right: 10px;
+        }
+        
+        .piano-details {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .piano-detail-item {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 15px;
+        }
+        
+        .piano-detail-label {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 5px;
+        }
+        
+        .piano-detail-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .btn-action {
+            padding: 15px 35px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin: 0 auto;
+            width: 80%;
+            max-width: 300px;
+        }
+        
+        .btn-action i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .btn-end-practice {
+            background-color: var(--danger-color);
+            border: none;
+            color: white;
+        }
+        
+        .btn-end-practice:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn-end-practice:disabled {
+            background-color: #95a5a6;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .time-requirement {
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: #777;
+        }
+        
+        .qr-scanner-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 75%;
+            overflow: hidden;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            margin-top: 2rem;
+            display: none;
+        }
+        
+        .qr-scanner-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            z-index: 1;
+        }
+        
+        .qr-scanner-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 60%;
+            box-sizing: border-box;
+            border: 2px dashed #07c160;
+            border-radius: 10px;
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .qr-scanner-corners {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+        
+        .qr-scanner-corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: #07c160;
+            border-style: solid;
+            border-width: 0;
+        }
+        
+        .qr-scanner-corner.top-left {
+            top: 0;
+            left: 0;
+            border-top-width: 3px;
+            border-left-width: 3px;
+        }
+        
+        .qr-scanner-corner.top-right {
+            top: 0;
+            right: 0;
+            border-top-width: 3px;
+            border-right-width: 3px;
+        }
+        
+        .qr-scanner-corner.bottom-left {
+            bottom: 0;
+            left: 0;
+            border-bottom-width: 3px;
+            border-left-width: 3px;
+        }
+        
+        .qr-scanner-corner.bottom-right {
+            bottom: 0;
+            right: 0;
+            border-bottom-width: 3px;
+            border-right-width: 3px;
+        }
+        
+        .qr-scanner-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #07c160;
+            top: 0;
+            left: 0;
+            opacity: 0.8;
+            animation: qr-scan-animation 2s infinite linear;
+        }
+        
+        @keyframes qr-scan-animation {
+            0% {
+                top: 0;
+            }
+            100% {
+                top: calc(100% - 2px);
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .return-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .return-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-active {
+            background-color: var(--success-color);
+            box-shadow: 0 0 5px var(--success-color);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 添加CSRF令牌隐藏字段 -->
+    {% csrf_token %}
+    
+    <div class="main-container">
+        <div class="practice-card">
+            <div class="practice-header">
+                <h2><i class="fas fa-music"></i> 钢琴练习中</h2>
+                <p class="mb-0">
+                    <span class="status-indicator status-active"></span>
+                    正在练习，请保持良好的演奏状态
+                </p>
+            </div>
+            
+            <!-- 大型计时器 -->
+            <div class="large-timer">
+                <div class="timer-wave"></div>
+                <div class="timer-value" id="practiceTimer">00:00:00</div>
+                <div class="timer-label">练习时间</div>
+            </div>
+            
+            <!-- 钢琴信息 -->
+            <div class="piano-info">
+                <h4><i class="fas fa-piano"></i> 当前使用的钢琴</h4>
+                <div class="piano-details">
+                    <div class="piano-detail-item">
+                        <div class="piano-detail-label">钢琴编号</div>
+                        <div class="piano-detail-value" id="pianoNumber">{{ piano_number }}</div>
+                    </div>
+                    <div class="piano-detail-item">
+                        <div class="piano-detail-label">钢琴品牌</div>
+                        <div class="piano-detail-value" id="pianoBrand">{{ piano_brand }}</div>
+                    </div>
+                    <div class="piano-detail-item">
+                        <div class="piano-detail-label">钢琴型号</div>
+                        <div class="piano-detail-value" id="pianoModel">{{ piano_model }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 操作按钮 -->
+            <div class="text-center">
+                <div class="time-requirement mb-3" id="timeRequirement">练习满30分钟后才能结束练习</div>
+                <button id="endPracticeBtn" class="btn btn-action btn-end-practice" disabled>
+                    <i class="fas fa-stop-circle"></i> 结束练习
+                </button>
+            </div>
+            
+            <!-- 扫描二维码区域 (默认隐藏) -->
+            <div id="qrScannerContainer" class="qr-scanner-container" style="display: none;">
+                <div id="qrScannerVideo" class="qr-scanner-video"></div>
+                <div class="qr-scanner-frame"></div>
+                <div class="text-center mt-3">
+                    <button id="cancelScanBtn" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-times"></i> 取消扫描
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'students:practice' %}" class="return-link">
+                    <i class="fas fa-arrow-left"></i> 返回练琴主页
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QR码扫描模态框 -->
+    <div class="modal fade" id="qrScanModal" tabindex="-1" aria-labelledby="qrScanModalLabel" aria-hidden="true" data-bs-keyboard="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrScanModalLabel">扫描二维码结束练习</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="qr-scanner-container mb-3" style="display: block !important; visibility: visible !important;">
+                        <video id="scanner" class="qr-scanner-video" muted playsinline autoplay style="display: block !important; visibility: visible !important;"></video>
+                        <div class="qr-scanner-frame">
+                            <div class="qr-scanner-corners">
+                                <div class="qr-scanner-corner top-left"></div>
+                                <div class="qr-scanner-corner top-right"></div>
+                                <div class="qr-scanner-corner bottom-left"></div>
+                                <div class="qr-scanner-corner bottom-right"></div>
+                            </div>
+                            <div class="qr-scanner-line"></div>
+                        </div>
+                    </div>
+                    <div id="scanResult" class="alert alert-info">
+                        <i class="fas fa-spinner fa-spin"></i> 正在启动摄像头...
+                    </div>
+                    <p class="text-muted"><small>请将钢琴上的二维码对准扫码框</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="closeQrScannerBtn" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" id="testCameraBtn" class="btn btn-primary">刷新摄像头</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jsQR 库 - 添加用于QR码扫描 -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <!-- 二维码扫描库 -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- Layer.js -->
+    <script src="{% static 'js/layer/layer.js' %}"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // 获取CSRF令牌
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // 全局变量
+            let practiceId = null;
+            let startTime = null;
+            let timerInterval = null;
+            let scannerInstance = null;
+            let canEndPractice = false;
+            let scanActive = false;
+            let scanInterval = null;
+            
+            // 从URL参数中获取练琴ID
+            const urlParams = new URLSearchParams(window.location.search);
+            practiceId = urlParams.get('practice_id');
+            
+            // 如果localStorage中有存储的practiceId，优先使用它
+            const storedPracticeId = localStorage.getItem('activePracticeId');
+            if (storedPracticeId && !practiceId) {
+                practiceId = storedPracticeId;
+            }
+            
+            // 从服务器渲染的数据中获取练琴信息
+            {% if practice %}
+            practiceId = "{{ practice.id }}";
+            startTime = new Date("{{ practice.start_time|date:'c' }}");
+            console.log("从服务器获取的练琴开始时间:", startTime);
+            
+            // 检查是否可以结束练习（已练习30分钟以上）
+            const now = new Date();
+            const elapsedSeconds = Math.floor((now - startTime) / 1000);
+            canEndPractice = elapsedSeconds >= 1800; // 30分钟
+            
+            if (elapsedSeconds > 0) {
+                // 初始显示计时
+                updateTimer(elapsedSeconds);
+            }
+            {% endif %}
+            
+            // 初始化页面
+            initializePage();
+            
+            // 初始化页面功能
+            function initializePage() {
+                if (!practiceId) {
+                    // 如果没有练琴ID，尝试获取活跃的练琴记录
+                    checkActivePractice();
+                } else {
+                    // 存储当前练琴ID到localStorage
+                    localStorage.setItem('activePracticeId', practiceId);
+                    
+                    // 如果已经有开始时间，直接启动计时器
+                    if (startTime) {
+                        // 更新结束按钮状态
+                        updateEndPracticeButton();
+                        // 启动持续计时
+                        startTimer();
+                    } else {
+                        // 否则获取练琴状态
+                        fetchPracticeStatus();
+                    }
+                }
+                
+                // 绑定结束练琴按钮事件
+                $('#endPracticeBtn').on('click', showQRScanner);
+                
+                // 取消扫描按钮事件
+                $('#cancelScanBtn').on('click', hideQRScanner);
+            }
+            
+            // 检查是否有活跃的练琴记录
+            function checkActivePractice() {
+                $.ajax({
+                    url: "{% url 'students:check_active_practice' %}",
+                    type: "GET",
+                    success: function(response) {
+                        console.log("检查活跃练琴记录响应:", response);
+                        if (response.success && response.has_active_practice) {
+                            practiceId = response.practice_id;
+                            localStorage.setItem('activePracticeId', practiceId);
+                            
+                            // 更新钢琴信息
+                            updatePianoInfo(
+                                response.piano_number, 
+                                response.piano_brand, 
+                                response.piano_model
+                            );
+                            
+                            // 设置开始时间
+                            startTime = new Date(response.start_time);
+                            
+                            // 更新计时器
+                            updateTimer(response.total_seconds);
+                            
+                            // 检查是否可以结束练习
+                            canEndPractice = response.can_end;
+                            updateEndPracticeButton();
+                            
+                            // 启动计时器
+                            startTimer();
+                        } else {
+                            // 没有活跃的练琴记录，重定向到练琴主页
+                            window.location.href = "{% url 'students:practice' %}";
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("检查练琴状态出错:", error);
+                        layer.msg("获取练琴状态失败，请刷新页面重试", {icon: 2});
+                    }
+                });
+            }
+            
+            // 获取练琴状态
+            function fetchPracticeStatus() {
+                if (!practiceId) return;
+                
+                $.ajax({
+                    url: "{% url 'students:check_practice_status' %}",
+                    type: "GET",
+                    data: {
+                        practice_id: practiceId
+                    },
+                    success: function(response) {
+                        console.log("获取练琴状态响应:", response);
+                        if (response.success) {
+                            if (response.status === "active") {
+                                // 更新钢琴信息
+                                updatePianoInfo(
+                                    response.piano_number, 
+                                    response.piano_brand, 
+                                    response.piano_model
+                                );
+                                
+                                // 设置开始时间从服务器返回的时间
+                                startTime = new Date(response.start_time);
+                                
+                                // 更新计时器
+                                updateTimer(response.total_seconds);
+                                
+                                // 检查是否可以结束练习
+                                canEndPractice = response.can_checkout;
+                                updateEndPracticeButton();
+                                
+                                // 启动计时器
+                                startTimer();
+                            } else {
+                                // 练琴已结束，重定向到练琴主页
+                                localStorage.removeItem('activePracticeId');
+                                window.location.href = "{% url 'students:practice' %}";
+                            }
+                        } else {
+                            layer.msg(response.message || "获取练琴状态失败", {icon: 2});
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("获取练琴状态出错:", error);
+                        layer.msg("获取练琴状态失败，请刷新页面重试", {icon: 2});
+                    }
+                });
+            }
+            
+            // 更新钢琴信息
+            function updatePianoInfo(number, brand, model) {
+                $('#pianoNumber').text(number || "--");
+                $('#pianoBrand').text(brand || "--");
+                $('#pianoModel').text(model || "--");
+            }
+            
+            // 启动计时器
+            function startTimer() {
+                // 清除可能存在的旧计时器
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                // 设置每秒更新一次
+                timerInterval = setInterval(function() {
+                    // 计算练习时间
+                    const now = new Date();
+                    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                    
+                    // 更新显示
+                    updateTimer(elapsedSeconds);
+                    
+                    // 检查是否满足最小练习时间要求
+                    if (elapsedSeconds >= 1800 && !canEndPractice) {  // 30分钟 = 1800秒
+                        canEndPractice = true;
+                        updateEndPracticeButton();
+                    }
+                }, 1000);
+            }
+            
+            // 更新计时器显示
+            function updateTimer(totalSeconds) {
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                
+                // 格式化为 HH:MM:SS
+                const formattedTime = 
+                    (hours < 10 ? '0' + hours : hours) + ':' +
+                    (minutes < 10 ? '0' + minutes : minutes) + ':' +
+                    (seconds < 10 ? '0' + seconds : seconds);
+                
+                $('#practiceTimer').text(formattedTime);
+                
+                // 更新时间要求提示
+                if (totalSeconds < 1800) {  // 30分钟 = 1800秒
+                    const remainingSeconds = 1800 - totalSeconds;
+                    const remainingMinutes = Math.floor(remainingSeconds / 60);
+                    const remainingSecs = remainingSeconds % 60;
+                    $('#timeRequirement').text(
+                        `请练习满30分钟后再结束（还需 ${remainingMinutes}:${remainingSecs < 10 ? '0' + remainingSecs : remainingSecs}）`
+                    );
+                } else {
+                    $('#timeRequirement').text('已满足最小练习时间要求，可以结束练习');
+                }
+            }
+            
+            // 更新结束练习按钮状态
+            function updateEndPracticeButton() {
+                if (canEndPractice) {
+                    $('#endPracticeBtn').prop('disabled', false);
+                } else {
+                    $('#endPracticeBtn').prop('disabled', true);
+                }
+            }
+            
+            // 显示二维码扫描器 - 修改为显示模态框
+            function showQRScanner() {
+                if (!canEndPractice) {
+                    layer.msg("请先完成最小练习时间要求", {icon: 2});
+                    return;
+                }
+                
+                console.log("显示二维码扫描模态框");
+                // 显示二维码扫描模态框
+                $('#qrScanModal').modal('show');
+                
+                // 延迟启动扫描器，确保模态框已完全显示
+                setTimeout(function() {
+                    startScanner();
+                }, 500);
+            }
+            
+            // 隐藏二维码扫描器
+            function hideQRScanner() {
+                stopScanner();
+                $('#qrScanModal').modal('hide');
+            }
+            
+            // 启动扫描器
+            function startScanner() {
+                console.log("开始启动扫描器...");
+                
+                // 先显示加载提示
+                $('#scanResult').html('<i class="fas fa-spinner fa-spin"></i> 正在启动摄像头...');
+                
+                // 确保video元素存在
+                if (!document.getElementById('scanner')) {
+                    console.error("找不到scanner元素");
+                    $('#scanResult').removeClass('alert-info').addClass('alert-danger')
+                        .html('<i class="fas fa-exclamation-triangle"></i> 找不到扫描器元素，请刷新页面重试');
+                    return;
+                }
+                
+                // 获取视频元素
+                const video = document.getElementById('scanner');
+                
+                // 清除任何可能存在的旧资源
+                if (video.srcObject) {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                }
+                
+                // 设置扫描活跃状态
+                scanActive = true;
+                
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    // 尝试多种视频约束，以提高兼容性
+                    const constraints = { 
+                        audio: false,
+                        video: { 
+                            facingMode: "environment", // 使用后置摄像头
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        } 
+                    };
+                    
+                    const fallbackConstraints = {
+                        audio: false,
+                        video: true // 使用默认摄像头设置
+                    };
+                    
+                    console.log("请求摄像头权限...");
+                    navigator.mediaDevices.getUserMedia(constraints)
+                        .then(handleCameraStream)
+                        .catch(function(error) {
+                            console.log("尝试备用摄像头设置...");
+                            navigator.mediaDevices.getUserMedia(fallbackConstraints)
+                                .then(handleCameraStream)
+                                .catch(handleCameraError);
+                        });
+                } else {
+                    $('#scanResult').removeClass('alert-info').addClass('alert-danger')
+                        .html('<i class="fas fa-exclamation-triangle"></i> 您的浏览器不支持摄像头访问，请尝试使用Chrome、Firefox或Safari浏览器。');
+                    
+                    scanActive = false;
+                }
+            }
+            
+            // 处理摄像头流
+            function handleCameraStream(stream) {
+                console.log("摄像头访问成功");
+                
+                // 获取视频元素
+                const video = document.getElementById('scanner');
+                
+                // 设置视频源
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.setAttribute('autoplay', true);
+                
+                // 确保视频元素可见
+                $(video).show();
+                
+                try {
+                    video.play()
+                        .then(() => {
+                            console.log("视频播放已开始");
+                            
+                            // 更新扫描状态提示
+                            $('#scanResult').removeClass('alert-danger').addClass('alert-info')
+                                .html('<i class="fas fa-qrcode"></i> 请将钢琴上的二维码对准扫码框...');
+                            
+                            // 启动QR码扫描
+                            startQRScan();
+                        })
+                        .catch(err => {
+                            console.error("视频播放错误:", err);
+                            handleCameraError(err);
+                        });
+                } catch (err) {
+                    console.error("视频播放异常:", err);
+                    handleCameraError(err);
+                }
+            }
+            
+            // 处理摄像头错误
+            function handleCameraError(error) {
+                console.error("摄像头访问错误:", error);
+                
+                scanActive = false;
+                
+                // 显示错误信息
+                $('#scanResult').removeClass('alert-info').addClass('alert-danger')
+                    .html(`<i class="fas fa-exclamation-triangle"></i> 无法访问摄像头: ${error.message || '请检查摄像头权限'}`);
+            }
+            
+            // 停止扫描器
+            function stopScanner() {
+                console.log("停止扫描器");
+                scanActive = false;
+                
+                // 清除扫描间隔
+                if (scanInterval) {
+                    clearInterval(scanInterval);
+                    scanInterval = null;
+                }
+                
+                // 停止视频流
+                const video = document.getElementById('scanner');
+                if (video && video.srcObject) {
+                    const tracks = video.srcObject.getTracks();
+                    tracks.forEach(track => track.stop());
+                    video.srcObject = null;
+                }
+            }
+            
+            // 启动QR码扫描
+            function startQRScan() {
+                if (!scanActive) return;
+                
+                console.log("启动QR码扫描");
+                
+                const video = document.getElementById('scanner');
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                let scanCount = 0;
+                
+                // 设置扫描间隔
+                scanInterval = setInterval(() => {
+                    if (!scanActive) {
+                        clearInterval(scanInterval);
+                        return;
+                    }
+                    
+                    scanCount++;
+                    if (scanCount % 30 === 0) {
+                        console.log("扫描中...");
+                    }
+                    
+                    // 确保视频已准备好
+                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                        // 设置画布尺寸与视频匹配
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        
+                        // 绘制视频帧到画布
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        
+                        // 获取图像数据
+                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                        
+                        try {
+                            // 使用jsQR库解码QR码
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
+                            
+                            if (code) {
+                                console.log("找到QR码:", code.data);
+                                
+                                // 停止扫描
+                                clearInterval(scanInterval);
+                                scanActive = false;
+                                
+                                // 处理扫描结果
+                                processQRCode(code.data);
+                            }
+                        } catch (error) {
+                            console.error("QR码解码错误:", error);
+                        }
+                    }
+                }, 100); // 每100毫秒扫描一次
+            }
+            
+            // 处理QR码结果
+            function processQRCode(qrData) {
+                console.log("处理QR码数据:", qrData);
+                
+                // 显示加载状态
+                $('#scanResult').html('<i class="fas fa-spinner fa-spin"></i> 正在验证...');
+                
+                // 获取CSRF令牌
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                
+                // 发送结束练琴请求
+                $.ajax({
+                    url: "{% url 'students:end_practice' %}",
+                    type: "POST",
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    data: {
+                        practice_id: practiceId,
+                        qrcode_data: qrData
+                    },
+                    success: function(response) {
+                        console.log("结束练琴响应:", response);
+                        
+                        if (response.success) {
+                            // 清除计时器
+                            if (timerInterval) {
+                                clearInterval(timerInterval);
+                            }
+                            
+                            // 清除localStorage中的练琴ID
+                            localStorage.removeItem('activePracticeId');
+                            
+                            // 显示成功消息
+                            $('#scanResult').removeClass('alert-info alert-danger').addClass('alert-success')
+                                .html(`<i class="fas fa-check-circle"></i> ${response.message || "练琴已成功结束"}`);
+                            
+                            // 2秒后重定向到练琴主页
+                            setTimeout(function() {
+                                window.location.href = "{% url 'students:practice' %}";
+                            }, 2000);
+                        } else {
+                            // 显示错误消息
+                            $('#scanResult').removeClass('alert-info alert-success').addClass('alert-danger')
+                                .html(`<i class="fas fa-exclamation-circle"></i> ${response.message || "结束练琴失败"}`);
+                            
+                            // 重新启动扫描
+                            setTimeout(() => {
+                                if ($('#qrScanModal').is(':visible')) {
+                                    startScanner();
+                                }
+                            }, 3000);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("结束练琴出错:", error);
+                        
+                        // 显示错误消息
+                        $('#scanResult').removeClass('alert-info alert-success').addClass('alert-danger')
+                            .html(`<i class="fas fa-exclamation-circle"></i> 请求失败，请重试: ${error}`);
+                        
+                        // 重新启动扫描
+                        setTimeout(() => {
+                            if ($('#qrScanModal').is(':visible')) {
+                                startScanner();
+                            }
+                        }, 3000);
+                    }
+                });
+            }
+            
+            // 绑定结束练琴按钮事件
+            $('#endPracticeBtn').on('click', showQRScanner);
+            
+            // 取消扫描按钮事件
+            $('#cancelScanBtn').on('click', hideQRScanner);
+            
+            // 关闭模态框时停止扫描
+            $('#qrScanModal').on('hidden.bs.modal', function() {
+                console.log("模态框关闭，停止扫描器");
+                stopScanner();
+            });
+            
+            // 刷新摄像头按钮事件
+            $('#testCameraBtn').on('click', function() {
+                console.log("刷新摄像头");
+                stopScanner();
+                setTimeout(function() {
+                    startScanner();
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html> 

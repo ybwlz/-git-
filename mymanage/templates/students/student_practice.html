@@ -484,7 +484,7 @@
             {% if student.user.avatar %}
                 <img src="{{ student.user.avatar.url }}" alt="{{ student.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
             {% else %}
-                <img src="{% static 'img/default-avatar.jpg' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+                <img src="{% static 'img/anime_boy.jpg' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
             {% endif %}
             <h5 class="mt-2">{{ student.name }}</h5>
         </div>
@@ -520,6 +520,9 @@
     <!-- 主要内容 -->
     <div class="main-content">
         <div class="container-fluid">
+            <!-- 添加CSRF令牌隐藏字段 -->
+            {% csrf_token %}
+            
             <!-- 添加新的顶部栏 -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">今日练琴</h2>
@@ -615,9 +618,55 @@
                 
                 <!-- 操作按钮 -->
                 <div class="action-buttons">
+                    <!-- 恢复扫码按钮 -->
                     <button id="scanBtn" class="btn btn-success btn-action btn-scan pulse-button">
                         <i class="fas fa-qrcode"></i> 扫码签到
                     </button>
+                    
+                    <!-- 练琴信息区域 -->
+                    <div id="practice-info" style="display: none;" class="mt-4">
+                        <div class="card border-success mb-3">
+                            <div class="card-header bg-success text-white">
+                                <i class="fas fa-music"></i> 练琴信息
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2" id="piano-info">钢琴编号: --</p>
+                                <p class="mb-2">已练习时间: <span id="practice-time">0</span> 分钟</p>
+                            </div>
+                        </div>
+                        <button id="startPracticeBtn" class="btn btn-success me-2">开始练琴</button>
+                        <button id="end-practice" class="btn btn-danger me-2" style="display: none;">结束练琴</button>
+                        <button class="btn btn-secondary rescan-button">重新扫码</button>
+                    </div>
+                    
+                    <!-- 等待队列信息区域 -->
+                    <div id="waiting-info" style="display: none;" class="mt-4">
+                        <div class="card border-warning mb-3">
+                            <div class="card-header bg-warning text-dark">
+                                <i class="fas fa-hourglass-half"></i> 等待队列
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2">当前排队位置: <span id="queue-position">--</span></p>
+                                <p class="mb-2">预计等待时间: <span id="wait-time">--</span> 分钟</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary rescan-button">重新扫码</button>
+                    </div>
+                    
+                    <!-- 需要加入等待队列的信息区域 -->
+                    <div id="waiting-required" style="display: none;" class="mt-4">
+                        <div class="card border-warning mb-3">
+                            <div class="card-header bg-warning text-dark">
+                                <i class="fas fa-clock"></i> 钢琴正在使用中
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2">目前所有钢琴都在使用中，需要等待</p>
+                                <p class="mb-2">预计等待时间: <span id="estimated-wait">--</span> 分钟</p>
+                            </div>
+                        </div>
+                        <button id="joinWaitingBtn" class="btn btn-warning me-2">加入等待队列</button>
+                        <button class="btn btn-secondary rescan-button">重新扫码</button>
+                    </div>
                 </div>
                 
                 <!-- 钢琴信息 -->
@@ -701,6 +750,8 @@
         let practiceStartTime = null; // 练琴开始时间
         let practiceTimer = null;     // 计时器
         let canEnd = false;           // 是否可以结束练琴
+        let elapsedMinutes = 0;       // 已练习分钟数
+        let timerInterval = null;     // 定时器对象
 
         // 获取CSRF Token
         function getCookie(name) {
@@ -716,6 +767,93 @@
                 }
             }
             return cookieValue;
+        }
+
+        // 获取CSRF令牌的函数
+        function getCSRFToken() {
+            return getCookie('csrftoken');
+        }
+
+        // 更新计时器显示
+        function updateTimer() {
+            if (!practiceStartTime) {
+                console.error('错误：无法更新计时器，没有设置练琴开始时间');
+                return;
+            }
+            
+            // 计算时分秒
+            const now = new Date();
+            const diffMs = now - practiceStartTime;
+            const totalSeconds = Math.floor(diffMs / 1000);
+            
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            // 更新UI显示
+            $('#hours').text(hours.toString().padStart(2, '0'));
+            $('#minutes').text(minutes.toString().padStart(2, '0'));
+            $('#seconds').text(seconds.toString().padStart(2, '0'));
+            
+            // 计算已练习分钟数
+            const elapsedMinutes = Math.floor(totalSeconds / 60);
+            
+            // 检查是否可以签退（超过30分钟）
+            if (elapsedMinutes >= 30 && !canEnd) {
+                canEnd = true;
+                $('#end-practice').prop('disabled', false).show();
+                console.log('练琴时间已超过30分钟，可以签退');
+                
+                // 提示用户可以结束练琴
+                Swal.fire({
+                    icon: 'success',
+                    title: '已达到练琴时间',
+                    text: '您已练琴满30分钟，可以点击"结束练琴"按钮结束',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 5000
+                });
+            }
+        }
+
+        // 启动计时器
+        function startTimer() {
+            console.log('启动计时器');
+            // 先清除可能存在的旧计时器
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            if (!practiceStartTime) {
+                console.error('错误：无法启动计时器，没有设置练琴开始时间');
+                practiceStartTime = new Date(); // 默认使用当前时间
+            }
+            
+            console.log('使用开始时间:', practiceStartTime);
+            
+            // 设置每秒更新一次
+            timerInterval = setInterval(function() {
+                updateTimer();
+            }, 1000); // 每秒更新一次
+            
+            // 立即更新一次显示
+            updateTimer();
+            
+            // 显示计时器容器和结束练琴按钮
+            $('#timerContainer').show();
+            $('#end-practice').show();
+        }
+
+        // 停止计时器
+        function stopTimer() {
+            console.log('停止计时器');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            practiceStartTime = null;
         }
 
         // 二维码扫描
@@ -974,6 +1112,12 @@
                         $('#scanResult').removeClass('alert-danger d-none').addClass('alert-info')
                             .html('<i class="fas fa-spinner fa-spin"></i> 正在处理二维码数据...');
                         
+                        // 使用新的处理函数
+                        if (typeof window.processScanResult === 'function') {
+                            // 如果存在处理函数，直接调用
+                            window.processScanResult(code.data);
+                        } else {
+                            // 否则使用原始处理方式
                         // 发送到后端
                         $.ajax({
                             url: "{% url 'students:scan_qrcode' %}",
@@ -982,8 +1126,11 @@
                                 csrfmiddlewaretoken: "{{ csrf_token }}",
                                 qrcode_data: code.data
                             },
+                                beforeSend: function(xhr, settings) {
+                                    console.log("准备发送二维码数据到后端:", settings.data);
+                                },
                             success: function(response) {
-                                console.log("扫码请求成功:", response);
+                                    console.log("扫码请求成功，响应数据:", response);
                                 // 关闭扫码模态框
                                 $('#qrScanModal').modal('hide');
                                 
@@ -992,6 +1139,9 @@
                             },
                             error: function(xhr, status, error) {
                                 console.error("扫码请求错误:", error);
+                                    console.error("错误状态:", xhr.status);
+                                    console.error("错误响应:", xhr.responseText);
+                                    
                                 $('#scanResult').removeClass('alert-info').addClass('alert-danger')
                                     .html('<i class="fas fa-exclamation-triangle"></i> 请求出错，请稍后重试<br>错误: ' + error);
                                 
@@ -1002,6 +1152,7 @@
                                 }, 3000);
                             }
                         });
+                        }
                     }
                 }
             } catch (e) {
@@ -1032,6 +1183,7 @@
                 
                 // 根据不同情况显示不同内容
                 if (response.can_start) {
+                    console.log("有可用钢琴，显示钢琴信息");
                     // 有可用钢琴，显示钢琴信息
                     $('#availablePianoNumber').text(response.piano_number);
                     $('#availablePianoBrand').text(response.piano_brand || "雅马哈");
@@ -1040,11 +1192,13 @@
                     $('#availablePianoInfo').show();
                     
                 } else if (response.waiting_required) {
+                    console.log("需要等待，显示等待信息");
                     // 需要等待，显示等待信息
                     $('#estimatedWaitTime').text(response.wait_minutes);
                     $('#waitingInfo').show();
                     
                 } else if (response.waiting) {
+                    console.log("已在等待队列中");
                     // 已在等待队列中
                     waitingId = response.waiting_id;
                     $('#queuePosition').text(response.queue_position);
@@ -1052,6 +1206,7 @@
                     $('#alreadyWaitingInfo').show();
                     
                 } else if (response.already_checked_in) {
+                    console.log("已经签到");
                     // 已经签到
                     practiceId = response.practice_id;
                     $('#currentPianoNumber').text(response.piano_number);
@@ -1066,6 +1221,7 @@
                     </div>
                 `);
             } else {
+                console.log("扫码失败");
                 // 扫码失败
                 $('#errorMessage').text(response.message);
                 $('#scanErrorInfo').show();
@@ -1080,30 +1236,28 @@
             
             // 显示模态框
             $('#scanResultModal').modal('show');
+            
+            // 添加调试信息
+            console.log("模态框状态:", {
+                'availablePianoInfo': $('#availablePianoInfo').is(':visible'),
+                'waitingInfo': $('#waitingInfo').is(':visible'),
+                'alreadyWaitingInfo': $('#alreadyWaitingInfo').is(':visible'),
+                'alreadyCheckedInInfo': $('#alreadyCheckedInInfo').is(':visible'),
+                'scanErrorInfo': $('#scanErrorInfo').is(':visible'),
+                'startPracticeBtn': $('#startPracticeBtn').length,
+                'joinWaitingBtn': $('#joinWaitingBtn').length,
+                'retryBtn': $('#retryBtn').length
+            });
         }
 
         // 开始练琴按钮点击事件
-        $('#startPracticeBtn').click(function() {
-            console.log("开始练琴按钮被点击", "会话ID:", sessionId);
+        $('#start-practice').click(function() {
+            const sessionId = $(this).data('session-id');
+            console.log('开始练琴 - 会话ID:', sessionId);
             
-            // 禁用按钮防止重复点击
-            $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
-            
-            // 检查会话ID是否存在
-            if (!sessionId) {
-                console.error("会话ID不存在，无法开始练琴");
-                $(this).prop('disabled', false).html('<i class="fas fa-play-circle"></i> 开始练琴');
-                Swal.fire({
-                    icon: 'error',
-                    title: '开始练琴失败',
-                    text: '会话ID不存在，请重新扫码'
-                });
-                return;
-            }
-
-            const csrfToken = getCookie('csrftoken') || $('[name=csrfmiddlewaretoken]').val();
-            console.log("CSRF Token:", csrfToken);
-            console.log("发送开始练琴请求，会话ID:", sessionId);
+            // 禁用按钮，防止重复点击
+            $(this).prop('disabled', true);
+            $(this).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
 
             $.ajax({
                 url: "{% url 'students:start_practice' %}",
@@ -1112,53 +1266,118 @@
                     csrfmiddlewaretoken: "{{ csrf_token }}",
                     session_id: sessionId
                 },
-                beforeSend: function(xhr, settings) {
-                    console.log("准备发送请求，URL:", settings.url, "数据:", settings.data);
-                },
                 success: function(response) {
-                    console.log("开始练琴请求成功:", response);
-                    
-                    // 恢复按钮状态（无论成功与否）
-                    $('#startPracticeBtn').prop('disabled', false).html('<i class="fas fa-play-circle"></i> 开始练琴');
+                    console.log('开始练琴响应:', response);
                     
                     if (response.success) {
-                        // 关闭扫码结果模态框
-                        $('#scanResultModal').modal('hide');
-                        
-                        // 保存练琴ID
+                        // 成功开始练琴
                         practiceId = response.practice_id;
-                        console.log("获取到练琴ID:", practiceId);
+                        elapsedMinutes = response.elapsed_minutes;
                         
-                        // 开始计时
-                        startPracticeTimer(response.piano_number);
-                    } else {
+                        // 更新钢琴信息
+                        $('#piano-number').text(response.piano_number);
+                        $('#piano-brand').text(response.piano_brand);
+                        $('#piano-model').text(response.piano_model);
+                        
+                        // 更新UI状态
+                        $('#practice-status-container').show();
+                        $('#practice-control-container').hide();
+                        $('#end-practice').show();
+                        $('#rescan-qr').hide();
+                        
+                        // 初始化计时器
+                        startTimer();
+                        
+                        // 开始自动检查练琴状态
+                        startPracticeStatusCheck();
+                        
+                        // 显示成功消息
                         Swal.fire({
-                            icon: 'error',
+                            icon: 'success',
+                            title: '成功开始练琴',
+                            text: response.message
+                        });
+                    } else {
+                        // 处理错误情况
+                        console.error('开始练琴失败:', response.message);
+                        
+                        // 检查是否是已有活跃练琴记录的错误
+                        if (response.practice_id && response.piano_number) {
+                            // 这是一个用户已经在其他钢琴练习的情况
+                        Swal.fire({
+                                icon: 'warning',
                             title: '开始练琴失败',
-                            text: response.message || '操作失败，请稍后重试'
+                                text: response.message,
+                                showCancelButton: true,
+                                confirmButtonText: '结束当前练琴',
+                                cancelButtonText: '取消'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // 用户选择结束当前练琴
+                                    $.ajax({
+                                        url: "{% url 'students:end_practice' %}",
+                                        type: "POST",
+                                        data: {
+                                            csrfmiddlewaretoken: "{{ csrf_token }}",
+                                            practice_id: response.practice_id
+                                        },
+                                        success: function(endResponse) {
+                                            if (endResponse.success) {
+                                                Swal.fire({
+                                                    icon: 'success',
+                                                    title: '已结束先前的练琴',
+                                                    text: endResponse.message,
+                                                    confirmButtonText: '重新扫码'
+                                                }).then(() => {
+                                                    location.reload();
+                                                });
+                                            } else {
+                                                Swal.fire({
+                                                    icon: 'error',
+                                                    title: '结束练琴失败',
+                                                    text: endResponse.message
                         });
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error("开始练琴请求失败:", error, "状态:", xhr.status, "响应:", xhr.responseText);
-                    
-                    // 恢复按钮状态
-                    $('#startPracticeBtn').prop('disabled', false).html('<i class="fas fa-play-circle"></i> 开始练琴');
-                    
-                    try {
-                        const responseObj = JSON.parse(xhr.responseText);
+                                        error: function() {
                         Swal.fire({
                             icon: 'error',
-                            title: '请求错误',
-                            text: responseObj.message || '开始练琴请求失败，请稍后重试'
-                        });
-                    } catch(e) {
+                                                title: '网络错误',
+                                                text: '请求失败，请检查网络连接'
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            // 其他一般错误
                         Swal.fire({
                             icon: 'error',
-                            title: '请求错误',
-                            text: '开始练琴请求失败，请稍后重试'
+                                title: '开始练琴失败',
+                                text: response.message
                         });
                     }
+                }
+                    
+                    // 恢复按钮状态
+                    $('#start-practice').prop('disabled', false);
+                    $('#start-practice').html('<i class="fas fa-play"></i> 开始练琴');
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX错误:', error);
+                    console.error('状态:', status);
+                    console.error('响应:', xhr.responseText);
+                    
+                    // 显示错误消息
+                    Swal.fire({
+                        icon: 'error',
+                        title: '请求失败',
+                        text: '请检查网络连接后重试'
+                    });
+                    
+                    // 恢复按钮状态
+                    $('#start-practice').prop('disabled', false);
+                    $('#start-practice').html('<i class="fas fa-play"></i> 开始练琴');
                 }
             });
         });
@@ -1166,7 +1385,7 @@
         // 加入等待队列按钮点击事件
         $('#joinWaitingBtn').click(function() {
             $.ajax({
-                url: "{% url 'students:join_waiting' %}",
+                url: "{% url 'students:join_waiting_queue' %}",
                 type: "POST",
                 data: {
                     csrfmiddlewaretoken: "{{ csrf_token }}",
@@ -1226,66 +1445,6 @@
             }, 500);
         });
 
-        // 开始练琴计时
-        function startPracticeTimer(pianoNumber) {
-            // 设置钢琴编号
-            $('#timerPianoNumber').text(pianoNumber);
-            $('#completedPianoNumber').text(pianoNumber);
-            
-            // 记录开始时间
-            practiceStartTime = new Date();
-            
-            // 启动计时器
-            updatePracticeTimer();
-            practiceTimer = setInterval(updatePracticeTimer, 1000);
-            
-            // 显示计时模态框
-            $('#practiceTimerModal').modal('show');
-        }
-
-        // 更新练琴计时器
-        function updatePracticeTimer() {
-            if (!practiceStartTime) return;
-            
-            const now = new Date();
-            const elapsedMs = now - practiceStartTime;
-            
-            // 计算时分秒
-            const hours = Math.floor(elapsedMs / 3600000);
-            const minutes = Math.floor((elapsedMs % 3600000) / 60000);
-            const seconds = Math.floor((elapsedMs % 60000) / 1000);
-            
-            // 更新显示
-            $('#practiceTimer').text(
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-            );
-            
-            // 计算剩余必要练习时间
-            const elapsedMinutes = Math.floor(elapsedMs / 60000);
-            const remainingMinutes = Math.max(0, 30 - elapsedMinutes);
-            $('#remainingMinTime').text(remainingMinutes);
-            
-            // 检查是否达到30分钟
-            if (elapsedMinutes >= 30 && !canEnd) {
-                canEnd = true;
-                
-                // 隐藏提示，启用结束按钮
-                $('#minTimeAlert').hide();
-                $('#endPracticeBtn').prop('disabled', false);
-                
-                // 提示用户可以结束练琴
-                Swal.fire({
-                    icon: 'success',
-                    title: '已达到练琴时间',
-                    text: '您已练琴满30分钟，可以点击"结束练琴"按钮结束',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 5000
-                });
-            }
-        }
-
         // 结束练琴按钮点击事件
         $('#endPracticeBtn').click(function() {
             if (!canEnd) {
@@ -1342,59 +1501,111 @@
 
         // 等待队列检查
         function startWaitingCheck() {
-            // 每10秒检查一次等待状态
-            setInterval(checkPracticeStatus, 10000);
+            console.log("开始等待队列检查", "等待ID:", waitingId);
+            
+            // 先清除可能的旧定时器
+            if (window.waitingCheckInterval) {
+                clearInterval(window.waitingCheckInterval);
+            }
+            
+            // 定时检查等待状态
+            window.waitingCheckInterval = setInterval(checkWaitingStatus, 10000); // 每10秒检查一次
+            
+            // 立即执行一次检查
+            checkWaitingStatus();
         }
-
-        // 检查练琴状态
-        function checkPracticeStatus() {
+        
+        // 检查等待队列状态
+        function checkWaitingStatus() {
+            console.log("检查等待队列状态", "等待ID:", waitingId);
+            
+            if (!waitingId) {
+                console.log("无等待ID，取消检查");
+                if (window.waitingCheckInterval) {
+                    clearInterval(window.waitingCheckInterval);
+                }
+                return;
+            }
+            
             $.ajax({
-                url: "{% url 'students:check_practice_status' %}",
+                url: "{% url 'students:check_waiting_status' %}",
                 type: "GET",
+                data: {
+                    waiting_id: waitingId
+                },
                 success: function(response) {
-                    console.log("状态检查响应:", response);
+                    console.log("等待状态检查响应:", response);
                     
-                    if (response.status === 'active') {
-                        // 如果当前状态是计时中，但模态框未显示，则显示计时模态框
-                        if (!$('#practiceTimerModal').hasClass('show')) {
-                            // 保存练琴ID
-                            practiceId = response.practice_id;
+                    if (response.success) {
+                        // 更新队列位置和等待时间显示
+                        $('#queuePosition').text(response.position);
+                        $('#remainingWaitTime').text(response.wait_minutes);
+                        
+                        // 如果状态为'ready'，表示已分配钢琴
+                        if (response.status === 'ready') {
+                            console.log("已分配钢琴，停止等待检查");
+                            clearInterval(window.waitingCheckInterval);
                             
-                            // 关闭其他模态框
+                            // 显示可以开始练琴的提示
+                            Swal.fire({
+                                icon: 'success',
+                                title: '钢琴已准备好',
+                                text: '已为您分配钢琴，请点击确定按钮开始练琴',
+                                confirmButtonText: '开始练琴'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // 关闭当前模态框
                             $('#scanResultModal').modal('hide');
                             
-                            // 设置开始时间（根据已经过的时间计算）
-                            const elapsedMs = response.elapsed_minutes * 60 * 1000;
-                            practiceStartTime = new Date(new Date() - elapsedMs);
+                                    // 使用会话ID启动练琴
+                                    startPracticeWithSessionId(sessionId);
+                                }
+                            });
+                        }
+                        // 如果等待时间为0且状态仍为waiting，说明有空闲钢琴但未自动分配
+                        else if (response.is_ready) {
+                            console.log("等待时间已到，提示用户可以尝试开始练琴");
                             
-                            // 开始计时
-                            startPracticeTimer(response.piano_number);
+                            // 更新UI显示
+                            $('#alreadyWaitingInfo').hide();
+                            $('#scanResultContent').html(`
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i> 您的等待时间已到！现在可能有空闲钢琴
+                                </div>
+                            `);
                             
-                            // 检查是否已满30分钟
-                            if (response.can_checkout) {
-                                canEnd = true;
-                                $('#minTimeAlert').hide();
-                                $('#endPracticeBtn').prop('disabled', false);
+                            // 添加开始练琴按钮
+                            if ($('#tryStartPracticeBtn').length === 0) {
+                                $('.modal-footer').prepend(`
+                                    <button id="tryStartPracticeBtn" class="btn btn-success">
+                                        <i class="fas fa-play-circle"></i> 尝试开始练琴
+                                    </button>
+                                `);
+                                
+                                // 绑定按钮点击事件
+                                $('#tryStartPracticeBtn').click(function() {
+                                    startPracticeWithSessionId(sessionId);
+                                });
                             }
                         }
-                    } else if (response.status === 'waiting') {
-                        // 如果当前在等待队列中，但可能有新的钢琴可用
-                        if (waitingId && waitingId != response.waiting_id) {
-                            // 刷新页面
-                            location.reload();
+                    } else {
+                        console.log("等待状态检查失败:", response.message);
+                        // 如果连续多次检查失败，停止检查
+                        if (window.waitingCheckFailCount === undefined) {
+                            window.waitingCheckFailCount = 1;
+                        } else {
+                            window.waitingCheckFailCount++;
                         }
                         
-                        // 更新等待信息
-                        if ($('#scanResultModal').hasClass('show') && $('#alreadyWaitingInfo').is(':visible')) {
-                            $('#queuePosition').text(response.position);
-                            $('#remainingWaitTime').text(response.wait_minutes);
+                        if (window.waitingCheckFailCount >= 3) {
+                            console.log("连续3次检查失败，停止检查");
+                            clearInterval(window.waitingCheckInterval);
                             
-                            // 如果等待时间已到，提示用户
-                            if (response.wait_minutes <= 0) {
+                            // 显示错误提示
                                 Swal.fire({
-                                    icon: 'info',
-                                    title: '钢琴已可用',
-                                    text: '您的等待时间已到，现在有钢琴可用，请刷新页面重新扫码',
+                                icon: 'error',
+                                title: '状态检查失败',
+                                text: '无法获取最新的等待状态，请刷新页面重试',
                                     confirmButtonText: '刷新页面'
                                 }).then((result) => {
                                     if (result.isConfirmed) {
@@ -1403,51 +1614,124 @@
                                 });
                             }
                         }
-                    } else if (response.status === 'completed' && $('#practiceTimerModal').hasClass('show')) {
-                        // 如果状态是已完成，但计时模态框仍在显示，则关闭它并显示完成信息
-                        clearInterval(practiceTimer);
-                        $('#practiceTimerModal').modal('hide');
-                        
+                },
+                error: function(xhr, status, error) {
+                    console.error("等待状态检查请求出错:", error);
+                    // 暂时不做处理，避免网络波动影响用户体验
+                }
+            });
+        }
+        
+        // 使用会话ID开始练琴（复用开始练琴逻辑，避免代码重复）
+        function startPracticeWithSessionId(sid) {
+            console.log("使用会话ID开始练琴:", sid);
+            
+            if (!sid) {
+                console.error("错误：会话ID不存在！");
                         Swal.fire({
-                            icon: 'info',
-                            title: '练琴已结束',
-                            text: '您的练琴记录已完成，可能由于系统重启或数据更新导致状态变化',
-                            confirmButtonText: '刷新页面'
-                        }).then((result) => {
-                            location.reload();
-                        });
-                    } else if (response.status === 'inactive' && $('#practiceTimerModal').hasClass('show')) {
-                        // 如果状态是未开始，但计时模态框仍在显示，则关闭它并显示错误信息
-                        clearInterval(practiceTimer);
-                        $('#practiceTimerModal').modal('hide');
+                    icon: 'error',
+                    title: '会话ID丢失',
+                    text: '请重新扫码获取有效的会话ID'
+                });
+                return;
+            }
+            
+            // 显示加载中
+            Swal.fire({
+                title: '处理中...',
+                html: '正在为您分配钢琴，请稍候',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // 确保CSRF令牌正确
+            const csrfToken = getCSRFToken();
+            console.log("发送开始练琴请求，会话ID:", sid, "CSRF令牌:", csrfToken);
+            
+            $.ajax({
+                url: '{% url "students:start_practice" %}',
+                type: 'POST',
+                data: {
+                    session_id: sid,
+                    csrfmiddlewaretoken: csrfToken
+                },
+                beforeSend: function(xhr, settings) {
+                    console.log("准备发送请求，数据:", settings.data);
+                },
+                success: function(response) {
+                    console.log('开始练琴响应:', response);
+                    Swal.close();
+                    
+                    if (response.success) {
+                        // 保存练琴ID到localStorage
+                        localStorage.setItem('activePracticeId', response.practice_id);
+                        console.log("成功获取练琴ID:", response.practice_id);
                         
+                        // 显示成功消息
+                        Swal.fire({
+                            icon: 'success',
+                            title: '开始练琴成功',
+                            text: '正在跳转到练琴页面...',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        
+                        // 跳转到专用练琴页面
+                        setTimeout(function() {
+                            window.location.href = "{% url 'students:piano_practice' %}?practice_id=" + response.practice_id;
+                        }, 1500);
+                    } else {
+                        console.error("开始练琴失败:", response.message);
+                        
+                        // 如果有practice_id但返回失败，可能是已经在练琴，也跳转到练琴页面
+                        if (response.practice_id) {
                         Swal.fire({
                             icon: 'warning',
-                            title: '签退异常',
-                            text: '没有找到进行中的练琴记录，可能由于系统错误或会话已过期',
-                            confirmButtonText: '刷新页面'
-                        }).then((result) => {
-                            location.reload();
-                        });
+                                title: '注意',
+                                text: response.message || '您已有进行中的练琴，即将跳转到练琴页面',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            
+                            // 跳转到专用练琴页面
+                            setTimeout(function() {
+                                window.location.href = "{% url 'students:piano_practice' %}?practice_id=" + response.practice_id;
+                            }, 2000);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '开始练琴失败',
+                                text: response.message || '操作失败，请稍后重试'
+                            });
+                            
+                            // 恢复按钮状态
+                            $('#startPracticeBtn').prop('disabled', false).html('<i class="fas fa-play-circle"></i> 开始练琴');
+                        }
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error("检查状态出错:", error);
-                    // 如果连续失败多次，提示用户刷新页面
-                    if (statusCheckErrorCount >= 3) {
+                    console.error('开始练琴请求失败:', error, "状态:", xhr.status, "响应:", xhr.responseText);
+                    Swal.close();
+                    
+                    try {
+                        const responseObj = JSON.parse(xhr.responseText);
                         Swal.fire({
                             icon: 'error',
-                            title: '连接错误',
-                            text: '无法获取最新状态，请刷新页面或稍后再试',
-                            confirmButtonText: '刷新页面'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                location.reload();
-                            }
+                            title: '请求错误',
+                            text: responseObj.message || '开始练琴请求失败，请稍后重试'
                         });
-                    } else {
-                        statusCheckErrorCount++;
+                    } catch(e) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '请求错误',
+                            text: '开始练琴请求失败，请稍后重试'
+                        });
                     }
+                    
+                    // 恢复按钮状态
+                    $('#startPracticeBtn').prop('disabled', false).html('<i class="fas fa-play-circle"></i> 开始练琴');
                 }
             });
         }
@@ -1456,6 +1740,7 @@
         $(document).ready(function() {
             // 初始化错误计数器
             window.statusCheckErrorCount = 0;
+            window.waitingCheckFailCount = 0;
             
             // 检查当前状态
             checkPracticeStatus();
@@ -1478,8 +1763,256 @@
                 if (practiceTimer) {
                     clearInterval(practiceTimer);
                 }
+                if (window.waitingCheckInterval) {
+                    clearInterval(window.waitingCheckInterval);
+                }
             });
+            
+            // 绑定开始练琴按钮事件
+            $(document).on('click', '#start-practice, #startPracticeBtn', function() {
+                console.log("开始练琴按钮被点击，当前会话ID:", sessionId);
+                
+                if (!sessionId) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '会话ID丢失',
+                        text: '请重新扫码'
+                    });
+                    return;
+                }
+                
+                // 禁用按钮并显示加载状态
+                $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+                
+                // 使用当前会话ID开始练琴
+                startPracticeWithSessionId(sessionId);
+            });
+            
+            // 绑定重新扫码按钮事件
+            $(document).on('click', '#retryBtn', function() {
+                console.log("重新扫码按钮被点击");
+                // 关闭结果模态框
+                $('#scanResultModal').modal('hide');
+                
+                // 重新打开扫码模态框
+                setTimeout(function() {
+                    $('#qrScanModal').modal('show');
+                    setTimeout(function() {
+                        startScanner();
+                    }, 500);
+                }, 500);
+            });
+            
+            // 绑定加入等待队列按钮事件
+            $(document).on('click', '#joinWaitingBtn', function() {
+                console.log("加入等待队列按钮被点击", "会话ID:", sessionId);
+                $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+                
+                // 执行加入等待队列的请求
+                $.ajax({
+                    url: "{% url 'students:join_waiting_queue' %}",
+                    type: "POST",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        session_id: sessionId
+                    },
+                    success: function(response) {
+                        // 恢复按钮状态
+                        $('#joinWaitingBtn').prop('disabled', false).html('<i class="fas fa-clock"></i> 加入等待队列');
+                        
+                        if (response.success) {
+                            // 保存等待ID
+                            waitingId = response.waiting_id;
+                            
+                            // 隐藏等待信息区域
+                            $('#waitingInfo').hide();
+                            
+                            // 显示已在等待队列信息
+                            $('#queuePosition').text(response.queue_position);
+                            $('#remainingWaitTime').text(response.wait_minutes);
+                            $('#alreadyWaitingInfo').show();
+                            
+                            // 更新结果内容
+                            $('#scanResultContent').html(`
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i> ${response.message}
+                                </div>
+                            `);
+                            
+                            // 添加等待时间检查
+                            startWaitingCheck();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '加入等待队列失败',
+                                text: response.message
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // 恢复按钮状态
+                        $('#joinWaitingBtn').prop('disabled', false).html('<i class="fas fa-clock"></i> 加入等待队列');
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: '请求错误',
+                            text: '加入等待队列请求失败，请稍后重试'
+                        });
+                    }
+                });
+            });
+            
+            // 绑定结束练琴按钮的点击事件
+            $('#end-practice').click(function() {
+                if (!practiceId) {
+                    console.error('错误：没有活跃的练琴ID');
+                    Swal.fire({
+                        icon: 'error',
+                        title: '操作失败',
+                        text: '没有找到活跃的练琴记录'
+                    });
+                    return;
+                }
+                
+                // 禁用按钮并显示加载状态
+                $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+                
+                // 发送结束练琴请求
+                $.ajax({
+                    url: '{% url "students:end_practice" %}',
+                    type: 'POST',
+                    data: {
+                        'practice_id': practiceId,
+                        'csrfmiddlewaretoken': getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // 停止计时器
+                            stopTimer();
+                            
+                            // 显示成功消息
+                            Swal.fire({
+                                icon: 'success',
+                                title: '练琴已结束',
+                                text: response.message,
+                                confirmButtonText: '确定'
+                            }).then(() => {
+                                // 刷新页面
+                                location.reload();
+                            });
+                        } else {
+                            // 如果失败，重新启用按钮
+                            $('#end-practice').prop('disabled', false).html('<i class="fas fa-stop-circle"></i> 结束练琴');
+                            
+                            // 显示错误消息
+                            Swal.fire({
+                                icon: 'error',
+                                title: '结束练琴失败',
+                                text: response.message
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // 重新启用按钮
+                        $('#end-practice').prop('disabled', false).html('<i class="fas fa-stop-circle"></i> 结束练琴');
+                        
+                        // 显示错误消息
+                        Swal.fire({
+                            icon: 'error',
+                            title: '网络错误',
+                            text: '请求失败，请检查网络连接'
+                        });
+                    }
+                });
+            });
+            
+            // 异步检查是否有活跃练琴记录
+            $.ajax({
+                url: '/students/check-active-practice/',
+                type: 'GET',
+                success: function(response) {
+                    console.log('检查活跃练琴记录响应:', response);
+                    
+                    if (response.success && response.has_active_practice) {
+                        // 有活跃练琴记录，显示相关信息
+                        practiceId = response.practice_id;
+                        
+                        // 设置开始练琴的确切时间，而不是使用当前时间
+                        practiceStartTime = new Date(response.start_time);
+                        console.log('设置练琴开始时间:', practiceStartTime);
+                        
+                        // 更新钢琴信息
+                        $('#piano-number').text(response.piano_number || '未分配');
+                        $('#piano-brand').text(response.piano_brand || '未知');
+                        $('#piano-model').text(response.piano_model || '未知');
+                        
+                        // 更新UI状态
+                        $('#practice-status-container').show();
+                        $('#practice-control-container').hide();
+                        
+                        // 如果已练习超过30分钟，启用结束按钮
+                        if (response.can_end) {
+                            $('#end-practice').prop('disabled', false);
+                        } else {
+                            $('#end-practice').prop('disabled', true);
+                        }
+                        
+                        $('#end-practice').show();
+                        $('#rescan-qr').hide();
+                        
+                        // 启动计时器
+                        startTimer();
+                        
+                        // 开始状态检查
+                        startPracticeStatusCheck();
+                        
+                        // 可选：显示提示消息
+                        Swal.fire({
+                            icon: 'info',
+                            title: '检测到进行中的练琴',
+                            text: `您正在${response.piano_number}号钢琴上练习，已练习${response.elapsed_minutes}分${response.elapsed_seconds}秒`,
+                            showConfirmButton: true,
+                            timer: 3000
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('检查活跃练琴记录失败:', error);
+                }
+            });
+            
+            // 检查是否有活跃的练琴记录
+            checkActivePractice();
         });
+
+        // 检查是否有活跃的练琴记录
+        function checkActivePractice() {
+            $.ajax({
+                url: "{% url 'students:check_active_practice' %}",
+                type: "GET",
+                success: function(response) {
+                    console.log("检查活跃练琴记录响应:", response);
+                    if (response.success && response.has_active_practice) {
+                        // 有活跃的练琴记录，弹出提示并跳转
+                        Swal.fire({
+                            icon: 'info',
+                            title: '练琴进行中',
+                            text: '您有正在进行的练琴，即将跳转到练琴页面',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
+                        // 跳转到专用练琴页面
+                        setTimeout(function() {
+                            window.location.href = "{% url 'students:piano_practice' %}?practice_id=" + response.practice_id;
+                        }, 2000);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("检查活跃练琴记录出错:", error);
+                }
+            });
+        }
 
         // 添加系统时间显示功能
         function updateSystemTime() {
@@ -1547,6 +2080,599 @@
                 });
             }
         });
+
+        // 检查练琴状态
+        function checkPracticeStatus() {
+            $.ajax({
+                url: "{% url 'students:check_practice_status' %}",
+                type: "GET",
+                success: function(response) {
+                    console.log("练琴状态检查响应:", response);
+                    
+                    if (response.status === 'active') {
+                        // 如果当前状态是计时中，但模态框未显示，则显示计时模态框
+                        if (!$('#practiceTimerModal').hasClass('show')) {
+                            // 保存练琴ID
+                            practiceId = response.practice_id;
+                            
+                            // 关闭其他模态框
+                            $('#scanResultModal').modal('hide');
+                            
+                            // 设置开始时间（根据已经过的时间计算）
+                            const elapsedMs = response.elapsed_minutes * 60 * 1000;
+                            practiceStartTime = new Date(new Date() - elapsedMs);
+                            
+                            // 开始计时
+                            startPracticeTimer(response.piano_number);
+                            
+                            // 检查是否已满30分钟
+                            if (response.can_checkout) {
+                                canEnd = true;
+                                $('#minTimeAlert').hide();
+                                $('#endPracticeBtn').prop('disabled', false);
+                            }
+                        }
+                    } else if (response.status === 'waiting') {
+                        // 如果当前在等待队列中，保存等待ID以便后续检查
+                        if (!waitingId) {
+                            waitingId = response.waiting_id;
+                            console.log("发现等待状态，设置等待ID:", waitingId);
+                            
+                            // 开始等待队列检查
+                            startWaitingCheck();
+                        }
+                        
+                        // 更新等待信息
+                        if ($('#scanResultModal').hasClass('show') && $('#alreadyWaitingInfo').is(':visible')) {
+                            $('#queuePosition').text(response.position);
+                            $('#remainingWaitTime').text(response.wait_minutes);
+                        }
+                    } else if (response.status === 'completed' && $('#practiceTimerModal').hasClass('show')) {
+                        // 如果状态是已完成，但计时模态框仍在显示，则关闭它并显示完成信息
+                        clearInterval(practiceTimer);
+                        $('#practiceTimerModal').modal('hide');
+                        
+                        Swal.fire({
+                            icon: 'info',
+                            title: '练琴已结束',
+                            text: '您的练琴记录已完成，可能由于系统重启或数据更新导致状态变化',
+                            confirmButtonText: '刷新页面'
+                        }).then((result) => {
+                            location.reload();
+                        });
+                    } else if (response.status === 'inactive' && $('#practiceTimerModal').hasClass('show')) {
+                        // 如果状态是未开始，但计时模态框仍在显示，则关闭它并显示错误信息
+                        clearInterval(practiceTimer);
+                        $('#practiceTimerModal').modal('hide');
+                        
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '签退异常',
+                            text: '没有找到进行中的练琴记录，可能由于系统错误或会话已过期',
+                            confirmButtonText: '刷新页面'
+                        }).then((result) => {
+                            location.reload();
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("检查状态出错:", error);
+                    // 如果连续失败多次，提示用户刷新页面
+                    if (window.statusCheckErrorCount === undefined) {
+                        window.statusCheckErrorCount = 1;
+                    } else {
+                        window.statusCheckErrorCount++;
+                    }
+                    
+                    if (window.statusCheckErrorCount >= 3) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '连接错误',
+                            text: '无法获取最新状态，请刷新页面或稍后再试',
+                            confirmButtonText: '刷新页面'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        // 更新开始练琴函数以正确处理和显示钢琴号码
+        function startPracticeWithSessionId(sessionId) {
+            console.log(`开始练琴 - 会话ID: ${sessionId}`);
+            
+            if (!sessionId) {
+                console.error("错误：会话ID不存在！");
+                // 显示错误提示
+                Swal.fire({
+                    title: '会话ID丢失',
+                    text: '无法开始练琴，请重新扫描二维码',
+                    icon: 'error',
+                    confirmButtonText: '确定'
+                });
+                return;
+            }
+            
+            // 获取CSRF令牌
+            const csrfToken = getCSRFToken();
+            console.log(`CSRF令牌: ${csrfToken ? '已获取' : '获取失败'}`);
+            
+            // 禁用按钮，显示加载状态
+            const startBtn = $('#startPracticeBtn');
+            startBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+            
+            // 发送请求开始练琴
+            console.log(`发送开始练琴请求 - 会话ID: ${sessionId}`);
+            $.ajax({
+                url: '/students/start-practice/',
+                type: 'POST',
+                data: {
+                    'session_id': sessionId,
+                    'csrfmiddlewaretoken': csrfToken
+                },
+                success: function(response) {
+                    console.log('开始练琴响应:', response);
+                    
+                    if (response.success) {
+                        // 成功获取练琴ID
+                        console.log(`成功获取练琴ID: ${response.practice_id}`);
+                        
+                        // 更新练琴信息
+                        practiceId = response.practice_id;
+                        
+                        // 显示钢琴信息
+                        $('#piano-number').text(response.piano_number || '未分配');
+                        $('#piano-brand').text(response.piano_brand || '未知');
+                        $('#piano-model').text(response.piano_model || '未知');
+                        
+                        // 设置已练习时间（分钟）
+                        elapsedMinutes = response.elapsed_minutes || 0;
+                        console.log(`初始已练习时间: ${elapsedMinutes}分钟`);
+                        
+                        // 更新计时器显示
+                        updateTimer();
+                        
+                        // 启动定时器，每分钟更新一次
+                        startTimer();
+                        
+                        // 关闭二维码扫描模态框
+                        $('#qrcodeScanModal').modal('hide');
+                        
+                        // 显示练琴信息模态框
+                        $('#practiceInfoModal').modal('show');
+                        
+                        // 每30秒检查一次练琴状态
+                        startPracticeStatusCheck();
+                    } else {
+                        // 处理错误
+                        console.error('开始练琴失败:', response.message);
+                        
+                        // 显示错误提示
+                        Swal.fire({
+                            title: '开始练琴失败',
+                            text: response.message,
+                            icon: 'error',
+                            confirmButtonText: '确定'
+                        });
+                        
+                        // 恢复按钮状态
+                        startBtn.prop('disabled', false).html('开始练琴');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX错误:', error);
+                    console.error('状态:', status);
+                    console.error('响应:', xhr.responseText);
+                    
+                    // 显示错误提示
+                    Swal.fire({
+                        title: '网络错误',
+                        text: '连接服务器失败，请检查网络连接',
+                        icon: 'error',
+                        confirmButtonText: '确定'
+                    });
+                    
+                    // 恢复按钮状态
+                    startBtn.prop('disabled', false).html('开始练琴');
+                }
+            });
+        }
+
+        // 更新检查练琴状态函数以正确显示钢琴信息
+        function checkPracticeStatus() {
+            if (!practiceId) {
+                console.error('错误：没有活跃的练琴ID，无法检查状态');
+                return;
+            }
+            
+            console.log(`检查练琴状态 - 练琴ID: ${practiceId}`);
+            
+            $.ajax({
+                url: '/students/check-practice-status/',
+                type: 'GET',
+                data: {
+                    'practice_id': practiceId
+                },
+                success: function(response) {
+                    console.log('练琴状态响应:', response);
+                    
+                    if (response.success) {
+                        // 更新钢琴信息显示
+                        $('#piano-number').text(response.piano_number || '未分配');
+                        $('#piano-brand').text(response.piano_brand || '未知');
+                        $('#piano-model').text(response.piano_model || '未知');
+                        
+                        // 更新已练习时间
+                        if (response.elapsed_minutes !== undefined) {
+                            elapsedMinutes = response.elapsed_minutes;
+                            console.log(`已练习时间已更新: ${elapsedMinutes}分钟`);
+                            updateTimer();
+                        }
+                        
+                        // 检查练琴状态
+                        if (response.status === 'completed') {
+                            console.log('练琴已完成');
+                            // 停止计时器
+                            stopTimer();
+                            // 显示完成消息
+                            Swal.fire({
+                                title: '练琴已完成',
+                                text: response.message,
+                                icon: 'success',
+                                confirmButtonText: '确定'
+                            }).then(() => {
+                                // 关闭练琴信息模态框
+                                $('#practiceInfoModal').modal('hide');
+                                // 停止状态检查
+                                stopPracticeStatusCheck();
+                            });
+                        } else if (response.status === 'active') {
+                            console.log('练琴进行中');
+                            // 更新是否可以签退
+                            if (response.can_checkout) {
+                                $('#endPracticeBtn').prop('disabled', false);
+                            }
+                        }
+                    } else {
+                        console.error('检查练琴状态失败:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX错误:', error);
+                    console.error('状态:', status);
+                    console.error('响应:', xhr.responseText);
+                }
+            });
+        }
+
+        // 处理QR码扫描结果的函数
+        function handleScanResult(result) {
+            console.log('QR码扫描结果:', result);
+            
+            // 关闭摄像头
+            scanner.stop();
+            
+            // 显示加载状态
+            $('#qr-scan-result').html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+            
+            // 获取CSRF令牌
+            const csrfToken = getCSRFToken();
+            console.log(`CSRF令牌: ${csrfToken ? '已获取' : '获取失败'}`);
+            
+            // 发送扫描结果到服务器
+            $.ajax({
+                url: '/students/scan-qrcode/',
+                type: 'POST',
+                data: {
+                    'qrcode_data': result,
+                    'csrfmiddlewaretoken': csrfToken
+                },
+                success: function(response) {
+                    console.log('QR码验证响应:', response);
+                    
+                    if (response.success) {
+                        // 显示成功消息
+                        $('#qr-scan-result').html(`
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> ${response.message}
+                            </div>
+                        `);
+                        
+                        // 显示"开始练琴"按钮
+                        $('#scan-actions').html(`
+                            <button id="startPracticeBtn" class="btn btn-primary btn-lg mt-3">
+                                <i class="fas fa-play-circle"></i> 开始练琴
+                            </button>
+                            <button id="rescanBtn" class="btn btn-secondary btn-lg mt-3 ml-2">
+                                <i class="fas fa-sync"></i> 重新扫码
+                            </button>
+                        `);
+                        
+                        // 保存会话ID
+                        sessionId = response.session_id;
+                        console.log(`已保存会话ID: ${sessionId}`);
+                        
+                        // 绑定"开始练琴"按钮点击事件
+                        $('#startPracticeBtn').click(function() {
+                            startPracticeWithSessionId(sessionId);
+                        });
+                        
+                        // 绑定"重新扫码"按钮点击事件
+                        $('#rescanBtn').click(function() {
+                            resetQRScanner();
+                        });
+                        
+                        // 如果有等待队列信息，显示等待按钮
+                        if (response.waiting_queue) {
+                            $('#scan-actions').append(`
+                                <button id="joinWaitingQueueBtn" class="btn btn-warning btn-lg mt-3 ml-2" data-session-id="${response.session_id}">
+                                    <i class="fas fa-clock"></i> 加入等待队列
+                                </button>
+                            `);
+                            
+                            // 绑定"加入等待队列"按钮点击事件
+                            $('#joinWaitingQueueBtn').click(function() {
+                                const sessionId = $(this).data('session-id');
+                                joinWaitingQueue(sessionId);
+                            });
+                        }
+                    } else {
+                        // 显示错误消息
+                        $('#qr-scan-result').html(`
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i> ${response.message}
+                            </div>
+                        `);
+                        
+                        // 显示"重新扫码"按钮
+                        $('#scan-actions').html(`
+                            <button id="rescanBtn" class="btn btn-secondary btn-lg mt-3">
+                                <i class="fas fa-sync"></i> 重新扫码
+                            </button>
+                        `);
+                        
+                        // 绑定"重新扫码"按钮点击事件
+                        $('#rescanBtn').click(function() {
+                            resetQRScanner();
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX错误:', error);
+                    console.error('状态:', status);
+                    console.error('响应:', xhr.responseText);
+                    
+                    // 显示错误消息
+                    $('#qr-scan-result').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> 网络错误，请检查连接
+                        </div>
+                    `);
+                    
+                    // 显示"重新扫码"按钮
+                    $('#scan-actions').html(`
+                        <button id="rescanBtn" class="btn btn-secondary btn-lg mt-3">
+                            <i class="fas fa-sync"></i> 重新扫码
+                        </button>
+                    `);
+                    
+                    // 绑定"重新扫码"按钮点击事件
+                    $('#rescanBtn').click(function() {
+                        resetQRScanner();
+                    });
+                }
+            });
+        }
+
+        // 当页面加载时检查学生当前是否有活跃的练琴记录
+        $(document).ready(function() {
+            console.log('页面加载，检查是否有活跃练琴记录');
+            
+            // 绑定结束练琴按钮的点击事件
+            $('#end-practice').click(function() {
+                if (!practiceId) {
+                    console.error('错误：没有活跃的练琴ID');
+                    Swal.fire({
+                        icon: 'error',
+                        title: '操作失败',
+                        text: '没有找到活跃的练琴记录'
+                    });
+                    return;
+                }
+                
+                // 禁用按钮并显示加载状态
+                $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+                
+                // 发送结束练琴请求
+                $.ajax({
+                    url: '{% url "students:end_practice" %}',
+                    type: 'POST',
+                    data: {
+                        'practice_id': practiceId,
+                        'csrfmiddlewaretoken': getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // 停止计时器
+                            stopTimer();
+                            
+                            // 显示成功消息
+                            Swal.fire({
+                                icon: 'success',
+                                title: '练琴已结束',
+                                text: response.message,
+                                confirmButtonText: '确定'
+                            }).then(() => {
+                                // 刷新页面
+                                location.reload();
+                            });
+                        } else {
+                            // 如果失败，重新启用按钮
+                            $('#end-practice').prop('disabled', false).html('<i class="fas fa-stop-circle"></i> 结束练琴');
+                            
+                            // 显示错误消息
+                            Swal.fire({
+                                icon: 'error',
+                                title: '结束练琴失败',
+                                text: response.message
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // 重新启用按钮
+                        $('#end-practice').prop('disabled', false).html('<i class="fas fa-stop-circle"></i> 结束练琴');
+                        
+                        // 显示错误消息
+                        Swal.fire({
+                            icon: 'error',
+                            title: '网络错误',
+                            text: '请求失败，请检查网络连接'
+                        });
+                    }
+                });
+            });
+            
+            // 异步检查是否有活跃练琴记录
+            $.ajax({
+                url: '/students/check-active-practice/',
+                type: 'GET',
+                success: function(response) {
+                    console.log('检查活跃练琴记录响应:', response);
+                    
+                    if (response.success && response.has_active_practice) {
+                        // 有活跃练琴记录，显示相关信息
+                        practiceId = response.practice_id;
+                        
+                        // 设置开始练琴的确切时间，而不是使用当前时间
+                        practiceStartTime = new Date(response.start_time);
+                        console.log('设置练琴开始时间:', practiceStartTime);
+                        
+                        // 更新钢琴信息
+                        $('#piano-number').text(response.piano_number || '未分配');
+                        $('#piano-brand').text(response.piano_brand || '未知');
+                        $('#piano-model').text(response.piano_model || '未知');
+                        
+                        // 更新UI状态
+                        $('#practice-status-container').show();
+                        $('#practice-control-container').hide();
+                        
+                        // 如果已练习超过30分钟，启用结束按钮
+                        if (response.can_end) {
+                            $('#end-practice').prop('disabled', false);
+                        } else {
+                            $('#end-practice').prop('disabled', true);
+                        }
+                        
+                        $('#end-practice').show();
+                        $('#rescan-qr').hide();
+                        
+                        // 启动计时器
+                        startTimer();
+                        
+                        // 开始状态检查
+                        startPracticeStatusCheck();
+                        
+                        // 可选：显示提示消息
+                        Swal.fire({
+                            icon: 'info',
+                            title: '检测到进行中的练琴',
+                            text: `您正在${response.piano_number}号钢琴上练习，已练习${response.elapsed_minutes}分${response.elapsed_seconds}秒`,
+                            showConfirmButton: true,
+                            timer: 3000
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('检查活跃练琴记录失败:', error);
+                }
+            });
+        });
+
+        // 停止计时器
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                console.log('计时器已停止');
+            }
+            practiceStartTime = null;
+        }
+        
+        // 处理QR码扫描成功
+        function handleQRScanSuccess(response) {
+            console.log("QR码扫描成功，响应:", response);
+            stopScanner();
+            
+            // 隐藏扫码模态框
+            $('#qrScanModal').modal('hide');
+            
+            // 设置会话信息
+            sessionId = response.session_id;
+            pianoNumber = response.piano_number;
+            
+            // 显示结果模态框
+            $('#scanResultModal').modal('show');
+            
+            // 更新结果内容
+            $('#scanResultContent').html(`
+                <div class="alert alert-success mb-4">
+                    <i class="fas fa-check-circle"></i> 二维码扫描成功！
+                </div>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">钢琴信息</h5>
+                        <p class="mb-2"><strong>编号：</strong> ${response.piano_number}</p>
+                        <p class="mb-2"><strong>品牌：</strong> ${response.piano_brand || '未知'}</p>
+                        <p class="mb-2"><strong>型号：</strong> ${response.piano_model || '未知'}</p>
+                        <p class="mb-0"><strong>状态：</strong> 
+                            <span class="${response.is_available ? 'text-success' : 'text-danger'}">
+                                ${response.is_available ? '可用' : '已占用'}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            `);
+            
+            if (response.is_available) {
+                // 钢琴可用，显示开始练琴按钮
+                $('#pianoNumber').val(response.piano_number);
+                $('#start-practice').prop('disabled', false).show();
+                $('#joinWaitingBtn').hide();
+                $('#waitingInfo').hide();
+                $('#alreadyWaitingInfo').hide();
+            } else {
+                // 钢琴不可用
+                $('#start-practice').hide();
+                
+                // 检查等待队列
+                if (response.waiting_queue && response.waiting_queue.total > 0) {
+                    $('#waitingCount').text(response.waiting_queue.total);
+                    $('#estimatedWaitTime').text(response.waiting_queue.estimated_wait_time);
+                    $('#waitingInfo').show();
+                    $('#joinWaitingBtn').show();
+                } else {
+                    $('#waitingInfo').hide();
+                    $('#joinWaitingBtn').hide();
+                }
+                
+                // 如果学生已经在等待队列中
+                if (response.already_waiting) {
+                    $('#joinWaitingBtn').hide();
+                    $('#queuePosition').text(response.queue_position);
+                    $('#remainingWaitTime').text(response.remaining_wait_time);
+                    $('#alreadyWaitingInfo').show();
+                    waitingId = response.waiting_id;
+                    
+                    // 启动等待队列状态检查
+                    startWaitingCheck();
+                } else {
+                    $('#alreadyWaitingInfo').hide();
+                }
+            }
+        }
     </script>
 
     <!-- QR码扫描模态框 -->
@@ -1578,7 +2704,6 @@
                 <div class="modal-footer">
                     <button type="button" id="closeQrScannerBtn" class="btn btn-secondary">关闭</button>
                     <button type="button" id="testCameraBtn" class="btn btn-primary">刷新摄像头</button>
-                    <button type="button" id="testCameraManualBtn" class="btn btn-info">测试摄像头</button>
                 </div>
             </div>
         </div>
@@ -1597,188 +2722,871 @@
                         <!-- 内容将通过JavaScript动态填充 -->
                     </div>
                     
-                    <!-- 可用钢琴信息（扫码成功且有空闲钢琴时显示） -->
+                    <!-- 有可用钢琴时显示 -->
                     <div id="availablePianoInfo" style="display: none;" class="mt-3">
-                        <div class="card border-success mb-3">
+                        <div class="card border-success">
                             <div class="card-header bg-success text-white">
-                                <i class="fas fa-check-circle"></i> 有钢琴可用
+                                <i class="fas fa-piano"></i> 可用钢琴信息
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title">钢琴信息</h5>
-                                <div class="row mt-3">
-                                    <div class="col-6">
-                                        <p><strong>钢琴编号:</strong> <span id="availablePianoNumber">-</span></p>
+                                <p class="mb-1"><strong>钢琴编号：</strong><span id="availablePianoNumber">--</span></p>
+                                <p class="mb-1"><strong>品牌型号：</strong><span id="availablePianoBrand">--</span></p>
+                                <p class="mb-0"><strong>位置：</strong><span id="availablePianoRoom">--</span></p>
                                     </div>
-                                    <div class="col-6">
-                                        <p><strong>品牌:</strong> <span id="availablePianoBrand">-</span></p>
                                     </div>
-                                </div>
-                                <p><strong>位置:</strong> 通用教室 钢琴<span id="availablePianoRoom">-</span></p>
-                                <button id="startPracticeBtn" class="btn btn-success btn-lg mt-3">
+                        <button id="startPracticeBtn" class="btn btn-success mt-3">
                                     <i class="fas fa-play-circle"></i> 开始练琴
                                 </button>
-                            </div>
-                        </div>
                     </div>
                     
-                    <!-- 等待信息（无空闲钢琴时显示） -->
+                    <!-- 需要等待时显示 -->
                     <div id="waitingInfo" style="display: none;" class="mt-3">
-                        <div class="card border-warning mb-3">
+                        <div class="card border-warning">
                             <div class="card-header bg-warning text-dark">
-                                <i class="fas fa-hourglass-half"></i> 需要等待
+                                <i class="fas fa-hourglass-half"></i> 钢琴正在使用中
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title">当前无空闲钢琴</h5>
-                                <p class="card-text">预计等待时间: <span id="estimatedWaitTime">-</span> 分钟</p>
-                                <button id="joinWaitingBtn" class="btn btn-warning btn-lg mt-3">
-                                    <i class="fas fa-clock"></i> 确认等待
-                                </button>
+                                <p class="mb-2">目前所有钢琴都在使用中，需要等待</p>
+                                <p class="mb-0">预计等待时间：<strong><span id="estimatedWaitTime">--</span></strong> 分钟</p>
                             </div>
                         </div>
+                        <button id="joinWaitingBtn" class="btn btn-warning mt-3">
+                            <i class="fas fa-clock"></i> 加入等待队列
+                        </button>
                     </div>
                     
-                    <!-- 已在等待队列中（已加入等待队列时显示） -->
+                    <!-- 已在等待队列中显示 -->
                     <div id="alreadyWaitingInfo" style="display: none;" class="mt-3">
-                        <div class="card border-info mb-3">
+                        <div class="card border-info">
                             <div class="card-header bg-info text-white">
-                                <i class="fas fa-info-circle"></i> 等待中
+                                <i class="fas fa-list-ol"></i> 等待队列信息
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title">您已在等待队列中</h5>
-                                <p class="card-text">当前排队位置: 第<span id="queuePosition">-</span>位</p>
-                                <p class="card-text">预计剩余等待时间: <span id="remainingWaitTime">-</span> 分钟</p>
-                                <p class="text-muted">等待时间到后系统会自动通知您</p>
+                                <p class="mb-1">您在队列中的位置：<strong><span id="queuePosition">--</span></strong></p>
+                                <p class="mb-0">预计剩余等待时间：<strong><span id="remainingWaitTime">--</span></strong> 分钟</p>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- 已签到（已经签到时显示） -->
+                    <!-- 已经签到显示 -->
                     <div id="alreadyCheckedInInfo" style="display: none;" class="mt-3">
-                        <div class="card border-primary mb-3">
-                            <div class="card-header bg-primary text-white">
-                                <i class="fas fa-music"></i> 练琴中
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <i class="fas fa-check-circle"></i> 您已签到
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title">您已开始练琴</h5>
-                                <p class="card-text">钢琴编号: <span id="currentPianoNumber">-</span></p>
-                                <p class="card-text">已练习时间: <span id="elapsedTime">-</span> 分钟</p>
+                                <p class="mb-1">使用钢琴：<strong><span id="currentPianoNumber">--</span></strong> 号</p>
+                                <p class="mb-0">已练习时间：<strong><span id="elapsedTime">--</span></strong> 分钟</p>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- 错误信息（扫码失败时显示） -->
+                    <!-- 扫码失败显示 -->
                     <div id="scanErrorInfo" style="display: none;" class="mt-3">
-                        <div class="card border-danger mb-3">
+                        <div class="card border-danger">
                             <div class="card-header bg-danger text-white">
                                 <i class="fas fa-exclamation-triangle"></i> 扫码失败
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title">扫码出错</h5>
-                                <p class="card-text" id="errorMessage">-</p>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                                <button id="retryBtn" class="btn btn-primary">重新扫码</button>
+                                <p class="mb-0" id="errorMessage">无效的二维码</p>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" id="retryBtn" class="btn btn-primary">重新扫码</button>
                 </div>
             </div>
         </div>
     </div>
     
     <!-- 练琴计时模态框 -->
-    <div class="modal fade" id="practiceTimerModal" tabindex="-1" aria-labelledby="practiceTimerModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog">
+    <div class="modal fade" id="practiceTimerModal" data-bs-backdrop="false" tabindex="-1" aria-labelledby="practiceTimerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="practiceTimerModalLabel">练琴计时</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
-                    <div class="practice-timer-container">
-                        <div class="timer-display">
-                            <h2 id="practiceTimer">00:00:00</h2>
-                            <p class="text-muted">已练习时间</p>
+                    <div class="mb-3">
+                        <i class="fas fa-piano display-4 text-primary"></i>
+                        <p class="lead mt-2">
+                            您正在使用 <span class="badge bg-primary" id="timerPianoNumber">--</span> 号钢琴
+                        </p>
                         </div>
                         
-                        <div class="piano-info mb-4">
-                            <p>钢琴编号: <strong id="timerPianoNumber">-</strong></p>
+                    <div class="timer-container mb-4">
+                        <div class="display-4 fw-bold" id="practiceTimer">00:00:00</div>
+                        <p class="text-muted">练琴时长</p>
                         </div>
                         
-                        <div class="min-time-alert alert alert-warning" id="minTimeAlert">
-                            <i class="fas fa-exclamation-circle"></i>
-                            练琴时间至少为30分钟，剩余时间: <span id="remainingMinTime">30</span> 分钟
+                    <div class="alert alert-warning" id="minTimeAlert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        请至少练琴30分钟，还需继续练习 <span id="remainingMinTime">30</span> 分钟
                         </div>
-                        
-                        <button class="btn btn-danger btn-lg mt-4" id="endPracticeBtn" disabled>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="endPracticeBtn" class="btn btn-danger" disabled>
                             <i class="fas fa-stop-circle"></i> 结束练琴
                         </button>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 练琴完成模态框 -->
-    <div class="modal fade" id="practiceCompletedModal" tabindex="-1" aria-labelledby="practiceCompletedModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="practiceCompletedModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="practiceCompletedModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="practiceCompletedModalLabel">练琴完成</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
-                    <div class="practice-completed-container">
-                        <div class="completed-icon mb-4">
-                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle display-1 text-success"></i>
                         </div>
-                        <h3>练琴已完成</h3>
-                        <p class="lead">感谢您的练习！</p>
-                        <div class="stats-container mt-4">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-label">练习时长</div>
-                                        <div class="stat-value" id="totalPracticeTime">-</div>
+                    <h4>练琴已完成！</h4>
+                    <p class="lead">
+                        您使用了 <span class="badge bg-primary" id="completedPianoNumber">--</span> 号钢琴
+                    </p>
+                    <p>
+                        本次练琴时长：<span class="fw-bold" id="totalPracticeTime">--</span>
+                    </p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        记录已保存，页面将在3秒后自动刷新...
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-label">钢琴编号</div>
-                                        <div class="stat-value" id="completedPianoNumber">-</div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    
+    <!-- 新增JavaScript代码 -->
+    <script>
+        $(document).ready(function() {
+            // 全局变量初始化
+            let sessionId = null;
+            let waitingId = null;
+            let practiceId = null;
+            let waitingCheckInterval = null;
+            let practiceStatusInterval = null;
+            let practiceStartTime = null;
+            let practiceTimer = null;
+            let canEnd = false;
 
-    <!-- 倒计时提醒模态框 -->
-    <div class="modal fade" id="countdownModal" tabindex="-1" aria-labelledby="countdownModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="countdownModalLabel">练琴提醒</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <div class="countdown-container">
-                        <h3 id="countdownMessage">快到你练琴的时间了！</h3>
-                        <div class="countdown-timer">
-                            <span id="countdownMinutes">00</span>:<span id="countdownSeconds">00</span>
+            // 修复ARIA相关警告
+            $(document).on('shown.bs.modal', '.modal', function() {
+                // 确保模态框和关闭按钮没有aria-hidden属性
+                $(this).removeAttr('aria-hidden');
+                $(this).find('.btn-close').removeAttr('aria-hidden');
+                
+                // 如果是练琴计时模态框，确保计时器启动
+                if ($(this).attr('id') === 'practiceTimerModal' && !practiceTimer && practiceStartTime) {
+                    // 启动计时器
+                    updatePracticeTimer();
+                    practiceTimer = setInterval(updatePracticeTimer, 1000);
+                }
+            });
+
+            // 获取CSRF令牌
+            function getCSRFToken() {
+                return $('input[name="csrfmiddlewaretoken"]').val();
+            }
+            
+            // 处理扫码结果
+            function handleScanResult(qrcodeData) {
+                console.log('处理扫码结果:', qrcodeData);
+                
+                // 发送请求
+                $.ajax({
+                    url: '{% url "students:scan_qrcode" %}',
+                    type: 'POST',
+                    data: {
+                        qrcode_data: qrcodeData,
+                        csrfmiddlewaretoken: getCSRFToken()
+                    },
+                    success: function(response) {
+                        console.log('扫码响应:', response);
+                        
+                        if (response.success) {
+                            // 确保会话ID被保存
+                            sessionId = response.session_id;
+                            console.log('保存会话ID:', sessionId);
+                            
+                            // 如果已经签到
+                            if (response.already_checked_in) {
+                                $('#practice-info').show();
+                                
+                                if (response.piano_number) {
+                                    $('#piano-info').text(`钢琴编号: ${response.piano_number}, 型号: ${response.piano_model || '未知'}, 品牌: ${response.piano_brand || '未知'}`);
+                                } else {
+                                    $('#piano-info').text('尚未分配钢琴');
+                                }
+                                
+                                if (response.practice_id) {
+                                    // 已经有活跃的练琴记录
+                                    practiceId = response.practice_id;
+                                    $('#start-practice').hide();
+                                    $('#end-practice').show();
+                                    // 启动状态检查
+                                    startPracticeStatusCheck(practiceId);
+                                } else {
+                                    // 有考勤记录但还没开始练琴
+                                    $('#start-practice').show();
+                                    $('#end-practice').hide();
+                                }
+                                
+                                // 关闭模态框
+                                $('#qrScanModal').modal('hide');
+                                $('#scanResultModal').modal('show');
+                                
+                                // 更新结果内容
+                                $('#scanResultContent').html(`
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i> ${response.message}
                         </div>
-                        <p>钢琴编号: <strong id="pianoNumber">-</strong></p>
+                                `);
+                                
+                                // 显示相关信息
+                                $('#alreadyCheckedInInfo').show();
+                            }
+                            // 如果在等待队列中
+                            else if (response.waiting) {
+                                $('#waiting-info').show();
+                                
+                                waitingId = response.waiting_id;
+                                $('#queue-position').text(response.queue_position);
+                                $('#wait-time').text(response.wait_minutes);
+                                
+                                // 启动等待状态检查
+                                startWaitingCheck(waitingId);
+                                
+                                // 关闭模态框
+                                $('#qrScanModal').modal('hide');
+                                $('#scanResultModal').modal('show');
+                                
+                                // 更新结果内容
+                                $('#scanResultContent').html(`
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i> ${response.message}
                     </div>
+                                `);
+                                
+                                // 显示相关信息
+                                $('#alreadyWaitingInfo').show();
+                            }
+                            // 如果有可用钢琴
+                            else if (response.can_start) {
+                                $('#practice-info').show();
+                                
+                                $('#piano-info').text(`钢琴编号: ${response.piano_number}, 型号: ${response.piano_model || '未知'}, 品牌: ${response.piano_brand || '未知'}`);
+                                $('#start-practice').show();
+                                $('#end-practice').hide();
+                                
+                                // 关闭模态框
+                                $('#qrScanModal').modal('hide');
+                                $('#scanResultModal').modal('show');
+                                
+                                // 更新结果内容
+                                $('#scanResultContent').html(`
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i> ${response.message}
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">我知道了</button>
+                                `);
+                                
+                                // 显示相关信息
+                                $('#availablePianoInfo').show();
+                                $('#availablePianoNumber').text(response.piano_number);
+                                $('#availablePianoBrand').text(response.piano_brand || "雅马哈");
+                                $('#availablePianoRoom').text("通用教室 钢琴" + response.piano_number);
+                            }
+                            // 如果需要等待
+                            else if (response.waiting_required) {
+                                $('#waiting-required').show();
+                                
+                                $('#estimated-wait').text(response.wait_minutes);
+                                
+                                // 关闭模态框
+                                $('#qrScanModal').modal('hide');
+                                $('#scanResultModal').modal('show');
+                                
+                                // 更新结果内容
+                                $('#scanResultContent').html(`
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i> ${response.message}
                 </div>
+                                `);
+                                
+                                // 显示相关信息
+                                $('#waitingInfo').show();
+                                $('#estimatedWaitTime').text(response.wait_minutes);
+                            }
+                            else {
+                                // 其他成功情况
+                                // 关闭模态框
+                                $('#qrScanModal').modal('hide');
+                                $('#scanResultModal').modal('show');
+                                
+                                // 更新结果内容
+                                $('#scanResultContent').html(`
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i> ${response.message}
             </div>
+                                `);
+                            }
+                        } else {
+                            // 失败情况
+                            // 关闭模态框
+                            $('#qrScanModal').modal('hide');
+                            $('#scanResultModal').modal('show');
+                            
+                            // 更新结果内容
+                            $('#scanResultContent').html(`
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-circle"></i> ${response.message}
         </div>
+                            `);
+                            
+                            // 显示相关信息
+                            $('#scanErrorInfo').show();
+                            $('#errorMessage').text(response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('扫码请求失败:', error);
+                        
+                        // 关闭模态框
+                        $('#qrScanModal').modal('hide');
+                        $('#scanResultModal').modal('show');
+                        
+                        // 更新结果内容
+                        $('#scanResultContent').html(`
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i> 请求失败，请重试
+    </div>
+                        `);
+                        
+                        // 显示相关信息
+                        $('#scanErrorInfo').show();
+                        $('#errorMessage').text('请求出错：' + error);
+                    }
+                });
+            }
+            
+            // 开始练琴按钮处理
+            $(document).on('click', '#start-practice, #startPracticeBtn', function() {
+                console.log("开始练琴按钮被点击，当前会话ID:", sessionId);
+                
+                if (!sessionId) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '会话ID丢失',
+                        text: '请重新扫码'
+                    });
+                    return;
+                }
+                
+                // 禁用按钮并显示加载状态
+                $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+                
+                // 使用当前会话ID开始练琴
+                startPracticeWithSessionId(sessionId);
+            });
+            
+            // 结束练琴按钮处理
+            $(document).on('click', '#endPracticeBtn', function() {
+                if (!practiceId) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '练琴ID丢失',
+                        text: '请重新扫码'
+                    });
+                    return;
+                }
+                
+                // 禁用按钮并显示加载状态
+                $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+                
+                $.ajax({
+                    url: '{% url "students:end_practice" %}',
+                    type: 'POST',
+                    data: {
+                        practice_id: practiceId,
+                        csrfmiddlewaretoken: getCSRFToken()
+                    },
+                    success: function(response) {
+                        console.log('结束练琴响应:', response);
+                        
+                        if (response.success) {
+                            // 停止状态检查
+                            if (practiceStatusInterval) {
+                                clearInterval(practiceStatusInterval);
+                                practiceStatusInterval = null;
+                            }
+                            
+                            // 关闭计时模态框
+                            $('#practiceTimerModal').modal('hide');
+                            
+                            // 设置完成信息
+                            $('#totalPracticeTime').text(response.duration + ' 分钟');
+                            $('#completedPianoNumber').text(response.piano_number);
+                            
+                            // 显示完成模态框
+                            $('#practiceCompletedModal').modal('show');
+                            
+                            // 3秒后刷新页面
+                            setTimeout(function() {
+                                location.reload();
+                            }, 3000);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '结束练琴失败',
+                                text: response.message
+                            });
+                            
+                            // 恢复按钮状态
+                            $('#endPracticeBtn').prop('disabled', false).html('<i class="fas fa-stop-circle"></i> 结束练琴');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('结束练琴请求失败:', error);
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: '请求出错',
+                            text: '结束练琴请求失败，请稍后重试'
+                        });
+                        
+                        // 恢复按钮状态
+                        $('#endPracticeBtn').prop('disabled', false).html('<i class="fas fa-stop-circle"></i> 结束练琴');
+                    }
+                });
+            });
+            
+            // 加入等待队列按钮处理
+            $(document).on('click', '#joinWaitingBtn', function() {
+                if (!sessionId) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '会话ID丢失',
+                        text: '请重新扫码'
+                    });
+                    return;
+                }
+                
+                // 禁用按钮并显示加载状态
+                $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+                
+                $.ajax({
+                    url: '{% url "students:join_waiting_queue" %}',
+                    type: 'POST',
+                    data: {
+                        session_id: sessionId,
+                        csrfmiddlewaretoken: getCSRFToken()
+                    },
+                    success: function(response) {
+                        console.log('加入等待队列响应:', response);
+                        
+                        if (response.success) {
+                            // 关闭结果模态框
+                            $('#scanResultModal').modal('hide');
+                            
+                            // 显示等待队列信息
+                            $('#waiting-info').show();
+                            $('#waiting-required').hide();
+                            
+                            waitingId = response.waiting_id;
+                            $('#queue-position').text(response.queue_position);
+                            $('#wait-time').text(response.wait_minutes);
+                            
+                            // 启动等待状态检查
+                            startWaitingCheck(waitingId);
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: '加入等待队列成功',
+                                text: response.message,
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '加入等待队列失败',
+                                text: response.message
+                            });
+                            
+                            // 恢复按钮状态
+                            $('#joinWaitingBtn').prop('disabled', false).html('<i class="fas fa-clock"></i> 加入等待队列');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加入等待队列请求失败:', error);
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: '请求出错',
+                            text: '加入等待队列请求失败，请稍后重试'
+                        });
+                        
+                        // 恢复按钮状态
+                        $('#joinWaitingBtn').prop('disabled', false).html('<i class="fas fa-clock"></i> 加入等待队列');
+                    }
+                });
+            });
+            
+            // 重新扫码按钮处理
+            $('.rescan-button').click(function() {
+                // 停止所有检查
+                if (waitingCheckInterval) {
+                    clearInterval(waitingCheckInterval);
+                    waitingCheckInterval = null;
+                }
+                
+                if (practiceStatusInterval) {
+                    clearInterval(practiceStatusInterval);
+                    practiceStatusInterval = null;
+                }
+                
+                // 重置状态
+                sessionId = null;
+                waitingId = null;
+                practiceId = null;
+                
+                // 隐藏所有信息区域
+                $('#practice-info').hide();
+                $('#waiting-info').hide();
+                $('#waiting-required').hide();
+                
+                // 显示扫码模态框
+                $('#qrScanModal').modal('show');
+                setTimeout(function() {
+                    startScanner();
+                }, 500);
+            });
+            
+            // 启动等待状态检查
+            function startWaitingCheck(id) {
+                // 先清除可能存在的定时器
+                if (waitingCheckInterval) {
+                    clearInterval(waitingCheckInterval);
+                }
+                
+                // 立即执行一次检查
+                checkWaitingStatus(id);
+                
+                // 设置定时器，每30秒检查一次
+                waitingCheckInterval = setInterval(function() {
+                    checkWaitingStatus(id);
+                }, 30000); // 30秒
+            }
+            
+            // 检查等待状态
+            function checkWaitingStatus(id) {
+                $.ajax({
+                    url: '{% url "students:check_waiting_status" %}',
+                    type: 'GET',
+                    data: {
+                        waiting_id: id
+                    },
+                    success: function(response) {
+                        console.log('等待状态检查响应:', response);
+                        
+                        if (response.success) {
+                            if (response.ready) {
+                                // 可以开始练琴了
+                                if (waitingCheckInterval) {
+                                    clearInterval(waitingCheckInterval);
+                                    waitingCheckInterval = null;
+                                }
+                                
+                                // 显示练琴信息
+                                $('#waiting-info').hide();
+                                $('#practice-info').show();
+                                
+                                sessionId = response.session_id;
+                                $('#piano-info').text(`钢琴编号: ${response.piano_number}, 型号: ${response.piano_model || '未知'}, 品牌: ${response.piano_brand || '未知'}`);
+                                $('#start-practice').show();
+                                $('#end-practice').hide();
+                                
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '钢琴已准备好',
+                                    text: response.message,
+                                    confirmButtonText: '开始练琴'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        startPracticeWithSessionId(sessionId);
+                                    }
+                                });
+                            } else {
+                                // 更新等待信息
+                                $('#queue-position').text(response.queue_position);
+                                $('#wait-time').text(response.wait_minutes);
+                            }
+                        } else {
+                            console.error('检查等待状态返回错误:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('检查等待状态请求失败:', error);
+                    }
+                });
+            }
+            
+            // 启动练琴状态检查
+            function startPracticeStatusCheck(id) {
+                // 先清除可能存在的定时器
+                if (practiceStatusInterval) {
+                    clearInterval(practiceStatusInterval);
+                }
+                
+                // 立即执行一次检查
+                checkPracticeStatus(id);
+                
+                // 设置定时器，每分钟检查一次
+                practiceStatusInterval = setInterval(function() {
+                    checkPracticeStatus(id);
+                }, 60000); // 1分钟
+            }
+            
+            // 检查练琴状态
+            function checkPracticeStatus(id) {
+                $.ajax({
+                    url: '{% url "students:check_practice_status" %}',
+                    type: 'GET',
+                    data: {
+                        practice_id: id
+                    },
+                    success: function(response) {
+                        console.log('练琴状态检查响应:', response);
+                        
+                        if (response.success) {
+                            // 更新练琴时间
+                            $('#practice-time').text(response.elapsed_minutes);
+                            
+                            // 如果练琴已结束
+                            if (response.status === 'completed') {
+                                if (practiceStatusInterval) {
+                                    clearInterval(practiceStatusInterval);
+                                    practiceStatusInterval = null;
+                                }
+                                
+                                // 隐藏所有信息区域
+                                $('#practice-info').hide();
+                                
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: '练琴已结束',
+                                    text: response.message,
+                                    confirmButtonText: '好的'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            }
+                        } else {
+                            console.error('检查练琴状态返回错误:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('检查练琴状态请求失败:', error);
+                    }
+                });
+            }
+            
+            // 使用会话ID开始练琴
+            function startPracticeWithSessionId(sid) {
+                console.log("使用会话ID开始练琴:", sid);
+                
+                if (!sid) {
+                    console.error("错误：会话ID不存在！");
+                    Swal.fire({
+                        icon: 'error',
+                        title: '会话ID丢失',
+                        text: '请重新扫码获取有效的会话ID'
+                    });
+                    return;
+                }
+                
+                // 显示加载中
+                Swal.fire({
+                    title: '处理中...',
+                    html: '正在为您分配钢琴，请稍候',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // 确保CSRF令牌正确
+                const csrfToken = getCSRFToken();
+                console.log("发送开始练琴请求，会话ID:", sid, "CSRF令牌:", csrfToken);
+                
+                $.ajax({
+                    url: '{% url "students:start_practice" %}',
+                    type: 'POST',
+                    data: {
+                        session_id: sid,
+                        csrfmiddlewaretoken: csrfToken
+                    },
+                    beforeSend: function(xhr, settings) {
+                        console.log("准备发送请求，数据:", settings.data);
+                    },
+                    success: function(response) {
+                        console.log('开始练琴响应:', response);
+                        Swal.close();
+                        
+                        if (response.success) {
+                            // 保存练琴ID到localStorage
+                            localStorage.setItem('activePracticeId', response.practice_id);
+                            console.log("成功获取练琴ID:", response.practice_id);
+                            
+                            // 显示成功消息
+                            Swal.fire({
+                                icon: 'success',
+                                title: '开始练琴成功',
+                                text: '正在跳转到练琴页面...',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            
+                            // 跳转到专用练琴页面
+                            setTimeout(function() {
+                                window.location.href = "{% url 'students:piano_practice' %}?practice_id=" + response.practice_id;
+                            }, 1500);
+                        } else {
+                            console.error("开始练琴失败:", response.message);
+                            
+                            // 如果有practice_id但返回失败，可能是已经在练琴，也跳转到练琴页面
+                            if (response.practice_id) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: '注意',
+                                    text: response.message || '您已有进行中的练琴，即将跳转到练琴页面',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                                
+                                // 跳转到专用练琴页面
+                                setTimeout(function() {
+                                    window.location.href = "{% url 'students:piano_practice' %}?practice_id=" + response.practice_id;
+                                }, 2000);
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: '开始练琴失败',
+                                    text: response.message || '操作失败，请稍后重试'
+                                });
+                                
+                                // 恢复按钮状态
+                                $('#startPracticeBtn').prop('disabled', false).html('<i class="fas fa-play-circle"></i> 开始练琴');
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('开始练琴请求失败:', error, "状态:", xhr.status, "响应:", xhr.responseText);
+                        Swal.close();
+                        
+                        try {
+                            const responseObj = JSON.parse(xhr.responseText);
+                            Swal.fire({
+                                icon: 'error',
+                                title: '请求错误',
+                                text: responseObj.message || '开始练琴请求失败，请稍后重试'
+                            });
+                        } catch(e) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '请求错误',
+                                text: '开始练琴请求失败，请稍后重试'
+                            });
+                        }
+                        
+                        // 恢复按钮状态
+                        $('#startPracticeBtn').prop('disabled', false).html('<i class="fas fa-play-circle"></i> 开始练琴');
+                    }
+                });
+            }
+            
+            // 开始练琴计时
+            function startPracticeTimer(pianoNumber) {
+                // 设置钢琴编号
+                $('#timerPianoNumber').text(pianoNumber);
+                $('#completedPianoNumber').text(pianoNumber);
+                
+                // 记录开始时间
+                practiceStartTime = new Date();
+                
+                // 启动计时器
+                updatePracticeTimer();
+                practiceTimer = setInterval(updatePracticeTimer, 1000);
+                
+                // 显示计时模态框
+                $('#practiceTimerModal').modal('show');
+            }
+            
+            // 更新练琴计时器
+            function updatePracticeTimer() {
+                if (!practiceStartTime) return;
+                
+                const now = new Date();
+                const elapsedMs = now - practiceStartTime;
+                
+                // 计算时分秒
+                const hours = Math.floor(elapsedMs / 3600000);
+                const minutes = Math.floor((elapsedMs % 3600000) / 60000);
+                const seconds = Math.floor((elapsedMs % 60000) / 1000);
+                
+                // 更新显示
+                $('#practiceTimer').text(
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                );
+                
+                // 计算剩余必要练习时间
+                const elapsedMinutes = Math.floor(elapsedMs / 60000);
+                const remainingMinutes = Math.max(0, 30 - elapsedMinutes);
+                $('#remainingMinTime').text(remainingMinutes);
+                
+                // 检查是否达到30分钟
+                if (elapsedMinutes >= 30 && !canEnd) {
+                    canEnd = true;
+                    
+                    // 隐藏提示，启用结束按钮
+                    $('#minTimeAlert').hide();
+                    $('#endPracticeBtn').prop('disabled', false);
+                    
+                    // 提示用户可以结束练琴
+                    Swal.fire({
+                        icon: 'success',
+                        title: '已达到练琴时间',
+                        text: '您已练琴满30分钟，可以点击"结束练琴"按钮结束',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000
+                    });
+                }
+            }
+            
+            // 检测并使用scanQRCode函数
+            if (typeof scanQRCode === 'function') {
+                console.log('检测到现有的scanQRCode函数，将使用它进行扫码处理');
+                
+                // 这是一个桥接器，用于连接原有的扫码处理和我们的结果处理
+                window.processScanResult = handleScanResult;
+            }
+        });
+    </script>
+
+    <!-- 练琴状态显示 -->
+    <div id="practice-status-container" class="container my-4" style="display: none;">
+        <!-- 已移动到专用练琴页面，此处不再需要 -->
     </div>
 </body>
 </html> 
