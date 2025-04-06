@@ -14,7 +14,7 @@
     <!-- Chart.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
     <!-- 自定义CSS -->
-    <link rel="stylesheet" href="../static/css/student.css">
+    <link rel="stylesheet" href="{% static 'css/student.css' %}">
     <link rel="stylesheet" href="../static/css/skin/default/layer.css">
     <style>
         :root {
@@ -283,6 +283,287 @@
             border-radius: 50%;
             margin-right: 5px;
         }
+        
+        /* 新增样式 - 优化表现 */
+        .attendance-list {
+            margin-top: 20px;
+        }
+        
+        .attendance-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .attendance-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .attendance-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .attendance-date {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .attendance-time {
+            color: #777;
+            margin-left: 20px;
+        }
+        
+        .attendance-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-checked-in {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        
+        .status-checked-out {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+        
+        .practice-summary {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+        
+        /* 懒加载优化 */
+        [data-lazy] {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s, transform 0.4s;
+        }
+        
+        [data-lazy].loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 骨架屏 */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+        
+        .skeleton-text {
+            height: 14px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+        
+        .skeleton-title {
+            height: 24px;
+            margin-bottom: 12px;
+            width: 70%;
+        }
+
+        /* 日历颜色主题 */
+        /* 默认主题保持原样 */
+
+        /* 蓝色经典主题 */
+        .calendar-theme-blue-style .fc-theme-standard th {
+            background-color: #1A73E8;
+            color: white;
+            padding: 12px;
+            border: 1px solid #4285F4;
+        }
+
+        .calendar-theme-blue-style .fc-theme-standard td {
+            border-color: #E8F0FE;
+        }
+
+        .calendar-theme-blue-style .fc-daygrid-day.fc-day-today {
+            background-color: rgba(26, 115, 232, 0.1);
+            box-shadow: 0 0 5px rgba(26, 115, 232, 0.2);
+        }
+
+        .calendar-theme-blue-style .fc-button-primary {
+            background-color: #1A73E8;
+            border-color: #4285F4;
+        }
+
+        .calendar-theme-blue-style .fc-button-primary:hover {
+            background-color: #0D66D0;
+            border-color: #4285F4;
+        }
+
+        .calendar-theme-blue-style .fc-button-primary:not(:disabled).fc-button-active, 
+        .calendar-theme-blue-style .fc-button-primary:not(:disabled):active {
+            background-color: #0D66D0;
+            border-color: #4285F4;
+        }
+
+        /* 翠竹青风主题 */
+        .calendar-theme-green-style .fc-theme-standard th {
+            background-color: #0F9D58;
+            color: white;
+            padding: 12px;
+            border: 1px solid #34A853;
+        }
+
+        .calendar-theme-green-style .fc-theme-standard td {
+            border-color: #E6F4EA;
+        }
+
+        .calendar-theme-green-style .fc-daygrid-day.fc-day-today {
+            background-color: rgba(15, 157, 88, 0.1);
+            box-shadow: 0 0 5px rgba(15, 157, 88, 0.2);
+        }
+
+        .calendar-theme-green-style .fc-button-primary {
+            background-color: #0F9D58;
+            border-color: #34A853;
+        }
+
+        .calendar-theme-green-style .fc-button-primary:hover {
+            background-color: #0B8043;
+            border-color: #34A853;
+        }
+
+        .calendar-theme-green-style .fc-button-primary:not(:disabled).fc-button-active, 
+        .calendar-theme-green-style .fc-button-primary:not(:disabled):active {
+            background-color: #0B8043;
+            border-color: #34A853;
+        }
+
+        /* 金秋风格主题 */
+        .calendar-theme-gold-style .fc-theme-standard th {
+            background-color: #F9A825;
+            color: white;
+            padding: 12px;
+            border: 1px solid #FBBC05;
+        }
+
+        .calendar-theme-gold-style .fc-theme-standard td {
+            border-color: #FEF7E0;
+        }
+
+        .calendar-theme-gold-style .fc-daygrid-day.fc-day-today {
+            background-color: rgba(249, 168, 37, 0.1);
+            box-shadow: 0 0 5px rgba(249, 168, 37, 0.2);
+        }
+
+        .calendar-theme-gold-style .fc-button-primary {
+            background-color: #F9A825;
+            border-color: #FBBC05;
+        }
+
+        .calendar-theme-gold-style .fc-button-primary:hover {
+            background-color: #F57F17;
+            border-color: #FBBC05;
+        }
+
+        .calendar-theme-gold-style .fc-button-primary:not(:disabled).fc-button-active, 
+        .calendar-theme-gold-style .fc-button-primary:not(:disabled):active {
+            background-color: #F57F17;
+            border-color: #FBBC05;
+        }
+
+        /* 紫气东来主题 */
+        .calendar-theme-purple-style .fc-theme-standard th {
+            background-color: #9C27B0;
+            color: white;
+            padding: 12px;
+            border: 1px solid #AB47BC;
+        }
+
+        .calendar-theme-purple-style .fc-theme-standard td {
+            border-color: #F3E5F5;
+        }
+
+        .calendar-theme-purple-style .fc-daygrid-day.fc-day-today {
+            background-color: rgba(156, 39, 176, 0.1);
+            box-shadow: 0 0 5px rgba(156, 39, 176, 0.2);
+        }
+
+        .calendar-theme-purple-style .fc-button-primary {
+            background-color: #9C27B0;
+            border-color: #AB47BC;
+        }
+
+        .calendar-theme-purple-style .fc-button-primary:hover {
+            background-color: #7B1FA2;
+            border-color: #AB47BC;
+        }
+
+        .calendar-theme-purple-style .fc-button-primary:not(:disabled).fc-button-active, 
+        .calendar-theme-purple-style .fc-button-primary:not(:disabled):active {
+            background-color: #7B1FA2;
+            border-color: #AB47BC;
+        }
+
+        /* 主题选择器样式 */
+        .calendar-theme-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .theme-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .theme-option:hover, .theme-option.active {
+            transform: scale(1.1);
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-option.default {
+            background-color: var(--primary-color);
+        }
+
+        .theme-option.blue-style {
+            background-color: #1A73E8;
+        }
+
+        .theme-option.green-style {
+            background-color: #0F9D58;
+        }
+
+        .theme-option.gold-style {
+            background-color: #F9A825;
+        }
+
+        .theme-option.purple-style {
+            background-color: #9C27B0;
+        }
+
+        /* 确保事件颜色在所有主题下保持一致 */
+        .fc .fc-event {
+            border-radius: 3px;
+            margin: 1px 0;
+        }
     </style>
 </head>
 <body>
@@ -340,129 +621,197 @@
                 </div>
             </div>
 
-            <!-- 统计数据 -->
+            <!-- 统计数据卡片 -->
             <div class="stats-container">
-                <div class="stat-card">
+                <div class="stat-card" data-lazy>
                     <div class="stat-icon">
                         <i class="fas fa-calendar-check"></i>
                     </div>
                     <div class="stat-value">{{ total_days|default:"0" }}</div>
-                    <div class="stat-label">累计练习天数</div>
+                    <div class="stat-label">累计考勤天数</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-lazy>
                     <div class="stat-icon">
                         <i class="fas fa-clock"></i>
                     </div>
                     <div class="stat-value">{{ total_practice_time|default:"0" }}</div>
-                    <div class="stat-label">累计练习小时</div>
+                    <div class="stat-label">累计练习时长(小时)</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-lazy>
                     <div class="stat-icon">
                         <i class="fas fa-percentage"></i>
                     </div>
                     <div class="stat-value">{{ attendance_rate|floatformat:0 }}%</div>
                     <div class="stat-label">出勤率</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <div class="stat-value">{{ month_attendances|default:"0" }}</div>
-                    <div class="stat-label">本月出勤</div>
-                </div>
             </div>
 
             <!-- 考勤日历 -->
-            <div class="attendance-card">
+            <div class="attendance-card" data-lazy>
                 <div class="attendance-header">
                     <h2>考勤日历</h2>
-                    <p>查看您的练琴记录、课程安排和考级时间</p>
+                    <p>查看您的考勤记录和练琴时间</p>
                 </div>
+                
+                <!-- 日历主题选择器 -->
+                <div class="calendar-theme-selector mb-3">
+                    <div class="d-flex align-items-center">
+                        <span class="me-2">选择日历风格：</span>
+                        <div class="theme-option default active" data-theme="default" title="默认风格"></div>
+                        <div class="theme-option blue-style" data-theme="blue-style" title="蓝色经典"></div>
+                        <div class="theme-option green-style" data-theme="green-style" title="翠竹青风"></div>
+                        <div class="theme-option gold-style" data-theme="gold-style" title="金秋风格"></div>
+                        <div class="theme-option purple-style" data-theme="purple-style" title="紫气东来"></div>
+                    </div>
+                </div>
+                
                 <div class="calendar-container" id="calendar"></div>
                 <div class="d-flex mt-3">
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: var(--primary-color);"></div>
-                        <span>练琴记录</span>
+                        <div class="legend-color" style="background-color: #28a745;"></div>
+                        <span>已签退</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #20bf6b;"></div>
-                        <span>课程安排</span>
+                        <div class="legend-color" style="background-color: #ffc107;"></div>
+                        <span>已签到</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #eb3b5a;"></div>
-                        <span>考级时间</span>
+                        <div class="legend-color" style="background-color: #6c757d;"></div>
+                        <span>其他状态</span>
                     </div>
                 </div>
             </div>
 
-            <!-- 练习时长图表 -->
-            <div class="chart-container">
-                <div class="chart-header">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-line me-2"></i> 练习时长趋势
-                    </div>
-                    <div class="chart-filters">
-                        <div class="chart-filter active" data-period="week">周</div>
-                        <div class="chart-filter" data-period="month">月</div>
-                        <div class="chart-filter" data-period="year">年</div>
-                    </div>
+            <!-- 考勤记录列表 -->
+            <div class="attendance-card" data-lazy>
+                <div class="attendance-header">
+                    <h2>考勤记录</h2>
+                    <p>查看您的详细考勤历史</p>
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="practiceChart"></canvas>
-                </div>
-            </div>
-
-            <!-- 练习内容分布 -->
-            <div class="chart-container">
-                <div class="chart-header">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-pie me-2"></i> 练习内容分布
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="chart-wrapper">
-                            <canvas id="contentChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mt-4">
-                            <h5 class="mb-3">练习内容分析</h5>
-                            <p>您的练习时间分配合理，基本功练习占比适中，建议增加一些视奏训练的时间，以提高阅读乐谱的能力。</p>
-                            <div class="mt-4">
-                                <h6>教师建议：</h6>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item border-0 ps-0">
-                                        <i class="fas fa-check-circle text-success me-2"></i> 继续保持每天的基本功练习
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0">
-                                        <i class="fas fa-check-circle text-success me-2"></i> 增加视奏训练的时间比例
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0">
-                                        <i class="fas fa-check-circle text-success me-2"></i> 可以适当减少曲目练习的时间
-                                    </li>
+                
+                <div class="attendance-list">
+                    {% if attendances %}
+                        {% for record in attendances %}
+                            <div class="attendance-item">
+                                <div class="attendance-info">
+                                    <div class="attendance-date">
+                                        {{ record.check_in_time|date:"Y年m月d日" }}
+                                    </div>
+                                    <div class="attendance-time">
+                                        签到: {{ record.check_in_time|time:"H:i:s" }}
+                                        {% if record.check_out_time %}
+                                            | 签退: {{ record.check_out_time|time:"H:i:s" }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="ms-3">
+                                        <span class="attendance-status {% if record.status == 'checked_in' %}status-checked-in{% elif record.status == 'checked_out' %}status-checked-out{% endif %}">
+                                            {{ record.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                {% if record.piano or record.duration_minutes %}
+                                    <div class="practice-summary">
+                                        {% if record.piano %}
+                                            <div class="mb-1">
+                                                <i class="fas fa-music me-2 text-muted"></i>
+                                                <span>钢琴编号: {{ record.piano.number }} 号</span>
+                                                {% if record.piano.brand %}
+                                                    <span class="ms-2">品牌: {{ record.piano.brand }}</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if record.duration_minutes %}
+                                            <div>
+                                                <i class="fas fa-clock me-2 text-muted"></i>
+                                                <span>练习时长: {{ record.duration_minutes|floatformat:0 }} 分钟</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        
+                        <!-- 分页 -->
+                        {% if attendances.has_other_pages %}
+                            <div class="pagination justify-content-center mt-4">
+                                <ul class="pagination">
+                                    {% if attendances.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ attendances.previous_page_number }}">上一页</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">上一页</span>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for i in attendances.paginator.page_range %}
+                                        {% if attendances.number == i %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ i }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if attendances.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ attendances.next_page_number }}">下一页</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">下一页</span>
+                                        </li>
+                                    {% endif %}
                                 </ul>
                             </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-check fs-1 text-muted mb-2"></i>
+                            <p class="mb-0">暂无考勤记录</p>
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS and jQuery -->
+    <!-- Bootstrap JS 和 jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/skin/default/layer.js' %}"></script>
     <!-- FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/zh-cn.js"></script>
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化日历
+            // 懒加载实现
+            const lazyElements = document.querySelectorAll('[data-lazy]');
+            
+            const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('loaded');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                rootMargin: '0px 0px 200px 0px'
+            });
+            
+            lazyElements.forEach(el => {
+                lazyLoadObserver.observe(el);
+            });
+            
+            // 日历初始化
             const calendarEl = document.getElementById('calendar');
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
@@ -478,191 +827,70 @@
                     week: '周',
                     list: '列表'
                 },
-                events: [
-                    // 练琴记录
-                    {
-                        title: '练琴 1.5小时',
-                        start: '2023-03-01',
-                        classNames: ['practice-event']
-                    },
-                    {
-                        title: '练琴 2小时',
-                        start: '2023-03-03',
-                        classNames: ['practice-event']
-                    },
-                    {
-                        title: '练琴 1小时',
-                        start: '2023-03-05',
-                        classNames: ['practice-event']
-                    },
-                    {
-                        title: '练琴 1.5小时',
-                        start: '2023-03-07',
-                        classNames: ['practice-event']
-                    },
-                    {
-                        title: '练琴 2小时',
-                        start: '2023-03-09',
-                        classNames: ['practice-event']
-                    },
-                    {
-                        title: '练琴 1小时',
-                        start: '2023-03-11',
-                        classNames: ['practice-event']
-                    },
-                    {
-                        title: '练琴 1.5小时',
-                        start: '2023-03-13',
-                        classNames: ['practice-event']
-                    },
-                    {
-                        title: '练琴 2小时',
-                        start: '2023-03-15',
-                        classNames: ['practice-event']
-                    },
-                    
-                    // 课程安排
-                    {
-                        title: '钢琴课',
-                        start: '2023-03-02T17:00:00',
-                        end: '2023-03-02T18:00:00',
-                        classNames: ['lesson-event']
-                    },
-                    {
-                        title: '钢琴课',
-                        start: '2023-03-06T17:00:00',
-                        end: '2023-03-06T18:00:00',
-                        classNames: ['lesson-event']
-                    },
-                    {
-                        title: '钢琴课',
-                        start: '2023-03-09T17:00:00',
-                        end: '2023-03-09T18:00:00',
-                        classNames: ['lesson-event']
-                    },
-                    {
-                        title: '钢琴课',
-                        start: '2023-03-13T17:00:00',
-                        end: '2023-03-13T18:00:00',
-                        classNames: ['lesson-event']
-                    },
-                    
-                    // 考级时间
-                    {
-                        title: '四级考试',
-                        start: '2023-03-25',
-                        classNames: ['exam-event']
-                    }
-                ],
+                events: {% autoescape off %}{{ calendar_data }}{% endautoescape %},
                 eventClick: function(info) {
                     alert(info.event.title);
                 }
             });
             calendar.render();
             
-            // 初始化练习时长趋势图表
-            const practiceCtx = document.getElementById('practiceChart').getContext('2d');
-            const practiceChart = new Chart(practiceCtx, {
-                type: 'line',
-                data: {
-                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-                    datasets: [{
-                        label: '练习时长（小时）',
-                        data: [1.5, 0, 2, 1, 1.5, 2, 1],
-                        backgroundColor: 'rgba(108, 92, 231, 0.2)',
-                        borderColor: 'rgba(108, 92, 231, 1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        pointBackgroundColor: 'rgba(108, 92, 231, 1)',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 3,
-                            ticks: {
-                                stepSize: 0.5
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
+            // 日历主题切换功能
+            const themeOptions = document.querySelectorAll('.theme-option');
+            const calendarCard = document.querySelector('.calendar-container').closest('.attendance-card');
             
-            // 初始化练习内容分布图表
-            const contentCtx = document.getElementById('contentChart').getContext('2d');
-            const contentChart = new Chart(contentCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['基本功练习', '曲目练习', '视奏训练', '即兴演奏'],
-                    datasets: [{
-                        data: [35, 40, 15, 10],
-                        backgroundColor: [
-                            'rgba(108, 92, 231, 0.8)',
-                            'rgba(46, 204, 113, 0.8)',
-                            'rgba(52, 152, 219, 0.8)',
-                            'rgba(253, 121, 168, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(108, 92, 231, 1)',
-                            'rgba(46, 204, 113, 1)',
-                            'rgba(52, 152, 219, 1)',
-                            'rgba(253, 121, 168, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
+            // 保存用户主题选择到localStorage
+            const savedTheme = localStorage.getItem('calendarTheme') || 'default';
             
-            // 图表过滤器切换
-            document.querySelectorAll('.chart-filter').forEach(filter => {
-                filter.addEventListener('click', function() {
-                    document.querySelectorAll('.chart-filter').forEach(f => f.classList.remove('active'));
+            // 初始化主题
+            if (savedTheme !== 'default') {
+                applyTheme(savedTheme);
+                
+                // 更新活动状态
+                themeOptions.forEach(option => {
+                    option.classList.remove('active');
+                    if (option.dataset.theme === savedTheme) {
+                        option.classList.add('active');
+                    }
+                });
+            }
+            
+            // 主题切换事件监听
+            themeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.dataset.theme;
+                    
+                    // 移除所有主题类
+                    themeOptions.forEach(opt => opt.classList.remove('active'));
+                    
+                    // 添加当前主题类
                     this.classList.add('active');
                     
-                    const period = this.dataset.period;
-                    let labels, data;
+                    // 应用所选主题
+                    applyTheme(theme);
                     
-                    switch(period) {
-                        case 'week':
-                            labels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-                            data = [1.5, 0, 2, 1, 1.5, 2, 1];
-                            break;
-                        case 'month':
-                            labels = ['第1周', '第2周', '第3周', '第4周'];
-                            data = [8, 7, 9, 6.5];
-                            break;
-                        case 'year':
-                            labels = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-                            data = [25, 28, 30, 26, 32, 35, 40, 38, 30, 28, 32, 30];
-                            break;
-                    }
-                    
-                    practiceChart.data.labels = labels;
-                    practiceChart.data.datasets[0].data = data;
-                    practiceChart.update();
+                    // 保存到localStorage
+                    localStorage.setItem('calendarTheme', theme);
                 });
             });
+            
+            // 应用主题函数
+            function applyTheme(theme) {
+                // 移除所有主题类
+                calendarCard.classList.remove(
+                    'calendar-theme-blue-style',
+                    'calendar-theme-green-style',
+                    'calendar-theme-gold-style',
+                    'calendar-theme-purple-style'
+                );
+                
+                // 添加所选主题类
+                if (theme !== 'default') {
+                    calendarCard.classList.add('calendar-theme-' + theme);
+                }
+                
+                // 触发窗口调整事件以重新渲染日历
+                window.dispatchEvent(new Event('resize'));
+            }
             
             // 添加系统时间显示功能
             function updateSystemTime() {

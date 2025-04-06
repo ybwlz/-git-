@@ -10,6 +10,9 @@ import qrcode
 from io import BytesIO
 import base64
 from django.db.models import Sum, Count, Avg, Q, Max, Avg
+from django.db.models import Count, Sum, F, Avg, ExpressionWrapper, DurationField
+from django.db.models.functions import TruncMonth, Extract
+from django.db import connection
 
 from .models import Student, PracticeRecord, Attendance, StudentFavorite
 from .forms import StudentProfileForm, PracticeRecordForm, AttendanceForm, SheetMusicSearchForm
@@ -959,35 +962,97 @@ def attendance(request):
     
     # 从考勤应用获取考勤记录，而不是使用学生应用的Attendance模型
     from mymanage.attendance.models import AttendanceRecord
+    from mymanage.courses.models import Piano
+    from django.db.models import Count, Sum, F, Avg, ExpressionWrapper, DurationField
+    from django.db.models.functions import TruncMonth, Extract
     
     # 获取今日考勤记录
     today_attendance = AttendanceRecord.objects.filter(
         student=student,
         check_in_time__date=today
-    ).first()
+    ).select_related('piano').first()
     
-    # 获取历史考勤记录
-    attendances = AttendanceRecord.objects.filter(student=student).order_by('-check_in_time')
+    # 获取历史考勤记录 - 使用select_related减少数据库查询
+    attendances = AttendanceRecord.objects.filter(
+        student=student
+    ).select_related('piano', 'session').order_by('-check_in_time')
+    
     paginator = Paginator(attendances, 10)
     page = request.GET.get('page')
     attendances_page = paginator.get_page(page)
     
     # 获取考勤统计数据
-    total_days = AttendanceRecord.objects.filter(student=student).count()
-    present_days = AttendanceRecord.objects.filter(student=student, status='checked_out').count()
+    total_days = attendances.count()
+    present_days = attendances.filter(status='checked_out').count()
     
-    # 如果有历史记录，计算出勤率
+    # 计算出勤率
     attendance_rate = (present_days / total_days * 100) if total_days > 0 else 0
     
-    # 获取本月考勤
-    current_month = timezone.now().month
-    current_year = timezone.now().year
-    month_attendances = AttendanceRecord.objects.filter(
-        student=student,
-        check_in_time__month=current_month,
-        check_in_time__year=current_year
-    ).count()
+    # 获取练琴统计数据
+    total_practice_time = attendances.filter(
+        status='checked_out'
+    ).aggregate(
+        total=Sum('duration_minutes')
+    )['total'] or 0
     
+    # 获取练琴时长统计 - 平均每次练习时长
+    avg_practice_time = attendances.filter(
+        status='checked_out',
+        duration_minutes__isnull=False
+    ).aggregate(
+        avg=Avg('duration_minutes')
+    )['avg'] or 0
+    
+    # 获取最长练习记录
+    longest_practice = attendances.filter(
+        status='checked_out'
+    ).order_by('-duration_minutes').first()
+    
+    max_practice_time = longest_practice.duration_minutes if longest_practice else 0
+    
+    # 获取最近练琴记录 - 包含详细信息
+    recent_practices = attendances.filter(
+        status='checked_out',
+        check_out_time__isnull=False
+    ).select_related('piano', 'session').order_by('-check_in_time')[:5]
+    
+    # 创建日历数据 - 对最近3个月的数据进行处理
+    three_months_ago = timezone.now() - timezone.timedelta(days=90)
+    calendar_data = []
+    
+    calendar_records = attendances.filter(
+        check_in_time__gte=three_months_ago
+    ).select_related('session')
+    
+    for record in calendar_records:
+        # 根据考勤状态设置事件类型和颜色
+        event_class = 'practice-event' 
+        event_color = '#6c5ce7'
+        
+        if record.status == 'checked_in':
+            title = '已签到'
+            event_color = '#ffc107'  # 黄色
+        elif record.status == 'checked_out':
+            if record.duration_minutes:
+                title = f'练琴 {int(record.duration_minutes)} 分钟'
+            else:
+                title = '已签退'
+            event_color = '#28a745'  # 绿色
+        else:
+            title = record.status
+            event_color = '#6c757d'  # 灰色
+        
+        calendar_data.append({
+            'title': title,
+            'start': record.check_in_time.strftime('%Y-%m-%d'),
+            'className': event_class,
+            'color': event_color
+        })
+    
+    # 将日历数据转换为JSON格式
+    calendar_json = json.dumps(calendar_data)
+    
+    # 组装上下文数据
     context = {
         'student': student,
         'today_attendance': today_attendance,
@@ -995,8 +1060,13 @@ def attendance(request):
         'total_days': total_days,
         'present_days': present_days,
         'attendance_rate': attendance_rate,
-        'month_attendances': month_attendances
+        'total_practice_time': round(total_practice_time / 60, 1),  # 将分钟转换为小时并保留一位小数
+        'avg_practice_time': round(avg_practice_time, 1),
+        'max_practice_time': max_practice_time,
+        'calendar_data': calendar_json,
+        'recent_practices': recent_practices
     }
+    
     return render(request, 'students/student_attendance.html', context)
 
 @login_required
