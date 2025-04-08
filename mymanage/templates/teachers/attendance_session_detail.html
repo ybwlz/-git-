@@ -134,6 +134,8 @@
             font-weight: 500;
         }
     </style>
+    <!-- 添加页面自动刷新功能，每30秒刷新一次 -->
+    <meta http-equiv="refresh" content="30">
 </head>
 <body>
     <div class="sidebar col-md-3 col-lg-2 d-md-block">
@@ -149,11 +151,6 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'teachers:dashboard' %}">
                     <i class="fas fa-home"></i> 控制面板
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:profile' %}">
-                    <i class="fas fa-user"></i> 个人主页
                 </a>
             </li>
             <li class="nav-item">
@@ -179,6 +176,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'teachers:finance' %}">
                     <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-cog"></i> 账号设置
                 </a>
             </li>
             <li class="nav-item mt-5">
@@ -264,7 +266,7 @@
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">出勤人数:</span>
-                                    <span>{{ session.attendance_count }}</span>
+                                    <span>{{ records.count }}</span>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -295,13 +297,11 @@
                 <div class="col-md-8">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">已签到学生 ({{ session.attendance_count }})</h5>
+                            <h5 class="mb-0">已签到学生 ({{ records.count }})</h5>
                             <div>
-                                {% if session.status == 'active' %}
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#manualCheckInModal">
-                                        <i class="fas fa-user-plus me-1"></i> 手动签到
-                                    </button>
-                                {% endif %}
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#manualCheckInModal">
+                                    <i class="fas fa-user-plus me-1"></i> 手动签到
+                                </button>
                             </div>
                         </div>
                         <div class="card-body p-0">
@@ -332,14 +332,14 @@
                                                         {% endif %}
                                                         <div>
                                                             <div class="fw-bold">{{ record.student.name }}</div>
-                                                            <small class="text-muted">{{ record.student.phone_number }}</small>
+                                                            <small class="text-muted">{{ record.student.phone|default:"未设置联系方式" }}</small>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td>{{ record.check_in_time|date:"H:i:s" }}</td>
+                                                <td>{{ record.check_in_local|date:"H:i:s" }}</td>
                                                 <td>
                                                     {% if record.check_out_time %}
-                                                        {{ record.check_out_time|date:"H:i:s" }}
+                                                        {{ record.check_out_local|date:"H:i:s" }}
                                                     {% else %}
                                                         <span class="text-muted">-</span>
                                                     {% endif %}
@@ -421,17 +421,11 @@
                                                         <div class="fw-bold">{{ student.name }}</div>
                                                     </div>
                                                 </td>
-                                                <td>{{ student.phone_number }}</td>
+                                                <td>{{ student.phone|default:"未设置联系方式" }}</td>
                                                 <td>
-                                                    {% if session.status == 'active' %}
-                                                        <button class="btn btn-sm btn-outline-success manual-checkin-btn" data-student-id="{{ student.id }}" data-student-name="{{ student.name }}">
-                                                            手动签到
-                                                        </button>
-                                                    {% else %}
-                                                        <a href="{% url 'teachers:student_detail' student.id %}" class="btn btn-sm btn-outline-primary">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                    {% endif %}
+                                                    <button class="btn btn-sm btn-outline-success direct-checkin-btn" data-student-id="{{ student.id }}" data-student-name="{{ student.name }}">
+                                                        手动签到
+                                                    </button>
                                                 </td>
                                             </tr>
                                         {% endfor %}
@@ -474,9 +468,9 @@
                     <h5 class="modal-title">手动签到</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="manualCheckInForm">
-                    {% csrf_token %}
-                    <div class="modal-body">
+                <div class="modal-body">
+                    <form id="manualCheckInForm">
+                        {% csrf_token %}
                         <div class="mb-3">
                             <label class="form-label">选择学生</label>
                             <select id="student_id" name="student_id" class="form-select" required>
@@ -488,14 +482,16 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">签到备注</label>
-                            <textarea name="note" class="form-control" rows="2" placeholder="可选"></textarea>
+                            <textarea name="notes" id="notes" class="form-control" rows="2" placeholder="可选"></textarea>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-success">确认签到</button>
-                    </div>
-                </form>
+                        <input type="hidden" name="session_id" id="session_id" value="{{ session.id }}">
+                        <input type="hidden" name="course_id" id="course_id" value="{{ session.course.id }}">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" id="submitManualCheckInBtn" class="btn btn-success">确认签到</button>
+                </div>
             </div>
         </div>
     </div>
@@ -528,52 +524,91 @@
         const manualCheckinBtns = document.querySelectorAll('.manual-checkin-btn');
         manualCheckinBtns.forEach(btn => {
             btn.addEventListener('click', function() {
-                const studentId = this.getAttribute('data-student-id');
-                const studentName = this.getAttribute('data-student-name');
-                // 预填充选择框
-                const studentSelect = document.getElementById('student_id');
-                if (studentSelect) {
-                    studentSelect.value = studentId;
-                }
-                // 显示模态框
+                // 显示模态框，供选择学生
                 const modal = new bootstrap.Modal(document.getElementById('manualCheckInModal'));
                 modal.show();
             });
         });
         
+        // 未签到学生列表中的直接签到按钮
+        const directCheckinBtns = document.querySelectorAll('.direct-checkin-btn');
+        directCheckinBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const studentId = this.getAttribute('data-student-id');
+                const studentName = this.getAttribute('data-student-name');
+                
+                if (confirm('确定要为 ' + studentName + ' 手动签到吗？')) {
+                    const formData = new FormData();
+                    formData.append('student_id', studentId);
+                    formData.append('session_id', '{{ session.id }}');
+                    formData.append('course_id', '{{ session.course.id }}');
+                    formData.append('notes', '');  // 添加备注字段，即使为空
+                    
+                    // 显示简单的处理中提示
+                    alert('处理中，请稍候...');
+                    
+                    fetch('/teachers/attendance/manual-checkin/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('签到成功');
+                            window.location.reload();
+                        } else {
+                            alert('签到失败: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('错误:', error);
+                        alert('操作失败，请重试');
+                    });
+                }
+            });
+        });
+        
         // 手动签到表单提交
-        const manualCheckInForm = document.getElementById('manualCheckInForm');
-        if (manualCheckInForm) {
-            manualCheckInForm.addEventListener('submit', function(e) {
-                e.preventDefault();
+        const submitManualCheckInBtn = document.getElementById('submitManualCheckInBtn');
+        if (submitManualCheckInBtn) {
+            submitManualCheckInBtn.addEventListener('click', function() {
+                var form = document.getElementById('manualCheckInForm');
+                var formData = new FormData(form);
                 
-                const formData = new FormData(this);
-                formData.append('session_id', '{{ session.id }}');
+                // 获取CSRF令牌
+                var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                 
-                layer.msg('处理中，请稍候...', {icon: 16, time: 0});
-                
-                fetch('/teachers/attendance/checkin/', {
+                // 发送请求
+                fetch('/teachers/attendance/manual-checkin/', {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': csrfToken
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: formData
                 })
-                .then(response => response.json())
-                .then(data => {
-                    layer.closeAll();
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
                     if (data.success) {
-                        layer.msg('签到成功', {icon: 1, time: 1500}, function() {
-                            window.location.reload();
-                        });
+                        alert('考勤记录添加成功');
+                        // 关闭模态框
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('manualCheckInModal'));
+                        modal.hide();
+                        // 刷新页面
+                        window.location.reload();
                     } else {
-                        layer.msg('签到失败: ' + data.message, {icon: 2});
+                        alert('添加失败: ' + data.message);
                     }
                 })
-                .catch(error => {
-                    layer.closeAll();
-                    layer.msg('操作失败，请重试', {icon: 2});
-                    console.error('错误:', error);
+                .catch(function(error) {
+                    console.error('添加考勤记录时出错:', error);
+                    alert('操作失败，请重试');
                 });
             });
         }

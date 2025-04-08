@@ -520,13 +520,21 @@ def end_session(request):
                     'message': '您没有权限结束此考勤会话'
                 }, status=403)
             
+            # 获取当前时间
+            now = timezone.now()
+            
+            # 如果有关联的二维码，更新其过期时间为当前时间，使其立即过期
+            if session.qrcode:
+                session.qrcode.expires_at = now
+                session.qrcode.save()
+            
             # 关闭会话
             session.status = 'closed'
             session.is_active = False
             
             # 确保会话有结束时间
             if not session.end_time:
-                session.end_time = timezone.now()
+                session.end_time = now
                 
             session.save()
             

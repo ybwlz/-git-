@@ -52,13 +52,16 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="level" class="form-label">难度等级 <span class="text-danger">*</span></label>
-                                        <select class="form-select" id="level" name="level" required>
-                                            <option value="">请选择难度等级</option>
+                                        <label for="level" class="form-label">难度等级</label>
+                                        <select class="form-select" id="level" name="level">
+                                            <option value="1" selected>默认级别</option>
                                             {% for level in levels %}
-                                                <option value="{{ level.id }}">{{ level.name }}</option>
+                                                {% if level.id != 1 %}
+                                                <option value="{{ level.id }}">{{ level }}</option>
+                                                {% endif %}
                                             {% endfor %}
                                         </select>
+                                        <small class="text-muted">系统会自动设置默认级别，您可以忽略此选项</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -158,12 +161,11 @@
         $('form').on('submit', function(e) {
             var title = $('#title').val();
             var composer = $('#composer').val();
-            var level = $('#level').val();
             var file = $('#file').val();
             
-            if (!title || !composer || !level || !file) {
+            if (!title || !composer || !file) {
                 e.preventDefault();
-                alert('请填写所有必填字段并上传曲谱文件');
+                alert('请填写曲谱标题、作曲家并上传曲谱文件');
             }
         });
     });

@@ -79,15 +79,30 @@ class PracticeRecord(models.Model):
         """兼容AttendanceRecord API，返回开始时间"""
         return self.start_time
     
+    @check_in_time.setter
+    def check_in_time(self, value):
+        """设置开始时间"""
+        self.start_time = value
+    
     @property
     def check_out_time(self):
         """兼容AttendanceRecord API，返回结束时间"""
         return self.end_time
     
+    @check_out_time.setter
+    def check_out_time(self, value):
+        """设置结束时间"""
+        self.end_time = value
+    
     @property
     def duration_minutes(self):
         """兼容AttendanceRecord API，返回时长（分钟）"""
         return self.duration
+    
+    @duration_minutes.setter
+    def duration_minutes(self, value):
+        """设置持续时间（分钟）"""
+        self.duration = value
 
 # 以下是原来的Attendance模型，仅作为兼容保留，不再主动使用
 class Attendance(models.Model):

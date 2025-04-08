@@ -287,11 +287,6 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:profile' %}">
-                    <i class="fas fa-user"></i> 个人主页
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link" href="{% url 'teachers:students' %}">
                     <i class="fas fa-users"></i> 学生管理
                 </a>
@@ -314,6 +309,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'teachers:finance' %}">
                     <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-cog"></i> 账号设置
                 </a>
             </li>
             <li class="nav-item mt-5">
@@ -564,15 +564,17 @@
                                             {{ record.student.name }}
                                         </div>
                                     </td>
-                                    <td>钢琴 {{ record.piano.number }}</td>
-                                    <td>{{ record.check_in_time|time:"H:i" }}</td>
-                                    <td>{{ record.check_out_time|time:"H:i"|default:"-" }}</td>
-                                    <td>{{ record.duration|default:"进行中" }}</td>
+                                    <td>钢琴 {% if record.piano %}{{ record.piano.number }}{% else %}{{ record.piano_number|default:"未记录" }}{% endif %}</td>
+                                    <td>{% if record.local_check_in %}{{ record.local_check_in|time:"H:i" }}{% elif record.start_time %}{{ record.start_time|time:"H:i" }}{% else %}{{ record.check_in_time|time:"H:i" }}{% endif %}</td>
+                                    <td>{% if record.local_check_out %}{{ record.local_check_out|time:"H:i" }}{% elif record.end_time %}{{ record.end_time|time:"H:i" }}{% elif record.check_out_time %}{{ record.check_out_time|time:"H:i" }}{% else %}-{% endif %}</td>
+                                    <td>{% if record.duration_mins %}{{ record.duration_mins }} 分钟{% elif record.duration_minutes %}{{ record.duration_minutes|floatformat:"0" }} 分钟{% elif record.duration %}{{ record.duration|floatformat:"0" }} 分钟{% else %}进行中{% endif %}</td>
                                     <td>
-                                        {% if record.status == 'checked_in' %}
+                                        {% if record.status == 'checked_in' or record.status == 'active' %}
                                         <span class="badge bg-primary">进行中</span>
-                                        {% else %}
+                                        {% elif record.status == 'checked_out' or record.status == 'completed' %}
                                         <span class="badge bg-success">已完成</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ record.status }}</span>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -827,25 +829,44 @@
                     
                     document.getElementById('forceCheckoutPianoId').value = pianoId;
                     document.getElementById('forceCheckoutStudentName').textContent = studentName;
+                    
+                    console.log('打开强制签退模态框:', {pianoId, studentName});
                 });
                 
                 // 提交强制签退表单
                 document.getElementById('submitForceCheckoutBtn').addEventListener('click', function() {
-                    const form = document.getElementById('forceCheckoutForm');
-                    const formData = new FormData(form);
+                    const pianoId = document.getElementById('forceCheckoutPianoId').value;
+                    const studentName = document.getElementById('forceCheckoutStudentName').textContent;
+                    console.log('准备提交强制签退请求:', {pianoId, studentName});
+                    
+                    if (!pianoId) {
+                        console.error('错误: 缺少钢琴ID');
+                        showToast('参数错误: 缺少钢琴ID', 'error', 3000);
+                        return;
+                    }
                     
                     // 显示加载中提示
                     const loadingToast = showToast('处理中...', 'loading', 10000);
+                    
+                    // 获取CSRF令牌
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    
+                    // 使用URLSearchParams来构建表单数据
+                    const formData = new URLSearchParams();
+                    formData.append('piano_id', pianoId);
+                    formData.append('student_name', studentName); // 添加学生名称参数
                     
                     // 使用fetch API提交
                     fetch('{% url "teachers:force_checkout" %}', {
                         method: 'POST',
                         headers: {
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': csrfToken
                         },
                         body: formData
                     })
                     .then(response => {
+                        console.log('签退请求状态:', response.status);
                         if (!response.ok) {
                             throw new Error(`HTTP错误! 状态: ${response.status}`);
                         }
@@ -854,6 +875,8 @@
                     .then(data => {
                         // 移除加载中提示
                         loadingToast.remove();
+                        
+                        console.log('签退响应数据:', data);
                         
                         if (data.success) {
                             // 关闭模态框
@@ -866,15 +889,16 @@
                                 refreshPianoStatus(false);
                             }, 800);
                         } else {
-                            showToast('操作失败', 'error', 2000);
+                            showToast('操作失败: ' + (data.message || '未知错误'), 'error', 3000);
+                            console.error('签退失败原因:', data.message);
                         }
                     })
                     .catch(error => {
                         // 移除加载中提示
                         loadingToast.remove();
                         
-                        console.error('Error:', error);
-                        showToast('提交失败', 'error', 2000);
+                        console.error('签退请求错误:', error);
+                        showToast('提交失败: ' + error.message, 'error', 3000);
                     });
                 });
             }

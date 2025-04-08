@@ -15,9 +15,12 @@ from django.db.models.functions import TruncMonth, Extract
 from django.db import connection
 import calendar
 import traceback
+import logging
 
 from .models import Student, PracticeRecord, Attendance, StudentFavorite
 from .forms import StudentProfileForm, PracticeRecordForm, AttendanceForm, SheetMusicSearchForm
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def profile(request):
@@ -442,288 +445,468 @@ def check_out(request):
 
 @login_required
 def scan_qrcode(request):
-    """处理二维码扫描请求"""
-    if request.method == 'POST':
-        qrcode_data = request.POST.get('qrcode_data')
-        student = get_object_or_404(Student, user=request.user)
-        
-        if not qrcode_data:
-            return JsonResponse({
-                'success': False,
-                'message': '二维码数据为空'
-            })
-        
-        # 记录二维码数据以便调试
-        print(f"收到二维码数据: {qrcode_data}")
-        
-        try:
-            # 导入需要的模型
-            from mymanage.attendance.models import QRCode, AttendanceRecord, AttendanceSession, WaitingQueue
-            from mymanage.courses.models import Piano
-            
-            # 多种格式尝试匹配
-            # 1. 直接尝试UUID匹配
-            qrcode_obj = None
-            try:
-                # 去除可能存在的引号和首尾空格
-                qrcode_data = qrcode_data.strip().strip('"\'')
-                
-                # 检查是否是UUID格式
-                import uuid
-                try:
-                    # 尝试转换为UUID对象
-                    uuid_obj = uuid.UUID(qrcode_data)
-                    qrcode_obj = QRCode.objects.filter(uuid=uuid_obj).first()
-                    if qrcode_obj:
-                        print(f"通过UUID匹配到二维码: {qrcode_obj}")
-                except ValueError:
-                    # 不是有效的UUID，尝试其他方式匹配
-                    pass
-                
-                # 如果UUID匹配失败，尝试其他方式匹配
-                if not qrcode_obj:
-                    # 省略其他匹配逻辑，保持原有代码...
-                    pass
-            
-            except Exception as e:
-                print(f"匹配二维码时出错: {str(e)}")
-            
-            # 如果找到有效的二维码
-            if qrcode_obj and qrcode_obj.is_valid():
-                # 获取关联的考勤会话
-                session = AttendanceSession.objects.filter(qrcode=qrcode_obj).first()
-                
-                if not session:
-                    return JsonResponse({
-                        'success': False,
-                        'message': '二维码未关联到有效的考勤会话'
-                    })
-                
-                # 检查学生是否已经签到
-                existing_record = AttendanceRecord.objects.filter(
-                    student=student,
-                    session=session,
-                    status='checked_in'
-                ).first()
-                
-                if existing_record:
-                    # 如果已经签到，返回当前练琴状态
-                    piano = existing_record.piano
-                    elapsed_minutes = 0
-                    
-                    if existing_record.check_in_time:
-                        elapsed_seconds = (timezone.now() - existing_record.check_in_time).total_seconds()
-                        elapsed_minutes = int(elapsed_seconds / 60)
-                    
-                    # 检查是否有活跃的练琴记录
-                    today = timezone.now().date()
-                    active_practice = PracticeRecord.objects.filter(
-                        student=student,
-                        date=today,
-                        status='active'
-                    ).first()
-                    
-                    practice_id = active_practice.id if active_practice else None
-                    
-                    return JsonResponse({
-                        'success': True,
-                        'already_checked_in': True,
-                        'message': '您已经签到，可以开始练琴',
-                        'piano_number': piano.number if piano else None,
-                        'piano_brand': piano.brand if piano else None,
-                        'piano_model': piano.model if piano else None,
-                        'elapsed_minutes': elapsed_minutes,
-                        'session_id': session.id,
-                        'practice_id': practice_id
-                    })
-                
-                # 检查是否在等待队列中
-                waiting_record = WaitingQueue.objects.filter(
-                    session=session,
-                    student=student,
-                    is_active=True
-                ).first()
-                
-                if waiting_record:
-                    # 计算剩余等待时间
-                    total_wait_time = waiting_record.estimated_wait_time
-                    elapsed_minutes = int((timezone.now() - waiting_record.join_time).total_seconds() / 60)
-                    remaining_minutes = max(0, total_wait_time - elapsed_minutes)
-                    
-                    return JsonResponse({
-                        'success': True,
-                        'waiting': True,
-                        'message': f'您已在等待队列中，预计还需等待{remaining_minutes}分钟',
-                        'wait_minutes': remaining_minutes,
-                        'queue_position': WaitingQueue.objects.filter(
-                            session=session,
-                            is_active=True,
-                            join_time__lt=waiting_record.join_time
-                        ).count() + 1,
-                        'session_id': session.id,
-                        'waiting_id': waiting_record.id
-                    })
-                
-                # 查找可用的钢琴
-                available_pianos = Piano.objects.filter(
-                    is_active=True,
-                    is_occupied=False
-                ).order_by('number')
-                
-                if available_pianos.exists():
-                    # 有空闲钢琴，但不直接分配，返回可用钢琴信息
-                    piano = available_pianos.first()
-                    
-                    return JsonResponse({
-                        'success': True,
-                        'can_start': True,
-                        'message': f'扫码成功！有可用钢琴（{piano.number}号），点击开始练琴',
-                        'piano_number': piano.number,
-                        'piano_brand': piano.brand,
-                        'piano_model': piano.model,
-                        'session_id': session.id
-                    })
-                else:
-                    # 没有空闲钢琴，计算等待时间但不直接加入队列
-                    active_records = AttendanceRecord.objects.filter(
-                        session=session,
-                        status='checked_in'
-                    ).count()
-                    
-                    # 假设每人平均练习30分钟，每5人增加10分钟等待时间
-                    estimated_wait_time = (active_records // 5) * 10 + 5
-                    
-                    return JsonResponse({
-                        'success': True,
-                        'waiting_required': True,
-                        'message': f'扫码成功！需要等待约{estimated_wait_time}分钟，点击确认加入等待',
-                        'wait_minutes': estimated_wait_time,
-                        'session_id': session.id
-                    })
-            else:
-                # 二维码无效或未找到
-                return JsonResponse({
-                    'success': False,
-                    'message': '无效的二维码或二维码已过期'
-                })
-                
-        except Exception as e:
-            import traceback
-            print(f"处理二维码时出错: {str(e)}")
-            print(traceback.format_exc())
-            return JsonResponse({
-                'success': False,
-                'message': f'处理二维码时出错: {str(e)}'
-            })
+    """处理二维码扫描请求，支持GET和POST请求"""
+    import logging
+    logger = logging.getLogger(__name__)
     
-    return JsonResponse({'success': False, 'message': '请求方法错误'}, status=400)
-
-@login_required
-def start_practice(request):
-    """开始练琴函数，同时创建考勤记录"""
+    # 记录请求信息
+    logger.debug(f"扫描二维码请求方法: {request.method}")
     if request.method == 'POST':
-        session_id = request.POST.get('session_id')
-        student = Student.objects.get(user=request.user)
-        
-        # 添加日志以跟踪会话ID
-        print(f"收到开始练琴请求 - 学生: {student.name}, 会话ID: {session_id}")
-        
-        if not session_id:
-            return JsonResponse({
-                'success': False,
-                'message': '缺少会话ID'
-            })
-        
+        logger.debug(f"POST数据: {request.POST}")
+    
+    # 获取请求参数
+    session_id = request.GET.get('session_id') or request.POST.get('session_id')
+    qrcode_data = request.POST.get('qrcode_data')
+    
+    if not hasattr(request.user, 'student_profile'):
+        return JsonResponse({
+            'success': False,
+            'message': '只有学生用户可以扫描考勤码'
+        }, status=400)
+    
+    student = request.user.student_profile
+    logger.debug(f"处理学生ID: {student.id}, 姓名: {student.name}")
+    
+    # 导入所需模型
+    from mymanage.attendance.models import AttendanceSession, AttendanceRecord, QRCode, WaitingQueue, PianoAssignment
+    from mymanage.courses.models import Piano, Course
+    
+    # 处理特定会话ID的请求
+    if session_id:
+        logger.debug(f"使用会话ID处理: {session_id}")
         try:
-            from mymanage.attendance.models import AttendanceSession
-            from mymanage.courses.models import Piano
+            # 获取会话信息
+            session = get_object_or_404(AttendanceSession, id=session_id)
             
-            # 检查会话是否存在
-            try:
-                session = AttendanceSession.objects.get(id=session_id)
-                print(f"找到会话: {session.id}, 课程: {session.course.name}")
-            except AttendanceSession.DoesNotExist:
-                print(f"错误: 找不到会话ID: {session_id}")
-                return JsonResponse({
-                    'success': False,
-                    'message': '无效的会话ID'
-                })
-            
-            # 检查学生是否有活跃的练琴记录
+            # 检查是否已有活跃的练琴记录
             active_practice = PracticeRecord.objects.filter(
                 student=student,
                 date=timezone.now().date(),
                 status='active'
             ).first()
             
-            # 如果已有活跃的练琴记录，返回该记录信息
             if active_practice:
-                print(f"学生已有活跃练琴记录 ID: {active_practice.id}, 钢琴: {active_practice.piano_number}")
                 # 计算已练习时间（分钟）
-                current_time = timezone.now()
-                elapsed_minutes = int((current_time - active_practice.start_time).total_seconds() / 60)
+                elapsed_minutes = int((timezone.now() - active_practice.start_time).total_seconds() / 60)
                 
                 # 获取钢琴信息
                 piano_number = active_practice.piano_number
                 piano_brand = "未知"
                 piano_model = "未知"
                 
-                if piano_number:
-                    try:
-                        piano = Piano.objects.get(number=piano_number)
-                        piano_brand = piano.brand
-                        piano_model = piano.model
-                    except Piano.DoesNotExist:
-                        print(f"警告：练琴记录关联的钢琴 {piano_number} 不存在")
+                try:
+                    piano = Piano.objects.get(number=piano_number)
+                    piano_brand = piano.brand
+                    piano_model = piano.model
+                except Piano.DoesNotExist:
+                    pass
                 
-                # 确保考勤会话关联
-                if not active_practice.attendance_session:
-                    active_practice.attendance_session = session
-                    active_practice.save()
-                    print(f"更新练琴记录关联考勤会话: {session.id}")
-                    
                 return JsonResponse({
                     'success': True,
-                    'message': f'继续练琴，您已在{piano_number}号钢琴练习中',
-                    'practice_id': active_practice.id,
+                    'message': f'您已在{piano_number}号钢琴练习中，已练习{elapsed_minutes}分钟',
+                    'piano_number': piano_number,
+                    'piano_brand': piano_brand,
+                    'piano_model': piano_model,
                     'elapsed_minutes': elapsed_minutes,
+                    'session_id': session.id,
+                    'practice_id': active_practice.id
+                })
+            
+            # 检查学生是否已有钢琴预留
+            piano_assignment = PianoAssignment.objects.filter(
+                session=session,
+                student=student,
+                status='reserved'
+            ).first()
+            
+            # 如果已有钢琴预留，返回预留信息
+            if piano_assignment:
+                # 计算预留剩余时间
+                remaining_seconds = (piano_assignment.expiration_time - timezone.now()).total_seconds()
+                
+                # 如果预留已过期但状态未更新，先更新状态
+                if remaining_seconds <= 0:
+                    piano_assignment.expire()
+                    # 继续处理后续逻辑，检查是否有其他可用钢琴
+                else:
+                    remaining_minutes = round(remaining_seconds / 60, 1)
+                    logger.info(f"找到钢琴预留: ID={piano_assignment.id}, 钢琴={piano_assignment.piano.number}, 剩余时间={remaining_minutes}分钟")
+                    return JsonResponse({
+                        'success': True,
+                        'reserved': True,
+                        'message': f'已为您预留{piano_assignment.piano.number}号钢琴，请在{remaining_minutes}分钟内点击"开始练琴"',
+                        'piano_number': piano_assignment.piano.number,
+                        'piano_brand': piano_assignment.piano.brand,
+                        'piano_model': piano_assignment.piano.model,
+                        'remaining_minutes': remaining_minutes,
+                        'session_id': session.id,
+                        'assignment_id': piano_assignment.id
+                    })
+            
+            # 检查学生是否已在等待队列
+            waiting_record = WaitingQueue.objects.filter(
+                session=session,
+                student=student,
+                is_active=True
+            ).first()
+            
+            # 如果已在等待队列中，返回等待信息
+            if waiting_record:
+                # 计算剩余等待时间
+                total_wait_time = waiting_record.estimated_wait_time
+                elapsed_minutes = int((timezone.now() - waiting_record.join_time).total_seconds() / 60)
+                remaining_minutes = max(0, total_wait_time - elapsed_minutes)
+                
+                queue_position = WaitingQueue.objects.filter(
+                    session=session,
+                    is_active=True,
+                    join_time__lt=waiting_record.join_time
+                ).count() + 1
+                
+                logger.info(f"学生在等待队列中: ID={waiting_record.id}, 排队位置={queue_position}, 剩余时间={remaining_minutes}分钟")
+                
+                return JsonResponse({
+                    'success': True,
+                    'waiting': True,
+                    'message': f'您已在等待队列中，预计还需等待{remaining_minutes}分钟',
+                    'wait_minutes': remaining_minutes,
+                    'queue_position': queue_position,
+                    'session_id': session.id,
+                    'waiting_id': waiting_record.id
+                })
+            
+            # 清理过期的钢琴预留
+            PianoAssignment.check_and_expire_reservations()
+            
+            # 查找可用的钢琴（未被占用且未被预留）
+            available_pianos = Piano.objects.filter(
+                is_active=True,
+                is_occupied=False,
+                is_reserved=False
+            ).order_by('number')
+            
+            if available_pianos.exists():
+                # 有空闲钢琴，但不立即预留，只返回可用信息
+                available_count = available_pianos.count()
+                logger.info(f"有{available_count}台可用钢琴")
+                
+                # 获取第一个可用钢琴信息用于显示
+                piano = available_pianos.first()
+                
+                # 返回可用钢琴信息
+                return JsonResponse({
+                    'success': True,
+                    'available_pianos': available_count,
+                    'message': f'当前有{available_count}台可用钢琴，您可以点击"开始练琴"',
+                    'piano_number': piano.number,  # 仅用于前端显示
+                    'piano_brand': piano.brand,
+                    'piano_model': piano.model,
+                    'session_id': session.id
+                })
+            else:
+                # 没有空闲钢琴，返回信息让前端提示加入等待队列
+                logger.info("没有可用钢琴，返回等待队列信息")
+                return JsonResponse({
+                    'success': True,
+                    'no_piano': True,
+                    'message': '当前没有可用的钢琴，请加入等待队列',
+                    'session_id': session.id
+                })
+                
+        except Exception as e:
+            import traceback
+            logger.error(f"处理会话时出错: {str(e)}")
+            logger.error(traceback.format_exc())
+            return JsonResponse({
+                'success': False,
+                'message': f'处理会话时出错: {str(e)}'
+            }, status=500)
+    
+    # 处理二维码数据
+    elif qrcode_data:
+        logger.debug(f"使用二维码数据处理: {qrcode_data}")
+        try:
+            # 去除可能存在的引号和首尾空格
+            qrcode_data = qrcode_data.strip().strip('"\'')
+            logger.debug(f"处理后的二维码数据: {qrcode_data}")
+            
+            # 导入UUID模块
+            import uuid
+            from django.core.exceptions import ObjectDoesNotExist
+            
+            qrcode_obj = None
+            
+            try:
+                # 尝试作为UUID字符串查找
+                uuid_obj = uuid.UUID(qrcode_data)
+                qrcode_obj = QRCode.objects.filter(uuid=uuid_obj).first()
+                logger.debug(f"通过UUID查找结果: {qrcode_obj}")
+                
+                # 如果没找到，尝试通过code字段查找
+                if not qrcode_obj:
+                    qrcode_obj = QRCode.objects.filter(code=qrcode_data).first()
+                    logger.debug(f"通过code字段查找结果: {qrcode_obj}")
+            except ValueError:
+                # 不是有效的UUID，尝试通过code字段查找
+                qrcode_obj = QRCode.objects.filter(code=qrcode_data).first()
+                logger.debug(f"非UUID格式，通过code字段查找结果: {qrcode_obj}")
+            
+            # 如果找到有效的二维码
+            if qrcode_obj:
+                logger.debug(f"找到二维码: ID={qrcode_obj.id}, 过期时间={qrcode_obj.expires_at}")
+                
+                # 检查二维码是否有效
+                if not qrcode_obj.is_valid():
+                    logger.debug(f"二维码已过期: {qrcode_obj.expires_at} < {timezone.now()}")
+                    return JsonResponse({
+                        'success': False,
+                        'message': '二维码已过期'
+                    }, status=400)
+                
+                # 获取关联的考勤会话
+                session = AttendanceSession.objects.filter(qrcode=qrcode_obj, status='active').first()
+                
+                if not session:
+                    # 尝试查找相关联的会话
+                    related_sessions = AttendanceSession.objects.filter(
+                        qrcode=qrcode_obj
+                    ).order_by('-start_time')
+                    
+                    if related_sessions.exists():
+                        # 找到了会话，但不是active状态
+                        related_session = related_sessions.first()
+                        logger.debug(f"找到相关会话但状态非活跃: ID={related_session.id}, 状态={related_session.status}")
+                        
+                        if related_session.status == 'closed':
+                            return JsonResponse({
+                                'success': False,
+                                'message': '考勤会话已关闭，请联系老师'
+                            }, status=400)
+                    
+                    # 没有找到会话，使用二维码创建一个新的临时会话
+                    logger.debug(f"未找到会话，创建新会话")
+                    try:
+                        session = AttendanceSession.objects.create(
+                            course=qrcode_obj.course,
+                            qrcode=qrcode_obj,
+                            created_by=request.user,
+                            start_time=timezone.now(),
+                            status='active',
+                            is_active=True,
+                            description=f"通过二维码创建的临时会话 - {timezone.now().strftime('%Y-%m-%d %H:%M')}"
+                        )
+                        logger.debug(f"成功创建新会话: ID={session.id}")
+                    except Exception as e:
+                        logger.error(f"创建新会话失败: {str(e)}")
+                        return JsonResponse({
+                            'success': False,
+                            'message': f'无法创建考勤会话: {str(e)}'
+                        }, status=400)
+                
+                # 递归调用自身，使用找到的会话ID处理
+                logger.debug(f"使用会话ID: {session.id} 重新处理请求")
+                request.method = 'GET'  # 强制使用GET方法
+                request.GET = request.GET.copy()
+                request.GET['session_id'] = str(session.id)
+                return scan_qrcode(request)
+            else:
+                # 二维码未找到
+                logger.warning(f"未找到匹配的二维码: {qrcode_data}")
+                return JsonResponse({
+                    'success': False,
+                    'message': '无效的二维码或二维码已过期'
+                }, status=400)
+        
+        except Exception as e:
+            import traceback
+            logger.error(f"处理二维码数据时出错: {str(e)}")
+            logger.error(traceback.format_exc())
+            return JsonResponse({
+                'success': False,
+                'message': f'处理二维码时出错: {str(e)}'
+            }, status=500)
+    
+    else:
+        # 缺少必要参数
+        logger.warning("请求缺少必要参数")
+        return JsonResponse({
+            'success': False,
+            'message': '请求参数不足，需要提供二维码数据或会话ID'
+        }, status=400)
+
+@login_required
+def start_practice(request):
+    """开始练琴，创建练琴记录"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    if request.method == 'POST':
+        student = Student.objects.get(user=request.user)
+        session_id = request.POST.get('session_id')
+        assignment_id = request.POST.get('assignment_id')
+        
+        logger.info(f"开始练琴请求 - 学生: {student.name}, 会话ID: {session_id}, 预留ID: {assignment_id}")
+        
+        try:
+            from mymanage.attendance.models import AttendanceSession, AttendanceRecord, PianoAssignment
+            from mymanage.courses.models import Piano
+            
+            # 获取会话信息
+            session = get_object_or_404(AttendanceSession, id=session_id)
+            
+            # 检查是否已有活跃的练琴记录
+            active_practice = PracticeRecord.objects.filter(
+                student=student,
+                date=timezone.now().date(),
+                status='active'
+            ).first()
+            
+            if active_practice:
+                logger.info(f"学生已有活跃练琴记录，无法重复开始: ID={active_practice.id}")
+                
+                # 获取钢琴信息
+                piano_number = active_practice.piano_number
+                piano_brand = "未知"
+                piano_model = "未知"
+                
+                try:
+                    piano = Piano.objects.get(number=piano_number)
+                    piano_brand = piano.brand
+                    piano_model = piano.model
+                except Piano.DoesNotExist:
+                    pass
+                
+                # 返回已有的练琴记录
+                return JsonResponse({
+                    'success': True,
+                    'message': f'您已在{piano_number}号钢琴练习中',
+                    'practice_id': active_practice.id,
                     'piano_number': piano_number,
                     'piano_brand': piano_brand,
                     'piano_model': piano_model
                 })
             
-            # 检查钢琴是否可用
-            available_pianos = Piano.objects.filter(is_occupied=False)
-            if not available_pianos.exists():
-                return JsonResponse({
-                    'success': False,
-                    'message': '当前没有可用的钢琴'
-                })
+            # 查找预留信息
+            piano_assignment = None
+            if assignment_id:
+                try:
+                    piano_assignment = PianoAssignment.objects.get(
+                        id=assignment_id,
+                        student=student,
+                        status='reserved'
+                    )
+                    # 检查预留是否已过期
+                    if piano_assignment.is_expired():
+                        piano_assignment.expire()
+                        piano_assignment = None
+                        logger.info(f"钢琴预留已过期，无法使用")
+                except PianoAssignment.DoesNotExist:
+                    logger.info(f"找不到钢琴预留: ID={assignment_id}")
+                    piano_assignment = None
             
-            # 分配第一个可用钢琴
-            piano = available_pianos.first()
-            piano_number = piano.number
-            print(f"为学生分配钢琴：{piano_number}")
+            # 获取钢琴
+            piano = None
             
-            # 更新钢琴状态为占用
-            piano.is_occupied = True
-            piano.save()
+            # 如果有预留的钢琴，使用该钢琴
+            if piano_assignment:
+                piano = piano_assignment.piano
+                # 将预留状态更新为已分配
+                piano_assignment.assign()
+                logger.info(f"将预留钢琴分配给学生: 钢琴={piano.number}, 学生={student.name}")
+            else:
+                # 没有预留，直接查找可用钢琴
+                available_pianos = Piano.objects.filter(
+                    is_active=True, 
+                    is_occupied=False, 
+                    is_reserved=False
+                ).order_by('number')
+                
+                if available_pianos.exists():
+                    piano = available_pianos.first()
+                    # 立即占用钢琴
+                    piano.start_using()
+                    logger.info(f"无预留情况下为学生分配钢琴：{piano.number}")
+                else:
+                    # 检查学生是否已在等待队列
+                    from mymanage.attendance.models import WaitingQueue
+                    waiting_record = WaitingQueue.objects.filter(
+                        session=session,
+                        student=student,
+                        is_active=True
+                    ).first()
+                    
+                    # 无钢琴可用，建议加入等待队列
+                    if not waiting_record:
+                        return JsonResponse({
+                            'success': False,
+                            'no_piano': True,
+                            'message': '当前没有可用的钢琴，请加入等待队列',
+                            'session_id': session_id
+                        })
+                    else:
+                        # 已在等待队列，返回队列信息
+                        queue_position = WaitingQueue.objects.filter(
+                            session=session,
+                            is_active=True,
+                            join_time__lt=waiting_record.join_time
+                        ).count() + 1
+                        
+                        elapsed_minutes = int((timezone.now() - waiting_record.join_time).total_seconds() / 60)
+                        remaining_minutes = max(0, waiting_record.estimated_wait_time - elapsed_minutes)
+                        
+                        return JsonResponse({
+                            'success': False,
+                            'waiting': True,
+                            'message': f'您需要等待钢琴，当前排队位置：{queue_position}，预计等待时间：{remaining_minutes}分钟',
+                            'queue_position': queue_position,
+                            'wait_minutes': remaining_minutes,
+                            'waiting_id': waiting_record.id,
+                            'session_id': session_id
+                        })
             
-            # 创建练琴记录（同时作为考勤记录）
+            # 创建练琴记录
             start_time = timezone.now()
             end_time = start_time + timezone.timedelta(hours=2)  # 默认2小时后结束
             
             practice = PracticeRecord.objects.create(
                 student=student,
                 date=start_time.date(),
-                piano_number=piano_number,
+                piano_number=piano.number,
                 start_time=start_time,
                 end_time=end_time,
                 status='active',
                 attendance_session=session  # 关联考勤会话
             )
             
-            print(f"创建新的练琴记录: ID={practice.id}, 日期={practice.date}, 钢琴={piano_number}")
+            logger.info(f"创建新的练琴记录: ID={practice.id}, 日期={practice.date}, 钢琴={piano.number}")
+            
+            # 同时创建或更新考勤记录
+            try:
+                # 检查是否已有考勤记录
+                att_record = AttendanceRecord.objects.filter(
+                    session=session,
+                    student=student
+                ).first()
+                
+                if not att_record:
+                    # 创建新的考勤记录
+                    AttendanceRecord.objects.create(
+                        session=session,
+                        student=student,
+                        piano=piano,
+                        check_in_time=start_time,
+                        status='checked_in'
+                    )
+                    logger.info(f"创建新的考勤记录，学生={student.name}, 钢琴={piano.number}")
+                else:
+                    # 更新现有考勤记录
+                    att_record.piano = piano
+                    att_record.check_in_time = start_time
+                    att_record.status = 'checked_in'
+                    att_record.save()
+                    logger.info(f"更新考勤记录: ID={att_record.id}, 钢琴={piano.number}")
+            except Exception as e:
+                logger.error(f"创建/更新考勤记录时出错: {str(e)}")
             
             # 同时创建旧版Attendance模型记录（仅为兼容）
             try:
@@ -740,24 +923,24 @@ def start_practice(request):
                         check_in_time=start_time,
                         status='present'
                     )
-                    print(f"创建兼容性旧版考勤记录，日期={start_time.date()}")
+                    logger.info(f"创建兼容性旧版考勤记录，日期={start_time.date()}")
             except Exception as e:
-                print(f"创建旧版考勤记录时出错: {str(e)}")
+                logger.error(f"创建旧版考勤记录时出错: {str(e)}")
             
+            # 返回成功信息
             return JsonResponse({
                 'success': True,
-                'message': '成功开始练琴',
+                'message': f'已开始在{piano.number}号钢琴练习',
                 'practice_id': practice.id,
-                'elapsed_minutes': 0,
-                'piano_number': piano_number,
+                'piano_number': piano.number,
                 'piano_brand': piano.brand,
                 'piano_model': piano.model
             })
-        
+            
         except Exception as e:
             import traceback
-            print(f"开始练琴时出错: {str(e)}")
-            print(traceback.format_exc())
+            logger.error(f"开始练琴时出错: {str(e)}")
+            logger.error(traceback.format_exc())
             return JsonResponse({
                 'success': False,
                 'message': f'开始练琴时出错: {str(e)}'
@@ -768,6 +951,9 @@ def start_practice(request):
 @login_required
 def check_waiting_status(request):
     """检查学生在等待队列中的状态"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     if request.method == 'GET':
         waiting_id = request.GET.get('waiting_id')
         if not waiting_id:
@@ -777,22 +963,50 @@ def check_waiting_status(request):
             })
         
         try:
-            from mymanage.attendance.models import WaitingQueue, AttendanceRecord
+            from mymanage.attendance.models import WaitingQueue, AttendanceRecord, PianoAssignment
             from mymanage.courses.models import Piano
             
             waiting = get_object_or_404(WaitingQueue, id=waiting_id)
+            student = waiting.student
             
-            # 如果不再活跃，表示可能已被分配
+            # 如果不再活跃，表示可能已被分配钢琴
             if not waiting.is_active:
-                # 检查是否已经有分配的钢琴
+                # 检查是否有钢琴预留
+                piano_assignment = PianoAssignment.objects.filter(
+                    student=student,
+                    session=waiting.session,
+                    status='reserved'
+                ).first()
+                
+                if piano_assignment and not piano_assignment.is_expired():
+                    # 有钢琴预留，返回预留信息
+                    piano = piano_assignment.piano
+                    remaining_seconds = (piano_assignment.expiration_time - timezone.now()).total_seconds()
+                    remaining_minutes = max(0, round(remaining_seconds / 60, 1))
+                    
+                    logger.info(f"等待学生已被分配钢琴: 学生={student.name}, 钢琴={piano.number}, 剩余预留时间={remaining_minutes}分钟")
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'ready': True,
+                        'message': f'您可以开始练琴，已为您预留{piano.number}号钢琴，请在{remaining_minutes}分钟内点击"开始练琴"',
+                        'piano_number': piano.number,
+                        'piano_brand': piano.brand,
+                        'piano_model': piano.model,
+                        'session_id': waiting.session.id,
+                        'assignment_id': piano_assignment.id,
+                        'remaining_minutes': remaining_minutes
+                    })
+                
+                # 检查是否已有考勤记录和分配的钢琴
                 attendance = AttendanceRecord.objects.filter(
-                    student=waiting.student,
+                    student=student,
                     session=waiting.session,
                     status='checked_in'
                 ).first()
                 
                 if attendance and attendance.piano:
-                    # 已分配钢琴
+                    # 已分配钢琴并已签到
                     return JsonResponse({
                         'success': True,
                         'ready': True,
@@ -807,13 +1021,46 @@ def check_waiting_status(request):
                     return JsonResponse({
                         'success': True,
                         'ready': False,
-                        'message': '您的等待已结束，请重新扫码以分配钢琴',
+                        'message': '您的等待已结束，但尚未分配钢琴，请重新扫码',
                         'session_id': waiting.session.id
                     })
             
             # 计算剩余等待时间
-            elapsed_minutes = int((timezone.now() - waiting.join_time).total_seconds() / 60)
-            remaining_minutes = max(0, waiting.estimated_wait_time - elapsed_minutes)
+            if waiting.practice_record:
+                # 如果已经分配了练琴记录，基于练琴记录计算
+                if waiting.practice_record.status == 'active':
+                    # 如果正在练琴，显示剩余练琴时间
+                    remaining_minutes = max(0, int((waiting.practice_record.end_time - timezone.now()).total_seconds() / 60))
+                else:
+                    # 如果还没开始练琴，显示等待时间
+                    remaining_minutes = max(0, int((waiting.practice_record.start_time - timezone.now()).total_seconds() / 60))
+            else:
+                # 如果还没分配练琴记录，重新计算等待时间
+                active_practices = PracticeRecord.objects.filter(
+                    date=timezone.now().date(),
+                    status='active'
+                ).order_by('end_time')
+                
+                if active_practices.exists():
+                    earliest_available_time = active_practices.first().end_time
+                    wait_minutes = max(0, int((earliest_available_time - timezone.now()).total_seconds() / 60))
+                    queue_position = WaitingQueue.objects.filter(
+                        session=waiting.session,
+                        is_active=True,
+                        join_time__lte=waiting.join_time
+                    ).count()
+                    remaining_minutes = wait_minutes + ((queue_position - 1) * 5)
+                else:
+                    queue_position = WaitingQueue.objects.filter(
+                        session=waiting.session,
+                        is_active=True,
+                        join_time__lte=waiting.join_time
+                    ).count()
+                    remaining_minutes = 5 + ((queue_position - 1) * 5)
+            
+            # 更新等待记录的预计等待时间
+            waiting.estimated_wait_time = remaining_minutes
+            waiting.save()
             
             # 获取当前队列位置
             queue_position = WaitingQueue.objects.filter(
@@ -822,82 +1069,66 @@ def check_waiting_status(request):
                 join_time__lt=waiting.join_time
             ).count() + 1
             
-            # 检查是否有空闲钢琴
+            # 检查是否有空闲钢琴，并且是队列中第一位
             available_pianos = Piano.objects.filter(
                 is_active=True,
-                is_occupied=False
-            ).exists()
+                is_occupied=False,
+                is_reserved=False
+            )
             
-            if available_pianos and queue_position <= 1:
-                # 更新等待状态为非活跃
+            if available_pianos.exists() and queue_position <= 1:
+                # 为该学生预留钢琴
+                piano = available_pianos.first()
+                
+                # 预留时间为30秒
+                reservation_time = 0.5  # 30秒
+                
+                # 标记等待状态为非活跃
                 waiting.is_active = False
                 waiting.save()
                 
-                # 获取第一个可用钢琴
-                piano = Piano.objects.filter(
-                    is_active=True,
-                    is_occupied=False
-                ).first()
+                # 为学生预留钢琴
+                piano.reserve_for_student(student, minutes=reservation_time)
                 
-                # 更新考勤记录，分配钢琴
-                attendance = AttendanceRecord.objects.filter(
-                    student=waiting.student,
-                    session=waiting.session
-                ).first()
+                # 创建预留记录
+                expiration_time = timezone.now() + timezone.timedelta(minutes=reservation_time)
+                assignment = PianoAssignment.objects.create(
+                    session=waiting.session,
+                    student=student,
+                    piano=piano,
+                    expiration_time=expiration_time,
+                    status='reserved'
+                )
                 
-                if attendance:
-                    attendance.piano = piano
-                    attendance.save()
-                    
-                    # 将钢琴标记为已占用
-                    piano.is_occupied = True
-                    piano.save()
+                logger.info(f"为等待队列中的学生预留钢琴: 学生={student.name}, 钢琴={piano.number}, 预留时间={reservation_time}分钟")
                 
                 return JsonResponse({
                     'success': True,
                     'ready': True,
-                    'message': f'您可以开始练琴，已为您分配{piano.number}号钢琴',
+                    'message': f'有钢琴可用！已为您预留{piano.number}号钢琴，请在{int(reservation_time*60)}秒内点击"开始练琴"',
                     'piano_number': piano.number,
                     'piano_brand': piano.brand,
                     'piano_model': piano.model,
-                    'session_id': waiting.session.id
+                    'session_id': waiting.session.id,
+                    'assignment_id': assignment.id,
+                    'remaining_minutes': reservation_time
                 })
-            else:
-                # 更新预计等待时间
-                active_records = AttendanceRecord.objects.filter(
-                    session=waiting.session,
-                    status='checked_in',
-                    piano__isnull=False
-                ).count()
-                
-                waiting_count = WaitingQueue.objects.filter(
-                    session=waiting.session,
-                    is_active=True,
-                    join_time__lt=waiting.join_time
-                ).count()
-                
-                # 重新计算等待时间
-                new_estimated_wait = ((active_records + waiting_count) // 5) * 10 + 5
-                
-                # 如果新估计比剩余时间更长，则更新
-                if new_estimated_wait > remaining_minutes:
-                    waiting.estimated_wait_time = elapsed_minutes + new_estimated_wait
-                    waiting.save()
-                    remaining_minutes = new_estimated_wait
-                
-                return JsonResponse({
-                    'success': True,
-                    'ready': False,
-                    'message': f'您当前排在第{queue_position}位，预计还需等待{remaining_minutes}分钟',
-                    'queue_position': queue_position,
-                    'wait_minutes': remaining_minutes,
-                    'session_id': waiting.session.id
-                })
-                
+            
+            # 仍在等待中
+            return JsonResponse({
+                'success': True,
+                'waiting': True,
+                'message': f'您仍在等待队列中，当前排队位置：{queue_position}，预计还需等待{remaining_minutes}分钟',
+                'queue_position': queue_position,
+                'wait_minutes': remaining_minutes,
+                'session_id': waiting.session.id,
+                'waiting_id': waiting.id
+            })
+            
         except Exception as e:
             import traceback
-            print(f"检查等待状态时出错: {str(e)}")
-            print(traceback.format_exc())
+            logger.error(f"检查等待状态时出错: {str(e)}")
+            logger.error(traceback.format_exc())
             return JsonResponse({
                 'success': False,
                 'message': f'检查等待状态时出错: {str(e)}'
@@ -907,95 +1138,123 @@ def check_waiting_status(request):
 
 @login_required
 def join_waiting_queue(request):
-    """将学生加入等待队列"""
+    """加入等待队列"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     if request.method == 'POST':
         session_id = request.POST.get('session_id')
-        student = get_object_or_404(Student, user=request.user)
+        student = Student.objects.get(user=request.user)
+        
+        if not session_id:
+            return JsonResponse({
+                'success': False,
+                'message': '缺少会话ID'
+            })
         
         try:
-            from mymanage.attendance.models import AttendanceSession, WaitingQueue, AttendanceRecord
+            from mymanage.attendance.models import AttendanceSession, WaitingQueue, PianoAssignment
+            from mymanage.courses.models import Piano
             
+            # 检查会话是否存在
             session = get_object_or_404(AttendanceSession, id=session_id)
             
-            # 检查是否已经在等待队列中
-            existing_wait = WaitingQueue.objects.filter(
+            # 检查是否已经在队列中
+            existing_queue = WaitingQueue.objects.filter(
                 session=session,
                 student=student,
                 is_active=True
             ).first()
             
-            if existing_wait:
-                # 如果已经在队列中，返回当前等待状态
-                elapsed_minutes = int((timezone.now() - existing_wait.join_time).total_seconds() / 60)
-                remaining_minutes = max(0, existing_wait.estimated_wait_time - elapsed_minutes)
+            # 如果已在队列中，直接返回信息
+            if existing_queue:
+                # 计算剩余等待时间
+                total_wait_time = existing_queue.estimated_wait_time
+                elapsed_minutes = int((timezone.now() - existing_queue.join_time).total_seconds() / 60)
+                remaining_minutes = max(0, total_wait_time - elapsed_minutes)
+                
+                queue_position = WaitingQueue.objects.filter(
+                    session=session,
+                    is_active=True,
+                    join_time__lt=existing_queue.join_time
+                ).count() + 1
                 
                 return JsonResponse({
                     'success': True,
                     'message': f'您已在等待队列中，预计还需等待{remaining_minutes}分钟',
                     'wait_minutes': remaining_minutes,
-                    'queue_position': WaitingQueue.objects.filter(
-                        session=session,
-                        is_active=True,
-                        join_time__lt=existing_wait.join_time
-                    ).count() + 1,
-                    'waiting_id': existing_wait.id
+                    'queue_position': queue_position,
+                    'waiting_id': existing_queue.id
                 })
             
-            # 检查是否已经签到
-            existing_record = AttendanceRecord.objects.filter(
-                student=student,
-                session=session,
-                status='checked_in'
-            ).first()
+            # 再次检查是否有空闲钢琴，优先直接分配
+            Piano.check_and_expire_reservations()  # 先清理过期的预留
             
-            if existing_record and existing_record.piano and existing_record.piano.is_occupied:
-                # 如果已经签到并分配了钢琴，不需要等待
+            available_pianos = Piano.objects.filter(
+                is_active=True,
+                is_occupied=False,
+                is_reserved=False
+            ).order_by('number')
+            
+            if available_pianos.exists():
+                # 有空闲钢琴，不需要加入等待队列，返回可用信息
+                piano = available_pianos.first()
+                available_count = available_pianos.count()
+                
                 return JsonResponse({
-                    'success': False,
-                    'message': '您已经签到并分配了钢琴，无需等待'
+                    'success': True,
+                    'available_pianos': available_count,
+                    'message': f'有{available_count}台空闲钢琴可用，您可以直接开始练琴',
+                    'piano_number': piano.number,
+                    'piano_brand': piano.brand,
+                    'piano_model': piano.model,
+                    'session_id': session.id
                 })
             
             # 计算预计等待时间
-            active_records = AttendanceRecord.objects.filter(
-                session=session,
-                status='checked_in'
-            ).count()
+            # 1. 获取所有正在练琴的记录
+            active_practices = PracticeRecord.objects.filter(
+                date=timezone.now().date(),
+                status='active'
+            ).order_by('end_time')
             
-            waiting_count = WaitingQueue.objects.filter(
+            # 2. 计算最早可用的钢琴时间
+            earliest_available_time = None
+            if active_practices.exists():
+                earliest_available_time = active_practices.first().end_time
+            
+            # 3. 计算等待队列长度
+            queue_length = WaitingQueue.objects.filter(
                 session=session,
                 is_active=True
             ).count()
             
-            # 估算等待时间：每5人增加10分钟，基础等待5分钟
-            estimated_wait_time = ((active_records + waiting_count) // 5) * 10 + 5
+            # 4. 计算预计等待时间
+            if earliest_available_time:
+                # 如果有正在练琴的记录，基于最早结束时间计算
+                wait_minutes = max(0, int((earliest_available_time - timezone.now()).total_seconds() / 60))
+                # 加上队列位置的影响（每人在队列中增加5分钟）
+                estimated_wait_time = wait_minutes + (queue_length * 5)
+            else:
+                # 如果没有正在练琴的记录，使用基础等待时间
+                estimated_wait_time = 5 + (queue_length * 5)
             
-            # 创建等待记录
+            # 创建等待队列记录
             waiting_record = WaitingQueue.objects.create(
-                student=student,
                 session=session,
-                join_time=timezone.now(),
-                estimated_wait_time=estimated_wait_time,
-                is_active=True
+                student=student,
+                estimated_wait_time=estimated_wait_time
             )
             
-            # 如果还没有创建考勤记录，则创建一个但不分配钢琴
-            if not existing_record:
-                AttendanceRecord.objects.create(
-                    student=student,
-                    session=session,
-                    status='checked_in',
-                    check_in_time=timezone.now()
-                )
+            # 队列位置是新记录在队列中的位置
+            queue_position = queue_length + 1
             
-            queue_position = WaitingQueue.objects.filter(
-                session=session,
-                is_active=True,
-                join_time__lt=waiting_record.join_time
-            ).count() + 1
+            logger.info(f"学生{student.name}加入等待队列，位置：{queue_position}，预计等待时间：{estimated_wait_time}分钟")
             
+            # 返回等待信息
             return JsonResponse({
                 'success': True,
-                'message': f'成功加入等待队列，您当前排在第{queue_position}位，预计等待{estimated_wait_time}分钟',
+                'message': f'已加入等待队列，当前排队位置：{queue_position}，预计等待时间：{estimated_wait_time}分钟',
                 'wait_minutes': estimated_wait_time,
                 'queue_position': queue_position,
                 'waiting_id': waiting_record.id
@@ -1003,8 +1262,8 @@ def join_waiting_queue(request):
             
         except Exception as e:
             import traceback
-            print(f"加入等待队列时出错: {str(e)}")
-            print(traceback.format_exc())
+            logger.error(f"加入等待队列时出错: {str(e)}")
+            logger.error(traceback.format_exc())
             return JsonResponse({
                 'success': False,
                 'message': f'加入等待队列时出错: {str(e)}'
@@ -1014,115 +1273,113 @@ def join_waiting_queue(request):
 
 @login_required
 def end_practice(request):
-    """结束练琴（签退），同时更新考勤记录"""
+    """结束练琴函数"""
     if request.method == 'POST':
-        student = get_object_or_404(Student, user=request.user)
         practice_id = request.POST.get('practice_id')
-        qrcode_data = request.POST.get('qrcode_data')
-        
-        print(f"结束练琴请求: 学生={student.name}, 练琴ID={practice_id}, 二维码数据={qrcode_data}")
         
         if not practice_id:
             return JsonResponse({
                 'success': False,
-                'message': '缺少练琴记录ID'
+                'message': '缺少练习ID'
             })
         
         try:
-            # 获取练琴记录
-            practice = get_object_or_404(PracticeRecord, id=practice_id, student=student)
-            print(f"找到练琴记录: 开始时间={practice.start_time}, 状态={practice.status}")
+            from mymanage.courses.models import Piano
+            from mymanage.attendance.models import AttendanceRecord
+            import logging
             
-            # 如果记录状态不是active，则返回错误
+            # 获取日志记录器
+            logger = logging.getLogger(__name__)
+            logger.info(f"收到结束练琴请求: 练习ID={practice_id}")
+            
+            # 获取练习记录
+            practice = get_object_or_404(PracticeRecord, id=practice_id)
+            
+            # 检查是否是本人的练习记录
+            if practice.student.user != request.user:
+                return JsonResponse({
+                    'success': False,
+                    'message': '无权结束此练习记录'
+                })
+            
+            # 如果记录已经结束，直接返回成功
             if practice.status != 'active':
                 return JsonResponse({
-                    'success': False,
-                    'message': '没有找到进行中的练琴记录'
+                    'success': True,
+                    'message': '练习已经结束'
                 })
             
-            # 检查是否满足最低练习时间（30分钟）
-            now = timezone.now()
-            practice_duration_seconds = (now - practice.start_time).total_seconds()
-            practice_duration = practice_duration_seconds / 60  # 分钟
+            current_time = timezone.now()
             
-            minutes = int(practice_duration)
-            seconds = int((practice_duration - minutes) * 60)
+            # 计算练习时长（分钟）
+            duration_minutes = int((current_time - practice.start_time).total_seconds() / 60)
             
-            print(f"计算练琴时长: {minutes}分{seconds}秒 (共{practice_duration:.2f}分钟)")
-            
-            if practice_duration < 30:
-                remaining_minutes = int(30 - practice_duration)
-                remaining_seconds = int(((30 - practice_duration) % 1) * 60)
-                
-                return JsonResponse({
-                    'success': False,
-                    'message': f'练琴时间不足30分钟，当前已练习{minutes}分{seconds}秒，还需继续练习{remaining_minutes}分{remaining_seconds}秒',
-                    'remaining_minutes': remaining_minutes,
-                    'remaining_seconds': remaining_seconds,
-                    'elapsed_minutes': minutes,
-                    'elapsed_seconds': seconds,
-                    'total_seconds': int(practice_duration_seconds)
-                })
+            # 更新练习记录
+            practice.status = 'completed'
+            practice.end_time = current_time
+            practice.duration = duration_minutes
+            practice.save()
             
             # 释放钢琴
-            from mymanage.courses.models import Piano
-            piano = None
             try:
                 piano = Piano.objects.get(number=practice.piano_number)
-                piano.is_occupied = False
-                piano.save()
-                print(f"释放钢琴: 编号={piano.number}")
+                # 检查是否有其他学生正在使用此钢琴
+                other_records = PracticeRecord.objects.filter(
+                    piano_number=practice.piano_number,
+                    status='active'
+                ).exclude(id=practice.id).exists()
+                
+                # 只有在没有其他记录的情况下才释放钢琴
+                if not other_records:
+                    piano.is_occupied = False
+                    piano.save()
+                    logger.info(f"钢琴已释放: 编号={piano.number}")
+                else:
+                    logger.info(f"钢琴仍有其他学生使用，保持占用状态: 编号={piano.number}")
             except Piano.DoesNotExist:
-                print(f"警告: 无法找到编号为 {practice.piano_number} 的钢琴")
+                logger.warning(f"找不到钢琴: 编号={practice.piano_number}")
             
-            # 更新练琴记录
-            practice.end_time = now
-            practice.duration = practice_duration
-            practice.status = 'completed'
-            practice.save()
-            print(f"更新练琴记录完成: 结束时间={practice.end_time}, 时长={practice.duration:.2f}分钟")
-            
-            # 更新旧版Attendance考勤记录（仅为兼容）
-            try:
-                # 获取旧版考勤记录
-                practice_date = practice.start_time.date()
-                attendance = Attendance.objects.filter(
-                    student=student,
-                    date=practice_date
+            # 更新考勤记录
+            if practice.attendance_session:
+                attendance = AttendanceRecord.objects.filter(
+                    session=practice.attendance_session,
+                    student=practice.student,
+                    status='checked_in'
                 ).first()
                 
                 if attendance:
-                    # 更新签退时间
-                    attendance.check_out_time = now
+                    attendance.check_out_time = current_time
+                    attendance.status = 'checked_out'
+                    attendance.duration_minutes = duration_minutes
+                    attendance.duration = duration_minutes / 60
                     attendance.save()
-                    print(f"更新旧版考勤记录: 日期={practice_date}, 签退时间={now}")
-                else:
-                    # 如果没有记录，创建一个完整记录
-                    Attendance.objects.create(
-                        student=student,
-                        date=practice_date,
-                        check_in_time=practice.start_time,
-                        check_out_time=now,
-                        status='present'
-                    )
-                    print(f"创建完整旧版考勤记录: 日期={practice_date}")
+                    logger.info(f"考勤记录已更新为签退状态: ID={attendance.id}")
+            
+            # 更新旧版考勤记录（兼容性）
+            try:
+                old_attendance = Attendance.objects.filter(
+                    student=practice.student,
+                    date=practice.date,
+                    status='present'
+                ).first()
+                
+                if old_attendance and not old_attendance.check_out_time:
+                    old_attendance.check_out_time = current_time
+                    old_attendance.save()
+                    logger.info(f"旧版考勤记录已更新: ID={old_attendance.id}")
             except Exception as e:
-                print(f"更新旧版考勤记录时出错: {str(e)}")
-                traceback.print_exc()
+                logger.error(f"更新旧版考勤记录时出错: {str(e)}")
             
             return JsonResponse({
                 'success': True,
-                'message': f'练琴结束，本次练习时长：{minutes}分{seconds}秒',
-                'duration_minutes': minutes,
-                'duration_seconds': seconds,
-                'total_seconds': int(practice_duration_seconds),
-                'practice_record_id': practice.id
+                'message': f'练习已结束，共练习{duration_minutes}分钟',
+                'duration': duration_minutes
             })
-                
+            
         except Exception as e:
             import traceback
-            print(f"结束练琴时出错: {str(e)}")
-            print(traceback.format_exc())
+            logger.error(f"结束练琴时出错: {str(e)}")
+            logger.error(traceback.format_exc())
             return JsonResponse({
                 'success': False,
                 'message': f'结束练琴时出错: {str(e)}'
@@ -1886,3 +2143,55 @@ def attendance_detail(request):
     }
     
     return render(request, 'students/student_attendance_detail.html', context)
+
+@login_required
+def cancel_waiting(request):
+    """取消等待队列"""
+    if request.method == 'POST':
+        waiting_id = request.POST.get('waiting_id')
+        
+        if not waiting_id:
+            return JsonResponse({
+                'success': False,
+                'message': '缺少等待记录ID'
+            })
+        
+        try:
+            from mymanage.attendance.models import WaitingQueue
+            student = Student.objects.get(user=request.user)
+            
+            # 检查等待记录是否存在且属于当前学生
+            try:
+                waiting = WaitingQueue.objects.get(id=waiting_id, student=student)
+            except WaitingQueue.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': '找不到对应的等待记录'
+                })
+            
+            # 检查等待记录是否仍然激活
+            if not waiting.is_active:
+                return JsonResponse({
+                    'success': False,
+                    'message': '该等待记录已不再活跃'
+                })
+            
+            # 取消等待
+            waiting.is_active = False
+            waiting.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': '成功取消等待'
+            })
+            
+        except Exception as e:
+            import traceback
+            print(f"取消等待队列时出错: {str(e)}")
+            print(traceback.format_exc())
+            return JsonResponse({
+                'success': False,
+                'message': f'取消等待队列时出错: {str(e)}'
+            })
+    
+    return JsonResponse({'success': False, 'message': '请求方法错误'}, status=400)

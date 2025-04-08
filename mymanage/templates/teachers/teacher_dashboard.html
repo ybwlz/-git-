@@ -129,11 +129,6 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'teachers:profile' %}">
-                    <i class="fas fa-user"></i> 个人主页
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link" href="{% url 'teachers:students' %}">
                     <i class="fas fa-users"></i> 学生管理
                 </a>
@@ -156,6 +151,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'teachers:finance' %}">
                     <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-cog"></i> 账号设置
                 </a>
             </li>
             <li class="nav-item mt-5">
@@ -238,94 +238,8 @@
             </div>
             
             <div class="row">
-                <div class="col-lg-8">
+                <div class="col-lg-7">
                     <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">今日课程安排</h5>
-                            <a href="{% url 'teachers:piano_arrangement' %}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-guitar me-1"></i>练琴安排
-                            </a>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>时间</th>
-                                            <th>学生</th>
-                                            <th>课程内容</th>
-                                            <th>教室</th>
-                                            <th>状态</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% if today_courses %}
-                                            {% for course in today_courses %}
-                                            <tr>
-                                                <td>{{ course.start_time|time:"H:i" }}-{{ course.end_time|time:"H:i" }}</td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        {% with students=course.course.students.all %}
-                                                        {% if students %}
-                                                            {% with student=students.first %}
-                                                            {% if student.avatar %}
-                                                            <img src="{{ student.avatar.url }}" class="avatar me-2" alt="学生头像" style="width:32px;height:32px;border-radius:50%;">
-                                                            {% else %}
-                                                            <div class="avatar me-2 bg-primary d-flex align-items-center justify-content-center text-white" style="width:32px;height:32px;border-radius:50%;">{{ student.name|slice:":1" }}</div>
-                                                            {% endif %}
-                                                            <span>{{ student.name }}</span>
-                                                            {% endwith %}
-                                                        {% else %}
-                                                            <div class="avatar me-2 bg-secondary d-flex align-items-center justify-content-center text-white" style="width:32px;height:32px;border-radius:50%;">?</div>
-                                                            <span>未分配学生</span>
-                                                        {% endif %}
-                                                        {% endwith %}
-                                                    </div>
-                                                </td>
-                                                <td>{{ course.course.name }}</td>
-                                                <td>{{ course.room|default:"未指定" }}</td>
-                                                <td>
-                                                    {% now "H:i" as current_time_str %}
-                                                    {% with start_time=course.start_time|time:"H:i" end_time=course.end_time|time:"H:i" %}
-                                                        {% if end_time < current_time_str %}
-                                                        <span class="badge bg-success badge-pill">已完成</span>
-                                                        {% elif start_time <= current_time_str and end_time >= current_time_str %}
-                                                        <span class="badge bg-primary badge-pill">进行中</span>
-                                                        {% else %}
-                                                        <span class="badge bg-warning badge-pill">待开始</span>
-                                                        {% endif %}
-                                                    {% endwith %}
-                                                </td>
-                                                <td>
-                                                    {% with students=course.course.students.all %}
-                                                    {% if students %}
-                                                        {% with student=students.first %}
-                                                        <a href="{% url 'teachers:student_detail' student.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        {% endwith %}
-                                                    {% else %}
-                                                        <button class="btn btn-sm btn-outline-secondary me-1" disabled>
-                                                            <i class="fas fa-eye-slash"></i>
-                                                        </button>
-                                                    {% endif %}
-                                                    {% endwith %}
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        {% else %}
-                                        <tr>
-                                            <td colspan="6" class="text-center py-3">今日暂无课程安排</td>
-                                        </tr>
-                                        {% endif %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0">学生学习进度</h5>
                         </div>
@@ -363,7 +277,7 @@
                     </div>
                 </div>
                 
-                <div class="col-lg-4">
+                <div class="col-lg-5">
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="mb-0">考勤二维码</h5>

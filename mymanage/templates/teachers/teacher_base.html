@@ -126,11 +126,6 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'teachers:profile' %}">
-                    <i class="fas fa-user"></i> 个人主页
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'students' %}active{% endif %}" href="{% url 'teachers:students' %}">
                     <i class="fas fa-users"></i> 学生管理
                 </a>
@@ -153,6 +148,11 @@
             <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'finance' %}active{% endif %}" href="{% url 'teachers:finance' %}">
                     <i class="fas fa-money-bill"></i> 财务管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'teachers:profile' %}">
+                    <i class="fas fa-cog"></i> 账号设置
                 </a>
             </li>
             <li class="nav-item mt-5">

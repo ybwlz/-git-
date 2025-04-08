@@ -1595,7 +1595,7 @@
                     
                     if (response.success) {
                         // 更新队列位置和等待时间显示
-                        $('#queuePosition').text(response.queue_position);
+                        $('#queuePosition').text(response.position);
                         $('#remainingWaitTime').text(response.wait_minutes);
                         
                         // 如果状态为'ready'，表示已分配钢琴
@@ -1680,8 +1680,8 @@
         }
         
         // 使用会话ID开始练琴（复用开始练琴逻辑，避免代码重复）
-        function startPracticeWithSessionId(sid, assignmentId) {
-            console.log("使用会话ID开始练琴:", sid, "预留ID:", assignmentId);
+        function startPracticeWithSessionId(sid) {
+            console.log("使用会话ID开始练琴:", sid);
             
             if (!sid) {
                 console.error("错误：会话ID不存在！");
@@ -1707,21 +1707,13 @@
             const csrfToken = getCSRFToken();
             console.log("发送开始练琴请求，会话ID:", sid, "CSRF令牌:", csrfToken);
             
-            // 准备请求数据
-            const requestData = {
-                session_id: sid,
-                csrfmiddlewaretoken: csrfToken
-            };
-            
-            // 如果有预留ID，添加到请求数据中
-            if (assignmentId) {
-                requestData.assignment_id = assignmentId;
-            }
-            
             $.ajax({
                 url: '/students/practice/start/',
                 type: 'POST',
-                data: requestData,
+                data: {
+                    session_id: sid,
+                    csrfmiddlewaretoken: csrfToken
+                },
                 beforeSend: function(xhr, settings) {
                     console.log("准备发送请求，数据:", settings.data);
                 },
@@ -2217,44 +2209,41 @@
         }
 
         // 更新开始练琴函数以正确处理和显示钢琴号码
-        function startPracticeWithSessionId(sid, assignmentId) {
-            console.log("使用会话ID开始练琴:", sid, "预留ID:", assignmentId);
+        function startPracticeWithSessionId(sessionId) {
+            console.log(`开始练琴 - 会话ID: ${sessionId}`);
             
-            if (!sid) {
+            if (!sessionId) {
                 console.error("错误：会话ID不存在！");
+                // 显示错误提示
                 Swal.fire({
-                    icon: 'error',
                     title: '会话ID丢失',
-                    text: '请重新扫码获取有效的会话ID'
+                    text: '无法开始练琴，请重新扫描二维码',
+                    icon: 'error',
+                    confirmButtonText: '确定'
                 });
                 return;
             }
             
-            // 显示加载中
-            Swal.fire({
-                title: '处理中...',
-                html: '正在为您分配钢琴，请稍候',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
-            // 确保CSRF令牌正确
+            // 获取CSRF令牌
             const csrfToken = getCSRFToken();
-            console.log("发送开始练琴请求，会话ID:", sid, "CSRF令牌:", csrfToken);
+            console.log(`CSRF令牌: ${csrfToken ? '已获取' : '获取失败'}`);
+            
+            // 禁用按钮，显示加载状态
+            const startBtn = $('#startPracticeBtn');
+            if (startBtn.length) {
+                startBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+            }
             
             // 准备请求数据
             const requestData = {
-                session_id: sid,
-                csrfmiddlewaretoken: csrfToken
+                'session_id': sessionId,
+                'csrfmiddlewaretoken': csrfToken
             };
             
-            // 如果有预留ID，添加到请求数据中
-            if (assignmentId) {
-                requestData.assignment_id = assignmentId;
-            }
+            // 注意：移除了对assignmentId变量的引用
             
+            // 发送请求开始练琴
+            console.log(`发送开始练琴请求 - 会话ID: ${sessionId}`);
             $.ajax({
                 url: '/students/practice/start/',
                 type: 'POST',
@@ -2300,7 +2289,7 @@
                                 cancelButtonText: '取消'
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    joinWaitingQueue(sid);
+                                    joinWaitingQueue(sessionId);
                                 }
                             });
                         } else if (response.waiting) {
@@ -2325,6 +2314,11 @@
                                 confirmButtonText: '确定'
                             });
                         }
+                        
+                        // 恢复按钮状态
+                        if (startBtn.length) {
+                            startBtn.prop('disabled', false).html('开始练琴');
+                        }
                     }
                 },
                 error: function(xhr, status, error) {
@@ -2339,6 +2333,11 @@
                         icon: 'error',
                         confirmButtonText: '确定'
                     });
+                    
+                    // 恢复按钮状态
+                    if (startBtn.length) {
+                        startBtn.prop('disabled', false).html('开始练琴');
+                    }
                 }
             });
         }
@@ -2666,7 +2665,11 @@
             });
         }
 
-        
+        // 定义全局变量
+        let canEnd = false;
+        let isPaused = false;
+        let practiceTimer = null;
+        let pauseStartTime = null;
     </script>
 
     <!-- 练琴状态显示 -->

@@ -10,6 +10,7 @@ from PIL import Image
 # from mymanage.students.models import Student
 # from mymanage.courses.models import Course, CourseSchedule, Piano
 from mymanage.users.models import User
+import logging
 
 
 class QRCode(models.Model):
@@ -144,14 +145,53 @@ class AttendanceSession(models.Model):
     
     def close_session(self):
         """关闭考勤会话"""
+        # 获取日志记录器
+        logger = logging.getLogger(__name__)
+        
+        # 记录调试信息
+        logger.debug(f"关闭会话: ID={self.id}, 开始时间={self.start_time}, 状态={self.status}")
+        
+        # 获取当前本地时间
+        current_time = timezone.localtime(timezone.now())
+        
+        # 检查并修复可能的时间异常
+        if self.start_time and self.start_time > current_time:
+            logger.warning(f"会话{self.id}的开始时间{self.start_time}晚于当前时间{current_time}，自动修正")
+            # 设置开始时间为当前时间前1小时
+            self.start_time = current_time - timezone.timedelta(hours=1)
+        
+        # 如果有关联的二维码，更新二维码的过期时间为当前时间，使其立即过期
+        if hasattr(self, 'qrcode') and self.qrcode:
+            logger.debug(f"更新二维码过期时间: ID={self.qrcode.id}, 原过期时间={self.qrcode.expires_at}")
+            self.qrcode.expires_at = current_time
+            self.qrcode.save()
+            logger.debug(f"二维码已更新为过期: ID={self.qrcode.id}, 新过期时间={current_time}")
+        
+        # 更新状态和结束时间
         self.status = 'closed'
         self.is_active = False
-        self.end_time = timezone.now()
-        self.save()
+        self.end_time = current_time
+        
+        try:
+            # 尝试保存
+            self.save()
+        except ValidationError as e:
+            logger.error(f"关闭会话时验证错误: {e}")
+            # 使用底层save方法绕过验证
+            from django.db import models
+            models.Model.save(self)
+            logger.info(f"已使用绕过验证的方式关闭会话{self.id}")
         
         # 释放所有钢琴
         for record in self.records.filter(status='checked_in'):
-            record.check_out()
+            try:
+                record.check_out()
+            except Exception as e:
+                logger.error(f"释放钢琴失败: {e}")
+                # 直接更新记录状态
+                record.status = 'checked_out'
+                record.check_out_time = current_time
+                record.save()
     
     @classmethod
     def check_and_close_expired_sessions(cls):
@@ -202,41 +242,78 @@ class AttendanceRecord(models.Model):
         return f"{self.student.name} - {self.check_in_time.strftime('%Y-%m-%d %H:%M')}"
     
     def check_out(self):
-        """学生签退"""
-        if self.status == 'checked_in':
-            self.check_out_time = timezone.now()
+        """签退方法，更新签退时间和状态"""
+        if self.status == 'checked_in':  # 只有处于签到状态才能签退
+            
+            import logging
+            logger = logging.getLogger(__name__)
+            
+            from django.utils import timezone
+            current_time = timezone.now()
+            
+            self.check_out_time = current_time
             self.status = 'checked_out'
-            # 计算学习时长
-            self.duration = (self.check_out_time - self.check_in_time).total_seconds() / 3600
-            self.duration_minutes = self.duration * 60
+            
+            # 计算持续时间（小时）
+            check_in_local = self.check_in_time
+            if check_in_local:
+                if check_in_local > current_time:
+                    # 时间异常，可能是时区问题
+                    logger.warning(f"签到时间异常: {check_in_local} > {current_time}")
+                    from datetime import timedelta
+                    # 使用默认持续时间30分钟
+                    self.duration = 0.5
+                    self.duration_minutes = 30
+                else:
+                    # 正常计算持续时间
+                    # 重新计算持续时间
+                    duration = (current_time - check_in_local).total_seconds() / 3600
+                    self.duration = duration
+                    self.duration_minutes = duration * 60
+            
             # 释放钢琴
             if self.piano:
-                self.piano.is_occupied = False
-                self.piano.save()
-            self.save()
-            
-            # 从等待队列中分配下一个学生
-            next_in_queue = WaitingQueue.objects.filter(
-                session=self.session,
-                is_active=True
-            ).order_by('join_time').first()
-            
-            if next_in_queue and self.piano:
-                # 自动分配钢琴给下一个学生
-                self.piano.is_occupied = True
-                self.piano.save()
+                logger.info(f"正在释放钢琴: 编号={self.piano.number}")
                 
-                # 创建新的考勤记录
-                AttendanceRecord.objects.create(
-                    session=self.session,
-                    student=next_in_queue.student,
-                    piano=self.piano
+                # 检查是否有其他学生正在使用此钢琴
+                other_records = AttendanceRecord.objects.filter(
+                    piano=self.piano,
+                    status='checked_in'
+                ).exclude(id=self.id).exists()
+                
+                # 检查是否有关联的PracticeRecord
+                from mymanage.students.models import PracticeRecord
+                practice_records = PracticeRecord.objects.filter(
+                    student=self.student,
+                    status='active',
+                    piano_number=self.piano.number
                 )
                 
-                # 从等待队列中移除学生
-                next_in_queue.is_active = False
-                next_in_queue.save()
+                # 更新所有相关的PracticeRecord
+                for practice in practice_records:
+                    practice.status = 'completed'
+                    practice.end_time = current_time
+                    # 计算时长(分钟)
+                    if practice.start_time:
+                        duration_mins = (current_time - practice.start_time).total_seconds() / 60
+                        practice.duration = int(duration_mins)
+                    practice.save()
+                    logger.info(f"已更新关联的PracticeRecord: ID={practice.id}, 学生={practice.student.name}")
                 
+                if not other_records:
+                    # 没有其他记录使用此钢琴，可以释放
+                    self.piano.stop_using()
+                    logger.info(f"钢琴已释放: 编号={self.piano.number}")
+                    
+                    # 尝试将钢琴分配给等待队列中的下一个学生
+                    from mymanage.attendance.models import PianoAssignment
+                    assignment = PianoAssignment.assign_piano_to_next_waiting_student(self.session)
+                    if assignment:
+                        logger.info(f"钢琴已分配给等待队列中的下一个学生: {assignment.student.name}")
+                else:
+                    logger.info(f"钢琴仍有其他学生使用，保持占用状态: 编号={self.piano.number}")
+            
+            self.save()
             return True
         return False
 
@@ -258,3 +335,130 @@ class WaitingQueue(models.Model):
     
     def __str__(self):
         return f"{self.student.name} - {self.join_time.strftime('%Y-%m-%d %H:%M')}"
+
+
+class PianoAssignment(models.Model):
+    """
+    钢琴分配模型，记录学生扫码后的钢琴预留和分配情况
+    """
+    session = models.ForeignKey(AttendanceSession, on_delete=models.CASCADE, related_name='piano_assignments')
+    student = models.ForeignKey('students.Student', on_delete=models.CASCADE, related_name='piano_assignments')
+    piano = models.ForeignKey('courses.Piano', on_delete=models.CASCADE, related_name='assignments')
+    reserved_time = models.DateTimeField('预留时间', auto_now_add=True)
+    expiration_time = models.DateTimeField('预留过期时间')
+    status = models.CharField('状态', max_length=20, choices=[
+        ('reserved', '已预留'),
+        ('assigned', '已分配'),
+        ('expired', '已过期'),
+        ('cancelled', '已取消')
+    ], default='reserved')
+    
+    class Meta:
+        verbose_name = '钢琴分配'
+        verbose_name_plural = '钢琴分配'
+        ordering = ['reserved_time']
+    
+    def __str__(self):
+        return f"钢琴{self.piano.number}分配 - {self.student.name} - {self.reserved_time.strftime('%Y-%m-%d %H:%M')}"
+    
+    def is_expired(self):
+        """检查预留是否已过期"""
+        return timezone.now() > self.expiration_time
+    
+    def expire(self):
+        """将预留标记为已过期"""
+        if self.status == 'reserved':
+            self.status = 'expired'
+            self.save()
+            # 释放钢琴预留
+            self.piano.cancel_reservation()
+            return True
+        return False
+    
+    def assign(self):
+        """将预留转为正式分配"""
+        if self.status == 'reserved' and not self.is_expired():
+            self.status = 'assigned'
+            self.save()
+            # 更新钢琴状态为占用
+            self.piano.start_using()
+            return True
+        return False
+    
+    def cancel(self):
+        """取消预留"""
+        if self.status == 'reserved':
+            self.status = 'cancelled'
+            self.save()
+            # 释放钢琴预留
+            self.piano.cancel_reservation()
+            return True
+        return False
+    
+    @classmethod
+    def check_and_expire_reservations(cls):
+        """检查并过期所有已超时的预留"""
+        expired_reservations = cls.objects.filter(
+            status='reserved',
+            expiration_time__lt=timezone.now()
+        )
+        
+        for reservation in expired_reservations:
+            reservation.expire()
+        
+        # 同时检查钢琴自身的预留状态
+        from mymanage.courses.models import Piano
+        Piano.check_and_expire_reservations()
+    
+    @classmethod
+    def assign_piano_to_next_waiting_student(cls, session):
+        """将钢琴分配给等待队列中的下一个学生"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # 获取可用钢琴
+        from mymanage.courses.models import Piano
+        available_pianos = Piano.objects.filter(
+            is_active=True,
+            is_occupied=False,
+            is_reserved=False
+        ).order_by('number')
+        
+        if not available_pianos.exists():
+            logger.info("没有可用钢琴，无法分配")
+            return None
+        
+        # 获取等待队列中的第一个学生
+        next_in_queue = WaitingQueue.objects.filter(
+            session=session,
+            is_active=True
+        ).order_by('join_time').first()
+        
+        if not next_in_queue:
+            logger.info("等待队列为空，无需分配")
+            return None
+        
+        piano = available_pianos.first()
+        student = next_in_queue.student
+        
+        # 为学生预留钢琴（30秒内有效）
+        reservation_time = 0.5  # 30秒
+        piano.reserve_for_student(student, minutes=reservation_time)
+        
+        # 创建预留记录
+        expiration_time = timezone.now() + timezone.timedelta(minutes=reservation_time)
+        assignment = cls.objects.create(
+            session=session,
+            student=student,
+            piano=piano,
+            expiration_time=expiration_time,
+            status='reserved'
+        )
+        
+        # 更新等待队列记录状态
+        next_in_queue.is_active = False
+        next_in_queue.save()
+        
+        logger.info(f"为等待学生 {student.name} 分配钢琴 {piano.number}，预留时间 {reservation_time} 分钟")
+        
+        return assignment

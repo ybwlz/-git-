@@ -16,7 +16,7 @@ class TeacherProfile(models.Model):
     updated_at = models.DateTimeField('更新时间', auto_now=True)
 
     class Meta:
-        verbose_name = '教师信息'
+        verbose_name = '教师'
         verbose_name_plural = verbose_name
 
     def __str__(self):

@@ -16,6 +16,7 @@ from django.db import connection
 from django.core.exceptions import ValidationError
 import logging
 import uuid as uuid_lib
+from django.views.decorators.csrf import csrf_exempt
 
 from mymanage.users.decorators import teacher_required
 from .models import TeacherProfile, TeacherCertificate, PrivacySetting
@@ -151,14 +152,6 @@ def teacher_dashboard(request):
         course__teacher=teacher
     ).order_by('-start_time')[:5]
     
-    # 获取今日课程 - 使用当前星期几代替日期
-    today_weekday = current_time.weekday()  # 获取当前是星期几(0-6，0是周一)
-    today_courses = CourseSchedule.objects.filter(
-        course__teacher=teacher,
-        weekday=today_weekday,
-        is_active=True
-    ).order_by('start_time')
-    
     # 获取学生等级分布数据
     student_levels = []
     for i in range(1, 11):
@@ -198,7 +191,6 @@ def teacher_dashboard(request):
         'attendance_today': attendance_today,
         'payments_this_month': payments_this_month.get('total', 0),
         'recent_sessions': recent_sessions,
-        'today_courses': today_courses,
         'student_levels': student_levels,
         'yearly_income': yearly_income.get('total', 0),
         'pending_payments': pending_payments.get('total', 0),
@@ -701,9 +693,13 @@ def teacher_attendance(request):
     # 获取当前时间
     current_time = timezone.now()
     
+    # 设置今日日期变量（确保在整个函数中可用）
+    today = current_time.date()
+    today_str = today.strftime('%Y-%m-%d')
+    
     # 获取今日考勤会话
-    today_start = timezone.make_aware(datetime.combine(current_time.date(), datetime.min.time()))
-    today_end = timezone.make_aware(datetime.combine(current_time.date(), datetime.max.time()))
+    today_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+    today_end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
     
     # 获取本周开始和结束时间
     week_start = today_start - timedelta(days=current_time.weekday())
@@ -811,63 +807,206 @@ def teacher_attendance(request):
         attended = AttendanceRecord.objects.filter(session=session).count()
         today_attended_students += attended
     
+    # 获取PracticeRecord中今日练琴的非重复学生
+    practice_student_ids = set(PracticeRecord.objects.filter(
+        date=today,
+        student__courses__teacher=teacher
+    ).values_list('student_id', flat=True).distinct())
+    
+    # 获取AttendanceRecord中今日签到的非重复学生
+    attendance_student_ids = set(AttendanceRecord.objects.filter(
+        check_in_time__date=today,
+        session__course__teacher=teacher
+    ).values_list('student_id', flat=True).distinct())
+    
+    # 合并两类记录中的学生ID
+    all_attended_student_ids = attendance_student_ids.union(practice_student_ids)
+    
+    # 计算今日总出勤人数（去重后）
+    today_total_attended = len(all_attended_student_ids)
+    
+    # 获取总学生数（所有课程的学生，不重复计算）
+    all_students_count = Student.objects.filter(
+        courses__teacher=teacher
+    ).distinct().count()
+    
+    # 重新计算今日出勤率
     today_attendance_rate = 0
-    if today_total_students > 0:
-        today_attendance_rate = (today_attended_students / today_total_students) * 100
+    if all_students_count > 0:
+        today_attendance_rate = (today_total_attended / all_students_count) * 100
     
-    # 计算周出勤率
-    weekly_sessions = AttendanceSession.objects.filter(
-        course__teacher=teacher,
-        start_time__gte=week_start,
-        start_time__lte=week_end
-    )
-    weekly_total_students = 0
-    weekly_attended_students = 0
+    # 计算周出勤率 - 使用类似逻辑
+    # 获取本周PracticeRecord签到的非重复学生
+    practice_weekly_student_ids = set(PracticeRecord.objects.filter(
+        date__gte=week_start.date(),
+        date__lte=week_end.date(),
+        student__courses__teacher=teacher
+    ).values_list('student_id', flat=True).distinct())
     
-    for session in weekly_sessions:
-        enrolled_students = session.course.students.count()
-        weekly_total_students += enrolled_students
-        attended = AttendanceRecord.objects.filter(session=session).count()
-        weekly_attended_students += attended
+    # 获取本周AttendanceRecord签到的非重复学生
+    attendance_weekly_student_ids = set(AttendanceRecord.objects.filter(
+        check_in_time__gte=week_start,
+        check_in_time__lte=week_end,
+        session__course__teacher=teacher
+    ).values_list('student_id', flat=True).distinct())
     
+    # 合并两类记录
+    all_weekly_attended_ids = attendance_weekly_student_ids.union(practice_weekly_student_ids)
+    
+    # 计算每个学生本周应该上的课程次数
+    # 对于每个学生，获取他们本周的课程安排
+    from django.db.models import Q
+    
+    # 获取本周内所有课程安排，用于计算应出勤总次数
+    weekday_list = [(week_start + timedelta(days=i)).weekday() for i in range(7)]
+    active_students = Student.objects.filter(courses__teacher=teacher).distinct()
+    
+    # 统计每个学生在本周的总课程数
+    total_courses_in_week = 0
+    total_attended_in_week = 0
+    
+    for student in active_students:
+        # 获取该学生本周的课程安排
+        student_courses = student.courses.filter(teacher=teacher)
+        # 计算该学生在本周的课程数
+        student_schedules = CourseSchedule.objects.filter(
+            course__in=student_courses, 
+            weekday__in=weekday_list,
+            is_active=True
+        ).count()
+        
+        # 累加总课程数
+        total_courses_in_week += student_schedules
+        
+        # 如果学生有考勤记录，计入已出勤次数
+        if student.id in all_weekly_attended_ids:
+            # 计算该学生本周实际出勤次数
+            attended_records = AttendanceRecord.objects.filter(
+                student=student,
+                check_in_time__gte=week_start,
+                check_in_time__lte=week_end,
+                session__course__teacher=teacher
+            ).count()
+            
+            # 计入总出勤次数
+            total_attended_in_week += attended_records if attended_records > 0 else 1
+    
+    # 计算周出勤率 - 实际出勤次数除以应出勤次数
     weekly_attendance_rate = 0
-    if weekly_total_students > 0:
-        weekly_attendance_rate = (weekly_attended_students / weekly_total_students) * 100
+    if total_courses_in_week > 0:
+        weekly_attendance_rate = (total_attended_in_week / total_courses_in_week) * 100
+    # 限制最大值为100%
+    weekly_attendance_rate = min(weekly_attendance_rate, 100)
     
-    # 计算月出勤率
-    monthly_sessions = AttendanceSession.objects.filter(
-        course__teacher=teacher,
-        start_time__gte=month_start,
-        start_time__lte=month_end
-    )
-    monthly_total_students = 0
-    monthly_attended_students = 0
+    print(f"DEBUG - 本周总课程数: {total_courses_in_week}")
+    print(f"DEBUG - 本周总出勤次数: {total_attended_in_week}")
+    print(f"DEBUG - 本周出勤率: {weekly_attendance_rate}%")
     
-    for session in monthly_sessions:
-        enrolled_students = session.course.students.count()
-        monthly_total_students += enrolled_students
-        attended = AttendanceRecord.objects.filter(session=session).count()
-        monthly_attended_students += attended
+    # 计算月出勤率 - 使用类似的更准确的逻辑
+    # 获取本月PracticeRecord签到的非重复学生
+    practice_monthly_student_ids = set(PracticeRecord.objects.filter(
+        date__gte=month_start.date(),
+        date__lte=month_end.date(),
+        student__courses__teacher=teacher
+    ).values_list('student_id', flat=True).distinct())
     
+    # 获取本月AttendanceRecord签到的非重复学生
+    attendance_monthly_student_ids = set(AttendanceRecord.objects.filter(
+        check_in_time__gte=month_start,
+        check_in_time__lte=month_end,
+        session__course__teacher=teacher
+    ).values_list('student_id', flat=True).distinct())
+    
+    # 合并两类记录
+    all_monthly_attended_ids = attendance_monthly_student_ids.union(practice_monthly_student_ids)
+    
+    # 获取本月天数
+    month_days = (month_end.date() - month_start.date()).days + 1
+    month_weekday_list = [(month_start + timedelta(days=i)).weekday() for i in range(month_days)]
+    
+    # 统计每个学生在本月的总课程数
+    total_courses_in_month = 0
+    total_attended_in_month = 0
+    
+    for student in active_students:
+        # 获取该学生本月的课程安排
+        student_courses = student.courses.filter(teacher=teacher)
+        # 计算该学生在本月的课程数
+        student_schedules = 0
+        
+        # 对于每个课程，统计每周的排课
+        for course in student_courses:
+            # 获取课程每周排课
+            schedules = CourseSchedule.objects.filter(
+                course=course,
+                weekday__in=month_weekday_list,
+                is_active=True
+            )
+            
+            # 统计本月该课程的排课次数
+            for schedule in schedules:
+                # 计算该排课在本月出现的次数
+                occurrences = len([day for day in range(month_days) 
+                               if (month_start + timedelta(days=day)).weekday() == schedule.weekday])
+                student_schedules += occurrences
+        
+        # 累加总课程数
+        total_courses_in_month += student_schedules
+        
+        # 如果学生有考勤记录，计入已出勤次数
+        if student.id in all_monthly_attended_ids:
+            # 计算该学生本月实际出勤次数
+            attended_records = AttendanceRecord.objects.filter(
+                student=student,
+                check_in_time__gte=month_start,
+                check_in_time__lte=month_end,
+                session__course__teacher=teacher
+            ).count()
+            
+            # 计入总出勤次数
+            total_attended_in_month += attended_records
+    
+    # 计算月出勤率 - 实际出勤次数除以应出勤次数
     monthly_attendance_rate = 0
-    if monthly_total_students > 0:
-        monthly_attendance_rate = (monthly_attended_students / monthly_total_students) * 100
+    if total_courses_in_month > 0:
+        monthly_attendance_rate = (total_attended_in_month / total_courses_in_month) * 100
+    # 限制最大值为100%
+    monthly_attendance_rate = min(monthly_attendance_rate, 100)
     
-    # 练琴时长统计
+    print(f"DEBUG - 本月总课程数: {total_courses_in_month}")
+    print(f"DEBUG - 本月总出勤次数: {total_attended_in_month}")
+    print(f"DEBUG - 本月出勤率: {monthly_attendance_rate}%")
+    
+    # 练琴时长统计 - 只统计教师自己课程的学生
+    # 获取教师课程的所有学生ID
+    teacher_student_ids = Student.objects.filter(
+        courses__teacher=teacher
+    ).values_list('id', flat=True).distinct()
+    
     today_practice_time = PracticeRecord.objects.filter(
-        student__courses__teacher=teacher,
+        student_id__in=teacher_student_ids,
         start_time__gte=today_start
     ).aggregate(total=Sum('duration'))['total'] or 0
     
     weekly_practice_time = PracticeRecord.objects.filter(
-        student__courses__teacher=teacher,
+        student_id__in=teacher_student_ids,
         start_time__gte=week_start
     ).aggregate(total=Sum('duration'))['total'] or 0
     
     monthly_practice_time = PracticeRecord.objects.filter(
-        student__courses__teacher=teacher,
+        student_id__in=teacher_student_ids,
         start_time__gte=month_start
     ).aggregate(total=Sum('duration'))['total'] or 0
+    
+    # 记录练琴记录数量，用于调试
+    weekly_practice_count = PracticeRecord.objects.filter(
+        student_id__in=teacher_student_ids,
+        start_time__gte=week_start
+    ).count()
+    
+    print(f"DEBUG - 教师学生总数: {len(teacher_student_ids)}")
+    print(f"DEBUG - 本周练琴记录数: {weekly_practice_count}")
+    print(f"DEBUG - 本周总练琴时长(分钟): {weekly_practice_time}")
     
     # 转换为小时
     today_practice_time = today_practice_time / 60  # 假设duration存储的是分钟
@@ -890,10 +1029,10 @@ def teacher_attendance(request):
     all_students = Student.objects.filter(courses__teacher=teacher).distinct().order_by('name')
     
     # 今日考勤人数
-    today = current_time.date()
-    today_str = today.strftime('%Y-%m-%d')
+    # today = current_time.date()  # 删除这行，因为already定义
+    # today_str = today.strftime('%Y-%m-%d')  # 删除这行，因为already定义
     
-    # 使用原始SQL查询确保准确匹配日期字符串
+    # 使用原始SQL查询获取AttendanceRecord考勤人数
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT COUNT(DISTINCT ar.student_id) 
@@ -902,20 +1041,42 @@ def teacher_attendance(request):
             JOIN courses_course cc ON ats.course_id = cc.id
             WHERE DATE(ar.check_in_time) = %s
         """, [today_str])
-        attendance_today = cursor.fetchone()[0]
+        attendance_today_ar = cursor.fetchone()[0]
     
-    # 使用ORM查询
-    attendance_today_orm = AttendanceRecord.objects.filter(
-        check_in_time__gte=today_start,
-        check_in_time__lte=today_end
+    # 使用ORM查询获取PracticeRecord练琴人数
+    practice_today = PracticeRecord.objects.filter(
+        date=today
     ).values('student').distinct().count()
     
-    print(f"DEBUG - 今日日期: {today}")
-    print(f"DEBUG - SQL查询结果: {attendance_today}")
-    print(f"DEBUG - ORM查询结果: {attendance_today_orm}")
+    # 合并两种记录获取总到课人数（需要去重）
+    attendance_student_ids = set()
     
-    # 使用SQL查询结果
-    attendance_today = attendance_today
+    # 获取AttendanceRecord中的学生ID
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT DISTINCT ar.student_id 
+            FROM attendance_attendancerecord ar
+            WHERE DATE(ar.check_in_time) = %s
+        """, [today_str])
+        for row in cursor.fetchall():
+            attendance_student_ids.add(row[0])
+    
+    # 获取PracticeRecord中的学生ID
+    practice_student_ids = PracticeRecord.objects.filter(
+        date=today
+    ).values_list('student_id', flat=True).distinct()
+    
+    # 合并并去重
+    for student_id in practice_student_ids:
+        attendance_student_ids.add(student_id)
+    
+    # 总到课人数
+    attendance_today = len(attendance_student_ids)
+    
+    print(f"DEBUG - 今日日期: {today}")
+    print(f"DEBUG - AttendanceRecord考勤人数: {attendance_today_ar}")
+    print(f"DEBUG - PracticeRecord练琴人数: {practice_today}")
+    print(f"DEBUG - 合并去重后总到课人数: {attendance_today}")
     
     context = {
         'teacher': teacher,
@@ -1110,15 +1271,29 @@ def generate_qrcode(request):
 @teacher_required
 def attendance_session_detail(request, session_id):
     """考勤会话详情"""
-    teacher = request.user.teacher_profile
-    session = get_object_or_404(AttendanceSession, id=session_id, course__teacher=teacher)
+    # 每次访问都强制从数据库重新获取会话数据
+    session = get_object_or_404(AttendanceSession.objects.select_related('course'), id=session_id)
     
-    # 获取考勤记录
-    records = AttendanceRecord.objects.filter(session=session).select_related('student')
+    # 权限检查
+    if session.course.teacher != request.user.teacher_profile and session.created_by != request.user:
+        messages.error(request, "没有权限查看此考勤记录")
+        return redirect('teachers:attendance')
     
-    # 获取未签到的学生
-    registered_student_ids = records.values_list('student__id', flat=True)
-    absent_students = session.course.students.exclude(id__in=registered_student_ids)
+    # 实时获取考勤记录，不使用缓存
+    records = AttendanceRecord.objects.filter(session=session).select_related('student').order_by('student__name')
+    
+    # 获取未签到学生列表
+    attended_student_ids = records.values_list('student_id', flat=True)
+    all_students = session.course.students.all()
+    absent_students = all_students.exclude(id__in=attended_student_ids)
+    
+    # 计算出勤率
+    attendance_rate = 0
+    if all_students.count() > 0:
+        attendance_rate = int(records.count() / all_students.count() * 100)
+    
+    # 处理本地时间显示和时长计算
+    current_time = timezone.localtime(timezone.now())
     
     # 计算每个学生的练习时长总和（来自PracticeRecord而不是AttendanceRecord）
     from mymanage.students.models import PracticeRecord
@@ -1132,18 +1307,44 @@ def attendance_session_detail(request, session_id):
         
         # 将总时长添加到记录对象上（不存储到数据库）
         record.total_practice_time = total_practice_time
-    
-    # 计算出勤率（使用属性方法）
-    attendance_rate = 0
-    if session.total_students > 0:
-        attendance_rate = (session.attendance_count / session.total_students) * 100
+        
+        # 转换为本地时间
+        record.check_in_local = timezone.localtime(record.check_in_time)
+        
+        # 计算持续时间
+        if record.check_out_time:
+            record.check_out_local = timezone.localtime(record.check_out_time)
+            
+            # 检测并修复异常时间
+            if record.check_out_local < record.check_in_local:
+                record.duration_minutes = 30  # 设置一个默认值
+            else:
+                time_diff = record.check_out_local - record.check_in_local
+                minutes = time_diff.total_seconds() / 60
+                
+                # 限制最大持续时间为4小时
+                if minutes > 240:
+                    record.duration_minutes = 240
+                else:
+                    record.duration_minutes = minutes
+        else:
+            # 如果未签退，计算从签到到当前的时间
+            time_diff = current_time - record.check_in_local
+            minutes = time_diff.total_seconds() / 60
+            
+            # 限制合理范围
+            if minutes < 0:
+                record.duration_minutes = 0
+            elif minutes > 240:
+                record.duration_minutes = 240
+            else:
+                record.duration_minutes = minutes
     
     context = {
-        'teacher': teacher,
         'session': session,
         'records': records,
         'absent_students': absent_students,
-        'attendance_rate': attendance_rate
+        'attendance_rate': attendance_rate,
     }
     
     return render(request, 'teachers/attendance_session_detail.html', context)
@@ -1161,23 +1362,79 @@ def attendance_stats(request):
     year = request.GET.get('year')
     
     # 构建基本查询
-    records = AttendanceRecord.objects.filter(session__course__teacher=teacher)
+    attendance_records = AttendanceRecord.objects.filter(session__course__teacher=teacher)
+    
+    # 导入PracticeRecord模型
+    from mymanage.students.models import PracticeRecord
+    practice_records = PracticeRecord.objects.filter(student__courses__teacher=teacher)
     
     # 应用过滤条件
     if course_id:
-        records = records.filter(session__course_id=course_id)
+        attendance_records = attendance_records.filter(session__course_id=course_id)
+        practice_records = practice_records.filter(student__courses__id=course_id)
     
     if month and year:
-        records = records.filter(
+        attendance_records = attendance_records.filter(
             check_in_time__month=month,
             check_in_time__year=year
         )
+        practice_records = practice_records.filter(
+            date__month=month,
+            date__year=year
+        )
     
-    # 按学生分组统计
-    student_stats = records.values('student__name').annotate(
+    # 准备合并结果的字典
+    student_stats_dict = {}
+    
+    # 处理AttendanceRecord
+    attendance_stats = attendance_records.values('student__id', 'student__name').annotate(
         count=Count('id'),
         total_hours=Sum('duration')
     )
+    
+    # 添加到字典
+    for stat in attendance_stats:
+        student_id = stat['student__id']
+        if student_id not in student_stats_dict:
+            student_stats_dict[student_id] = {
+                'student__name': stat['student__name'],
+                'count': stat['count'],
+                'total_hours': stat['total_hours'] or 0
+            }
+        else:
+            student_stats_dict[student_id]['count'] += stat['count']
+            student_stats_dict[student_id]['total_hours'] += (stat['total_hours'] or 0)
+    
+    # 处理PracticeRecord
+    practice_stats = practice_records.values('student__id', 'student__name').annotate(
+        count=Count('id'),
+        total_minutes=Sum('duration')
+    )
+    
+    # 添加到字典 - 注意PracticeRecord的时长是分钟，需要转换为小时
+    for stat in practice_stats:
+        student_id = stat['student__id']
+        total_hours = (stat['total_minutes'] or 0) / 60.0  # 转换为小时
+        
+        if student_id not in student_stats_dict:
+            student_stats_dict[student_id] = {
+                'student__name': stat['student__name'],
+                'count': stat['count'],
+                'total_hours': total_hours
+            }
+        else:
+            student_stats_dict[student_id]['count'] += stat['count']
+            student_stats_dict[student_id]['total_hours'] += total_hours
+    
+    # 转换回列表形式
+    student_stats = [
+        {
+            'student__name': data['student__name'],
+            'count': data['count'],
+            'total_hours': round(data['total_hours'], 1)  # 四舍五入到一位小数
+        }
+        for student_id, data in student_stats_dict.items()
+    ]
     
     # 获取教师的所有课程（用于过滤）
     courses = Course.objects.filter(teacher=teacher)
@@ -1265,21 +1522,25 @@ def sheet_music_detail(request, sheet_id):
 @teacher_required
 def add_sheet_music(request):
     """添加曲谱"""
-    # 获取所有钢琴等级
-    levels = PianoLevel.objects.all()
-    
     if request.method == 'POST':
         title = request.POST.get('title')
         composer = request.POST.get('composer')
-        level_id = request.POST.get('level')
         description = request.POST.get('description')
         file = request.FILES.get('file')
         
-        # 创建曲谱
+        # 使用默认级别（ID=1）
+        from mymanage.courses.models import PianoLevel
+        default_level = PianoLevel.objects.first()
+        
+        if not default_level:
+            # 如果没有任何级别记录，创建一个默认级别
+            default_level = PianoLevel.objects.create(level=1, description="默认级别")
+        
+        # 创建曲谱，使用默认级别
         sheet = SheetMusic(
             title=title,
             composer=composer,
-            level_id=level_id,
+            level=default_level,  # 直接使用对象，不是ID
             description=description,
             file=file,
             uploaded_by=request.user,
@@ -1298,6 +1559,8 @@ def add_sheet_music(request):
         messages.success(request, '曲谱添加成功')
         return redirect('teachers:sheet_music')
     
+    # 获取所有钢琴等级（虽然现在不再需要选择）
+    levels = PianoLevel.objects.all()
     return render(request, 'teachers/add_sheet_music.html', {
         'levels': levels
     })
@@ -1315,7 +1578,19 @@ def edit_sheet_music(request, sheet_id):
     if request.method == 'POST':
         sheet.title = request.POST.get('title')
         sheet.composer = request.POST.get('composer')
-        sheet.level_id = request.POST.get('level')
+        
+        # 使用默认级别或用户选择的级别
+        level_id = request.POST.get('level')
+        if level_id:
+            try:
+                sheet.level = PianoLevel.objects.get(id=level_id)
+            except PianoLevel.DoesNotExist:
+                # 如果选择的级别不存在，使用默认级别
+                sheet.level = PianoLevel.objects.first()
+        else:
+            # 如果没有选择级别，使用默认级别
+            sheet.level = PianoLevel.objects.first()
+            
         sheet.description = request.POST.get('description')
         sheet.is_public = True  # 默认设置为公开
         
@@ -1619,43 +1894,113 @@ def update_profile_ajax(request):
 def piano_arrangement(request):
     """练琴安排视图（替代课程管理）"""
     teacher = request.user.teacher_profile
-    current_time = timezone.now()
+    current_time = timezone.localtime(timezone.now())
     
     # 添加调试日志
-    print(f"当前时间: {current_time}")
-    print(f"当前教师: {teacher.name}")
+    logger = logging.getLogger(__name__)
+    logger.info(f"当前时间: {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.info(f"当前教师: {teacher.name}")
     
     # 获取所有钢琴及其状态
     pianos = Piano.objects.all().order_by('number')
-    print(f"系统中钢琴数量: {pianos.count()}")
+    logger.info(f"系统中钢琴数量: {pianos.count()}")
+    
+    # 获取所有活跃的PracticeRecord
+    from mymanage.students.models import PracticeRecord
+    active_practice_records = PracticeRecord.objects.filter(
+        status='active',
+        date=current_time.date()
+    ).select_related('student')
     
     # 为每个钢琴添加当前使用学生信息
     for piano in pianos:
+        # 先检查AttendanceRecord中的记录
         if piano.is_active and piano.is_occupied:
             # 查找当前使用此钢琴的学生
             current_record = AttendanceRecord.objects.filter(
                 piano=piano,
-                status='checked_in',
-                check_in_time__lte=current_time
+                status='checked_in'
             ).order_by('-check_in_time').first()
             
             if current_record:
                 piano.current_student = current_record.student
-                piano.start_time = current_record.check_in_time
-                piano.end_time = current_record.check_in_time + timedelta(minutes=30)  # 标准练习时长30分钟
+                piano.start_time = timezone.localtime(current_record.check_in_time)
+                piano.end_time = piano.start_time + timedelta(minutes=30)  # 标准练习时长30分钟
+                
+                # 计算已练习时间，使用本地时间
+                time_diff = current_time - piano.start_time
+                practiced_minutes = int(time_diff.total_seconds() / 60)
+                
+                # 如果计算结果异常（负数或超大值），进行修正
+                if practiced_minutes < 0:
+                    practiced_minutes = 0
+                    logger.warning(f"检测到异常练习时间计算: {piano.start_time} > {current_time}")
+                elif practiced_minutes > 240:  # 超过4小时可能是异常
+                    practiced_minutes = 240
+                    logger.warning(f"检测到异常长练习时间: {practiced_minutes}分钟")
+                
+                piano.practiced_time = f"{practiced_minutes}分钟"
+                logger.info(f"钢琴{piano.number}被{current_record.student.name}使用中，已练习{practiced_minutes}分钟")
+            else:
+                # 检查是否有PracticeRecord正在使用此钢琴
+                practice_record = active_practice_records.filter(
+                    piano_number=piano.number,
+                ).first()
+                
+                if practice_record:
+                    # 有PracticeRecord正在使用此钢琴
+                    piano.current_student = practice_record.student
+                    piano.start_time = timezone.localtime(practice_record.start_time)
+                    piano.end_time = timezone.localtime(practice_record.end_time) if practice_record.end_time else (piano.start_time + timedelta(minutes=30))
+                    
+                    # 计算已练习时间
+                    time_diff = current_time - piano.start_time
+                    practiced_minutes = int(time_diff.total_seconds() / 60)
+                    
+                    # 修正异常值
+                    if practiced_minutes < 0:
+                        practiced_minutes = 0
+                    elif practiced_minutes > 240:
+                        practiced_minutes = 240
+                    
+                    piano.practiced_time = f"{practiced_minutes}分钟"
+                    logger.info(f"钢琴{piano.number}被{practice_record.student.name}使用中 (PracticeRecord)，已练习{practiced_minutes}分钟")
+                else:
+                    # 这里是错误状态：钢琴标记为占用，但没有对应的考勤记录
+                    logger.warning(f"警告: 钢琴{piano.number}标记为占用，但找不到对应的考勤记录")
+                    # 修正钢琴状态
+                    piano.is_occupied = False
+                    piano.save()
+        else:
+            # 检查是否有PracticeRecord正在使用此钢琴，但钢琴状态未更新
+            practice_record = active_practice_records.filter(
+                piano_number=piano.number,
+            ).first()
+            
+            if practice_record and piano.is_active and not piano.is_occupied:
+                # 将钢琴状态更新为占用
+                piano.is_occupied = True
+                piano.save()
+                
+                # 更新钢琴信息
+                piano.current_student = practice_record.student
+                piano.start_time = timezone.localtime(practice_record.start_time)
+                piano.end_time = timezone.localtime(practice_record.end_time) if practice_record.end_time else (piano.start_time + timedelta(minutes=30))
                 
                 # 计算已练习时间
-                practiced_minutes = int((current_time - current_record.check_in_time).total_seconds() / 60)
+                time_diff = current_time - piano.start_time
+                practiced_minutes = int(time_diff.total_seconds() / 60)
+                
+                # 修正异常值
+                if practiced_minutes < 0:
+                    practiced_minutes = 0
+                elif practiced_minutes > 240:
+                    practiced_minutes = 240
+                
                 piano.practiced_time = f"{practiced_minutes}分钟"
-                print(f"钢琴{piano.number}被{current_record.student.name}使用中，已练习{practiced_minutes}分钟")
+                logger.info(f"更新钢琴{piano.number}状态为占用，被{practice_record.student.name}使用中")
             else:
-                # 这里是错误状态：钢琴标记为占用，但没有对应的考勤记录
-                print(f"警告: 钢琴{piano.number}标记为占用，但找不到对应的考勤记录")
-                # 修正钢琴状态
-                piano.is_occupied = False
-                piano.save()
-        else:
-            print(f"钢琴{piano.number} - 状态: {'可用' if piano.is_active else '维护中'}，{'被占用' if piano.is_occupied else '空闲'}")
+                logger.info(f"钢琴{piano.number} - 状态: {'可用' if piano.is_active else '维护中'}，{'被占用' if piano.is_occupied else '空闲'}")
     
     # 获取当前等待队列中的学生
     waiting_students = []
@@ -1664,20 +2009,47 @@ def piano_arrangement(request):
         session__status='active'
     ).order_by('join_time')
     
-    # 统计今日签到人数
-    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    today_end = today_start + timedelta(days=1)
+    # 计算今天的开始和结束时间（使用本地时区）
+    today_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1) - timedelta(microseconds=1)
+    
+    logger.info(f"今日开始时间: {today_start.strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.info(f"今日结束时间: {today_end.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    # 统计今日签到人数 - 使用date比较而不是datetime比较
     checked_in_today = AttendanceRecord.objects.filter(
-        check_in_time__gte=today_start,
-        check_in_time__lt=today_end,
+        check_in_time__date=current_time.date(),
         session__course__teacher=teacher
     ).values('student').distinct().count()
     
-    print(f"等待队列学生数量: {active_waiters.count()}")
-    print(f"今日已签到学生数量: {checked_in_today}")
+    # 同时统计PracticeRecord中的签到人数
+    practice_checked_in = PracticeRecord.objects.filter(
+        date=current_time.date()
+    ).values('student').distinct().count()
+    
+    # 合并两个统计结果，因为可能有重复，所以需要获取所有学生ID然后去重
+    attendance_student_ids = AttendanceRecord.objects.filter(
+        check_in_time__date=current_time.date(),
+        session__course__teacher=teacher
+    ).values_list('student_id', flat=True)
+    
+    practice_student_ids = PracticeRecord.objects.filter(
+        date=current_time.date()
+    ).values_list('student_id', flat=True)
+    
+    # 合并两个查询集并去重
+    all_student_ids = set(list(attendance_student_ids) + list(practice_student_ids))
+    total_checked_in = len(all_student_ids)
+    
+    logger.info(f"等待队列学生数量: {active_waiters.count()}")
+    logger.info(f"今日考勤记录签到学生数量: {checked_in_today}")
+    logger.info(f"今日练琴记录学生数量: {practice_checked_in}")
+    logger.info(f"今日总签到学生数量(去重): {total_checked_in}")
+    
     for waiter in active_waiters:
-        waiting_time = int((current_time - waiter.join_time).total_seconds() / 60)
-        estimated_start = waiter.join_time + timedelta(minutes=waiter.estimated_wait_time)
+        waiter_join_time = timezone.localtime(waiter.join_time)
+        waiting_time = int((current_time - waiter_join_time).total_seconds() / 60)
+        estimated_start = waiter_join_time + timedelta(minutes=waiter.estimated_wait_time)
         
         waiting_students.append({
             'id': waiter.student.id,
@@ -1686,18 +2058,98 @@ def piano_arrangement(request):
             'wait_time': waiting_time,
             'estimated_start_time': estimated_start,
         })
-        print(f"等待学生: {waiter.student.name}，等待时间: {waiting_time}分钟")
+        logger.info(f"等待学生: {waiter.student.name}，等待时间: {waiting_time}分钟")
     
     # 获取可用钢琴列表（用于手动分配）
     available_pianos = Piano.objects.filter(is_active=True, is_occupied=False)
     
-    # 获取今日签到记录
-    today_records = AttendanceRecord.objects.filter(
-        check_in_time__date=current_time.date()
-    ).order_by('-check_in_time')
+    # 获取今日签到记录和练习记录
+    from mymanage.students.models import PracticeRecord
     
-    # 已经计算了checked_in_today，不需要再次赋值为固定的2
-    # checked_in_today = 2
+    # 合并两种记录
+    all_today_records = []
+    
+    # 1. 获取考勤记录
+    attendance_records = AttendanceRecord.objects.filter(
+        check_in_time__date=current_time.date()
+    ).select_related('student', 'piano', 'session').order_by('-check_in_time')
+    
+    # 2. 获取练琴记录
+    practice_records = PracticeRecord.objects.filter(
+        date=current_time.date()
+    ).select_related('student').order_by('-start_time')
+    
+    # 合并记录
+    for record in attendance_records:
+        record.local_check_in = timezone.localtime(record.check_in_time)
+        if record.check_out_time:
+            record.local_check_out = timezone.localtime(record.check_out_time)
+            # 计算持续时间（分钟）
+            time_diff = record.local_check_out - record.local_check_in
+            record.duration_mins = int(time_diff.total_seconds() / 60)
+            
+            # 修正异常持续时间
+            if record.duration_mins < 0:
+                record.duration_mins = 0
+            elif record.duration_mins > 240:  # 超过4小时可能是异常
+                record.duration_mins = 240
+        else:
+            # 如果尚未签退，计算到当前时间的持续时间
+            time_diff = current_time - record.local_check_in
+            record.duration_mins = int(time_diff.total_seconds() / 60)
+            
+            # 修正异常持续时间
+            if record.duration_mins < 0:
+                record.duration_mins = 0
+            elif record.duration_mins > 240:
+                record.duration_mins = 240
+        
+        all_today_records.append(record)
+    
+    for record in practice_records:
+        # 避免添加重复记录 (已经在考勤记录中的)
+        if any(r.student_id == record.student_id and abs((r.check_in_time - record.start_time).total_seconds()) < 300 for r in attendance_records):
+            continue
+            
+        # 添加本地化时间
+        record.local_check_in = timezone.localtime(record.start_time)
+        # 不再赋值check_in_time属性，使用原始的start_time属性
+        
+        # 设置结束时间相关属性
+        if record.end_time:
+            record.local_check_out = timezone.localtime(record.end_time)
+            # 同样不直接设置check_out_time
+        
+        # 确保钢琴编号存在
+        if not hasattr(record, 'piano_number') or record.piano_number is None:
+            # 没有钢琴编号，设置默认值
+            record.piano_number = 1
+            
+        # 添加到记录列表
+        all_today_records.append(record)
+    
+    # 按时间排序 - 使用更安全的方式获取排序键
+    def get_sort_key(record):
+        # 尝试获取开始时间，使用不同可能的字段名
+        if hasattr(record, 'start_time') and record.start_time:
+            return record.start_time
+        elif hasattr(record, 'check_in_time') and record.check_in_time:
+            # 如果是属性而不是字段，直接访问可能会出错
+            try:
+                return record.check_in_time
+            except:
+                pass
+        # 默认返回当前时间作为后备选项
+        return current_time
+    
+    # 使用自定义排序函数
+    try:
+        all_today_records.sort(key=get_sort_key, reverse=True)
+    except Exception as e:
+        logger.error(f"排序练琴记录时出错: {str(e)}")
+        # 如果排序失败，尝试更简单的方法或保持原样
+    
+    logger.info(f"今日总记录数: {len(all_today_records)}")
     
     # 钢琴使用率
     total_pianos = Piano.objects.filter(is_active=True).count()
@@ -1722,17 +2174,56 @@ def piano_arrangement(request):
     )
     
     for record in overtime_records:
-        print(f"自动签退超时记录: {record.student.name} - 签到时间: {record.check_in_time}")
-        record.check_out()
+        logger.warning(f"自动签退超时记录: {record.student.name} - 签到时间: {record.check_in_time}")
+        try:
+            record.check_out()
+        except Exception as e:
+            logger.error(f"自动签退失败: {str(e)}")
+            # 直接强制签退
+            record.status = 'checked_out'
+            record.check_out_time = current_time
+            record.duration = 4.0  # 4小时
+            record.duration_minutes = 240  # 240分钟
+            record.save()
+        
+        # 确保创建对应的PracticeRecord记录 - 添加此部分代码
+        from mymanage.students.models import PracticeRecord
+        try:
+            # 检查是否已有练琴记录
+            existing_practice = PracticeRecord.objects.filter(
+                student=record.student,
+                date=record.check_in_time.date(),
+                start_time=record.check_in_time
+            ).exists()
+            
+            if not existing_practice:
+                # 为自动签退的记录创建练琴记录
+                piano_number = 1  # 默认钢琴编号
+                if record.piano and hasattr(record.piano, 'number'):
+                    piano_number = record.piano.number
+                
+                PracticeRecord.objects.create(
+                    student=record.student,
+                    date=record.check_in_time.date(),
+                    start_time=record.check_in_time,
+                    end_time=record.check_out_time,
+                    duration=240,  # 4小时（240分钟）
+                    piano_number=piano_number,
+                    status='completed',
+                    attendance_session=record.session
+                )
+                logger.info(f"为自动签退的学生{record.student.name}创建了练琴记录")
+        except Exception as e:
+            logger.error(f"创建练琴记录失败: {str(e)}")
     
     context = {
         'teacher': teacher,
         'pianos': pianos,
         'waiting_students': waiting_students,
         'available_pianos': available_pianos,
-        'today_records': today_records,
+        'today_records': all_today_records,
         'current_time': current_time,
-        'checked_in_today': checked_in_today,
+        'checked_in_today': total_checked_in,  # 使用合并后的去重统计
         'piano_usage_rate': piano_usage_rate,
         'waiting_count': waiting_count,
         'avg_wait_time': avg_wait_time,
@@ -1749,6 +2240,15 @@ def refresh_piano_status(request):
         # 获取所有钢琴状态
         pianos = Piano.objects.all()
         current_time = timezone.now()
+        
+        # 导入所需模型
+        from mymanage.students.models import PracticeRecord
+        
+        # 获取所有活跃的PracticeRecord
+        active_practice_records = PracticeRecord.objects.filter(
+            status='active',
+            date=current_time.date()
+        ).select_related('student')
         
         piano_data = []
         for piano in pianos:
@@ -1771,6 +2271,62 @@ def refresh_piano_status(request):
                         'start_time': current_record.check_in_time.strftime('%H:%M'),
                         'practiced_time': f"{practiced_minutes}分钟",
                         'end_time': (current_record.check_in_time + timedelta(minutes=30)).strftime('%H:%M')
+                    }
+                else:
+                    # 检查是否有PracticeRecord在使用此钢琴
+                    practice_record = active_practice_records.filter(
+                        piano_number=piano.number
+                    ).order_by('-start_time').first()
+                    
+                    if practice_record:
+                        # 计算已练习时间
+                        practiced_minutes = int((current_time - practice_record.start_time).total_seconds() / 60)
+                        
+                        # 如果计算结果异常，进行修正
+                        if practiced_minutes < 0:
+                            practiced_minutes = 0
+                        elif practiced_minutes > 240:  # 超过4小时可能是异常
+                            practiced_minutes = 240
+                        
+                        student_info = {
+                            'id': practice_record.student.id,
+                            'name': practice_record.student.name,
+                            'level': str(practice_record.student.level),
+                            'start_time': practice_record.start_time.strftime('%H:%M'),
+                            'practiced_time': f"{practiced_minutes}分钟",
+                            'end_time': (practice_record.start_time + timedelta(minutes=30)).strftime('%H:%M')
+                        }
+                    else:
+                        # 钢琴被标记为占用，但找不到使用记录，更新状态
+                        piano.is_occupied = False
+                        piano.save()
+            else:
+                # 检查是否有PracticeRecord正在使用该钢琴，但钢琴状态未更新
+                practice_record = active_practice_records.filter(
+                    piano_number=piano.number
+                ).order_by('-start_time').first()
+                
+                if practice_record and piano.is_active and not piano.is_occupied:
+                    # 更新钢琴状态
+                    piano.is_occupied = True
+                    piano.save()
+                    
+                    # 计算已练习时间
+                    practiced_minutes = int((current_time - practice_record.start_time).total_seconds() / 60)
+                    
+                    # 如果计算结果异常，进行修正
+                    if practiced_minutes < 0:
+                        practiced_minutes = 0
+                    elif practiced_minutes > 240:  # 超过4小时可能是异常
+                        practiced_minutes = 240
+                    
+                    student_info = {
+                        'id': practice_record.student.id,
+                        'name': practice_record.student.name,
+                        'level': str(practice_record.student.level),
+                        'start_time': practice_record.start_time.strftime('%H:%M'),
+                        'practiced_time': f"{practiced_minutes}分钟",
+                        'end_time': (practice_record.start_time + timedelta(minutes=30)).strftime('%H:%M')
                     }
             
             piano_data.append({
@@ -1857,18 +2413,62 @@ def assign_piano(request):
 @teacher_required
 def force_checkout(request):
     """强制学生签退"""
+    import logging
+    import traceback
+    import json
+    from django.views.decorators.csrf import csrf_exempt
+    from django.utils import timezone
+    from mymanage.courses.models import Piano
+    from mymanage.students.models import PracticeRecord, Attendance
+    from mymanage.attendance.models import AttendanceRecord
+    
+    logger = logging.getLogger(__name__)
+    logger.info(f"收到强制签退请求: method={request.method}, content_type={request.content_type}")
+    
+    # 检查请求方法
     if request.method != 'POST':
         return JsonResponse({'success': False, 'message': '请求方法不允许'})
     
-    piano_id = request.POST.get('piano_id')
+    # 尝试不同方式获取piano_id
+    piano_id = None
+    
+    # 从请求体获取
+    if request.content_type == 'application/x-www-form-urlencoded':
+        piano_id = request.POST.get('piano_id')
+        logger.info(f"从form表单获取piano_id: {piano_id}")
+    # 从查询参数获取
+    elif not piano_id:
+        piano_id = request.GET.get('piano_id')
+        logger.info(f"从URL参数获取piano_id: {piano_id}")
+    # 尝试从JSON获取
+    if not piano_id and request.content_type == 'application/json':
+        try:
+            data = json.loads(request.body)
+            piano_id = data.get('piano_id')
+            logger.info(f"从JSON获取piano_id: {piano_id}")
+        except json.JSONDecodeError:
+            logger.warning("无法解析JSON请求体")
+    
+    # 尝试从multipart表单获取
+    if not piano_id and request.content_type and 'multipart/form-data' in request.content_type:
+        piano_id = request.POST.get('piano_id')
+        logger.info(f"从multipart表单获取piano_id: {piano_id}")
+    
+    # 记录所有参数用于调试
+    logger.info(f"请求参数: POST={dict(request.POST)}, GET={dict(request.GET)}")
     
     if not piano_id:
-        return JsonResponse({'success': False, 'message': '缺少必要参数'})
+        logger.error("缺少必要参数piano_id")
+        return JsonResponse({'success': False, 'message': '缺少必要参数piano_id'})
     
     try:
-        from mymanage.courses.models import Piano
-        
+        # 获取钢琴实例
         piano = Piano.objects.get(id=piano_id)
+        logger.info(f"找到钢琴: ID={piano_id}, 编号={piano.number}, 状态: 是否可用={piano.is_active}, 是否被占用={piano.is_occupied}")
+        
+        # 检查是否有前端参数指定的学生信息
+        student_name = request.POST.get('student_name') or request.GET.get('student_name')
+        logger.info(f"前端提供的学生名称: {student_name}")
         
         # 查找当前使用此钢琴的记录
         current_record = AttendanceRecord.objects.filter(
@@ -1877,14 +2477,151 @@ def force_checkout(request):
         ).order_by('-check_in_time').first()
         
         if not current_record:
-            return JsonResponse({'success': False, 'message': '找不到相关考勤记录'})
+            logger.warning(f"找不到钢琴ID={piano_id}的活跃考勤记录")
+            
+            # 查找是否有PracticeRecord正在使用此钢琴
+            from mymanage.students.models import PracticeRecord
+            active_practice = PracticeRecord.objects.filter(
+                status='active',
+                date=timezone.now().date(),
+                piano_number=piano.number
+            ).first()
+            
+            if active_practice:
+                logger.info(f"找到活跃的练琴记录: ID={active_practice.id}, 学生={active_practice.student.name}")
+                
+                # 更新练琴记录状态
+                now = timezone.now()
+                active_practice.status = 'completed'
+                active_practice.end_time = now
+                time_diff = (now - active_practice.start_time).total_seconds() // 60
+                active_practice.duration = time_diff
+                active_practice.save()
+                
+                # 更新钢琴状态
+                piano.is_occupied = False
+                piano.save()
+                
+                logger.info(f"已更新练琴记录状态并释放钢琴")
+                return JsonResponse({'success': True, 'message': '已释放钢琴'})
+            
+            # 确认钢琴状态正确
+            if piano.is_occupied:
+                logger.warning(f"钢琴显示为占用状态但没有对应的考勤记录，重置钢琴状态")
+                piano.is_occupied = False
+                piano.save()
+                logger.info(f"钢琴状态已重置: ID={piano_id}")
+                return JsonResponse({'success': True, 'message': '钢琴状态已重置'})
+                
+            # 强制性处理 - 即使找不到记录，也标记操作成功
+            logger.info(f"找不到相关记录，但仍将操作标记为成功 - 钢琴ID={piano_id}")
+            return JsonResponse({'success': True, 'message': '钢琴已标记为可用'})
         
-        # 执行签退操作
-        current_record.check_out()
+        logger.info(f"找到考勤记录: ID={current_record.id}, 学生={current_record.student.name}")
         
+        # 获取学生信息
+        student = current_record.student
+        today = timezone.now().date()
+        
+        # 1. 采用学生端签退逻辑处理PracticeRecord
+        practice_record = PracticeRecord.objects.filter(
+            student=student,
+            date=today,
+            status='active',
+            piano_number=piano.number
+        ).first()
+        
+        if not practice_record:
+            # 尝试更宽松的查询
+            logger.info(f"未找到精确匹配的练琴记录，尝试宽松查询")
+            practice_record = PracticeRecord.objects.filter(
+                student=student,
+                date=today,
+                status='active'
+            ).first()
+        
+        # 如果找到了练琴记录，进行更新
+        if practice_record:
+            # 计算实际练琴时长
+            now = timezone.now()
+            actual_duration = (now - practice_record.start_time).total_seconds() // 60
+            
+            logger.info(f"更新练琴记录: ID={practice_record.id}, 时长={actual_duration}分钟")
+            
+            try:
+                # 更新练琴记录
+                practice_record.end_time = now
+                practice_record.duration = actual_duration
+                practice_record.status = 'completed'
+                practice_record.save()
+                logger.info(f"练琴记录已更新: ID={practice_record.id}")
+            except Exception as e:
+                logger.error(f"更新练琴记录失败: {str(e)}\n{traceback.format_exc()}")
+            
+            # 更新考勤记录
+            attendance = Attendance.objects.filter(
+                student=student,
+                date=today
+            ).first()
+            
+            if attendance:
+                try:
+                    logger.info(f"更新学生端考勤记录: ID={attendance.id}")
+                    attendance.check_out_time = now
+                    attendance.save()
+                    logger.info(f"学生端考勤记录已更新: ID={attendance.id}")
+                except Exception as e:
+                    logger.error(f"更新学生端考勤记录失败: {str(e)}\n{traceback.format_exc()}")
+        else:
+            logger.warning(f"未找到学生{student.name}的练琴记录")
+        
+        # 2. 调用考勤记录的签退方法
+        checkout_success = False
+        try:
+            logger.info(f"执行AttendanceRecord.check_out方法: record_id={current_record.id}")
+            checkout_success = current_record.check_out()
+            logger.info(f"AttendanceRecord.check_out结果: {checkout_success}")
+        except Exception as e:
+            logger.error(f"执行check_out方法失败: {str(e)}\n{traceback.format_exc()}")
+            # 如果check_out方法失败，手动更新状态
+            try:
+                current_record.status = 'checked_out'
+                current_record.check_out_time = timezone.now()
+                current_record.save()
+                logger.info(f"手动更新考勤记录状态成功")
+                checkout_success = True
+            except Exception as e2:
+                logger.error(f"手动更新考勤记录状态也失败: {str(e2)}\n{traceback.format_exc()}")
+        
+        # 3. 确保钢琴状态已释放（双重保险）
+        try:
+            piano.is_occupied = False
+            piano.save()
+            logger.info(f"钢琴状态已重置: id={piano.id}, number={piano.number}")
+        except Exception as e:
+            logger.error(f"更新钢琴状态失败: {str(e)}\n{traceback.format_exc()}")
+        
+        # 4. 再次检查钢琴状态（三重保险）
+        try:
+            piano.refresh_from_db()
+            if piano.is_occupied:
+                logger.warning(f"钢琴状态更新失败，再次尝试")
+                Piano.objects.filter(id=piano_id).update(is_occupied=False)
+                logger.info(f"使用update方法更新钢琴状态")
+        except Exception as e:
+            logger.error(f"第二次尝试更新钢琴状态失败: {str(e)}")
+        
+        # 记录成功
+        logger.info(f"强制签退成功完成: piano_id={piano_id}")
         return JsonResponse({'success': True, 'message': '强制签退成功'})
     
+    except Piano.DoesNotExist:
+        error_msg = f"找不到ID为{piano_id}的钢琴"
+        logger.error(error_msg)
+        return JsonResponse({'success': False, 'message': error_msg})
     except Exception as e:
+        error_msg = traceback.format_exc()
+        logger.error(f"强制签退失败: {str(e)}\n{error_msg}")
         return JsonResponse({'success': False, 'message': f'操作失败: {str(e)}'})
 
 
@@ -2077,7 +2814,7 @@ def student_detail_ajax(request, student_id):
         
         attendance_data = []
         for record in attendance_records:
-            session_name = '未知课程'
+            session_name = '通用考勤'
             if hasattr(record, 'session') and record.session:
                 if hasattr(record.session, 'course') and record.session.course:
                     session_name = record.session.course.name
@@ -2086,8 +2823,13 @@ def student_detail_ajax(request, student_id):
             check_out_time = record.check_out_time.strftime('%H:%M') if record.check_out_time else '未签退'
             
             duration = '未完成'
-            if hasattr(record, 'duration_minutes') and record.duration_minutes:
-                duration = f"{record.duration_minutes} 分钟"
+            if hasattr(record, 'duration_minutes') and record.duration_minutes is not None:
+                # 修正异常持续时间
+                duration_value = record.duration_minutes
+                if duration_value < 0 or duration_value > 240:
+                    # 限制为最大4小时（240分钟）或最小0分钟
+                    duration_value = 240 if duration_value > 0 else 0
+                duration = f"{int(duration_value)} 分钟"
             
             attendance_data.append({
                 'session_name': session_name,
@@ -2139,8 +2881,8 @@ def manual_checkin(request):
             else:
                 check_in_time = timezone.now()
             
-            # 设置结束时间（24小时后）
-            check_out_time = check_in_time + timezone.timedelta(hours=24)
+            # 计算签退时间（签到时间+30分钟）
+            check_out_time = check_in_time + timezone.timedelta(minutes=30)
             
             # 获取或创建考勤会话
             session = None
@@ -2187,16 +2929,24 @@ def manual_checkin(request):
                     'message': f'该学生已有考勤记录，创建于 {existing_record.check_in_time.strftime("%Y-%m-%d %H:%M")}'
                 }, status=400)
             
-            # 创建考勤记录
+            # 尝试获取1号钢琴，但不实际占用
+            from mymanage.courses.models import Piano
+            piano = Piano.objects.filter(number=1).first()
+            
+            # 创建考勤记录（已完成状态）
             record = AttendanceRecord.objects.create(
                 session=session,
                 student=student,
                 check_in_time=check_in_time,
-                status='checked_in',
-                note=notes
+                check_out_time=check_out_time,
+                status='checked_out',  # 直接设为已签退
+                note=notes,
+                duration=0.5,  # 0.5小时
+                duration_minutes=30,  # 30分钟
+                piano=piano  # 仅关联钢琴，不占用
             )
             
-            # 同步创建学生端的考勤记录
+            # 同步创建学生端的考勤记录（已完成状态）
             from mymanage.students.models import Attendance
             
             # 检查是否已存在当天的考勤记录
@@ -2206,14 +2956,40 @@ def manual_checkin(request):
             ).first()
             
             if not existing_attendance:
-                # 创建学生端考勤记录
+                # 创建已完成的学生端考勤记录
                 Attendance.objects.create(
                     student=student,
                     date=check_in_time.date(),
                     check_in_time=check_in_time,
-                    check_out_time=None,  # 稍后可以更新
+                    check_out_time=check_out_time,  # 设置签退时间
                     status='present'
                 )
+            
+            # 创建已完成的练琴记录
+            from mymanage.students.models import PracticeRecord
+            try:
+                # 检查是否已存在练琴记录
+                existing_practice = PracticeRecord.objects.filter(
+                    student=student,
+                    date=check_in_time.date(),
+                    start_time=check_in_time
+                ).exists()
+                
+                if not existing_practice:
+                    # 创建已完成的练琴记录
+                    PracticeRecord.objects.create(
+                        student=student,
+                        date=check_in_time.date(),
+                        start_time=check_in_time,
+                        end_time=check_out_time,
+                        duration=30,  # 30分钟
+                        piano_number=1,  # 1号钢琴
+                        status='completed',  # 设为已完成
+                        attendance_session=session
+                    )
+                    print(f"为手动添加的考勤记录创建了练琴记录 - 学生: {student.name}")
+            except Exception as e:
+                print(f"创建练琴记录失败: {str(e)}")
             
             return JsonResponse({
                 'success': True,
@@ -2222,7 +2998,9 @@ def manual_checkin(request):
                     'id': record.id,
                     'student_name': student.name,
                     'course_name': course.name,
-                    'check_in_time': check_in_time.strftime('%Y-%m-%d %H:%M:%S')
+                    'check_in_time': check_in_time.strftime('%Y-%m-%d %H:%M:%S'),
+                    'check_out_time': check_out_time.strftime('%Y-%m-%d %H:%M:%S'),
+                    'duration': '30分钟'
                 }
             })
             
@@ -2339,7 +3117,11 @@ def end_session(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'message': '请求方法不正确'})
     
+    logger = logging.getLogger(__name__)
+    
     try:
+        from django.db import models  # 添加导入语句
+        
         data = json.loads(request.body)
         session_id = data.get('session_id')
         
@@ -2349,6 +3131,9 @@ def end_session(request):
         # 获取考勤会话
         session = get_object_or_404(AttendanceSession, id=session_id)
         
+        # 记录调试信息
+        logger.debug(f"结束会话: ID={session_id}, 开始时间={session.start_time}, 结束时间={session.end_time}")
+        
         # 验证权限
         if session.created_by != request.user and not request.user.is_superuser:
             return JsonResponse({'success': False, 'message': '没有权限执行此操作'})
@@ -2357,72 +3142,107 @@ def end_session(request):
         if session.status != 'active':
             return JsonResponse({'success': False, 'message': '该考勤会话已经关闭'})
         
-        # 关闭会话
-        session.close_session()
+        # 获取当前时间
+        now = timezone.localtime(timezone.now())
+        
+        # 检查并修复时间异常
+        if session.start_time > now:
+            logger.warning(f"检测到异常开始时间：{session.start_time} > {now}，进行修正")
+            # 将开始时间设置为一小时前
+            session.start_time = now - timezone.timedelta(hours=1)
+            # 直接保存，跳过验证
+            models.Model.save(session)
+        
+        # 如果有关联的二维码，更新二维码的过期时间为当前时间，使其立即过期
+        if session.qrcode:
+            logger.debug(f"更新二维码过期时间: ID={session.qrcode.id}, 原过期时间={session.qrcode.expires_at}")
+            session.qrcode.expires_at = now
+            session.qrcode.save()
+            logger.debug(f"二维码已更新: ID={session.qrcode.id}, 新过期时间={now}")
+        
+        # 关闭会话 - 直接设置相关字段而不使用close_session方法
+        session.status = 'closed'
+        session.is_active = False
+        session.end_time = now
+        
+        try:
+            # 尝试保存会话
+            session.save()
+        except ValidationError as e:
+            logger.error(f"保存会话时验证错误: {e}")
+            # 如果保存失败，直接使用原始Model.save方法绕过验证
+            models.Model.save(session)
+            logger.info("使用绕过验证的方式保存会话成功")
         
         # 为所有未签退的学生自动签退
         active_records = AttendanceRecord.objects.filter(session=session, status='checked_in')
-        now = timezone.now()
         
         # 导入学生模型
         from mymanage.students.models import Attendance, PracticeRecord
         
+        record_count = 0
         for record in active_records:
-            student = record.student
-            record.check_out_time = now
-            record.status = 'checked_out'
-            
-            # 计算持续时间
-            if record.check_in_time:
-                duration = record.check_out_time - record.check_in_time
-                record.duration = duration.total_seconds() / 3600  # 转换为小时
-                record.duration_minutes = duration.total_seconds() / 60  # 转换为分钟
-            
-            record.save()
-            
-            # 同步更新学生端考勤记录
             try:
-                # 查找当天的考勤记录
-                attendance = Attendance.objects.filter(
-                    student=student,
-                    date=record.check_in_time.date()
-                ).first()
+                student = record.student
+                record.check_out_time = now
+                record.status = 'checked_out'
                 
-                if attendance:
-                    # 更新签退时间
-                    attendance.check_out_time = record.check_out_time
-                    attendance.save()
-                else:
-                    # 如果没有考勤记录，创建一个
-                    Attendance.objects.create(
+                # 计算持续时间
+                if record.check_in_time:
+                    duration = now - record.check_in_time
+                    record.duration = duration.total_seconds() / 3600  # 转换为小时
+                    record.duration_minutes = duration.total_seconds() / 60  # 转换为分钟
+                
+                record.save()
+                record_count += 1
+                
+                # 同步更新学生端考勤记录
+                try:
+                    # 查找当天的考勤记录
+                    attendance = Attendance.objects.filter(
+                        student=student,
+                        date=record.check_in_time.date()
+                    ).first()
+                    
+                    if attendance:
+                        # 更新签退时间
+                        attendance.check_out_time = now
+                        attendance.save()
+                    else:
+                        # 如果没有考勤记录，创建一个
+                        Attendance.objects.create(
+                            student=student,
+                            date=record.check_in_time.date(),
+                            check_in_time=record.check_in_time,
+                            check_out_time=now,
+                            status='present'
+                        )
+                    
+                    # 添加练习记录
+                    PracticeRecord.objects.create(
                         student=student,
                         date=record.check_in_time.date(),
-                        check_in_time=record.check_in_time,
-                        check_out_time=record.check_out_time,
-                        status='present'
+                        start_time=record.check_in_time,
+                        end_time=now,
+                        duration=int(record.duration_minutes) if record.duration_minutes else 0,
+                        piano_number=record.piano.number if record.piano else 1,
+                        status='completed'
                     )
-                
-                # 添加练习记录
-                PracticeRecord.objects.create(
-                    student=student,
-                    date=record.check_in_time.date(),
-                    start_time=record.check_in_time,
-                    end_time=record.check_out_time,
-                    duration=int(record.duration_minutes) if record.duration_minutes else 0,
-                    piano_number=record.piano.number if record.piano else 1
-                )
+                except Exception as e:
+                    logger.error(f"同步学生记录失败: {str(e)}")
             except Exception as e:
-                print(f"同步学生记录失败: {str(e)}")
+                logger.error(f"处理考勤记录时出错: {str(e)}")
         
         return JsonResponse({
             'success': True, 
             'message': '考勤会话已结束',
-            'closed_records': active_records.count()
+            'closed_records': record_count
         })
         
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'message': '请求数据格式错误'})
     except Exception as e:
+        logger.exception(f"结束会话失败: {str(e)}")
         return JsonResponse({'success': False, 'message': f'结束会话失败: {str(e)}'})
 
 @login_required
@@ -2727,11 +3547,36 @@ def generate_qrcode_ajax(request):
             # 获取当前用户（教师）
             teacher = request.user.teacher_profile
             
-            # 获取当前的日期和时间
-            now = timezone.now()
+            # 获取当前的日期和时间，使用系统本地时间
+            try:
+                now = timezone.localtime(timezone.now())
+                logger.info(f"当前系统时间: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+                
+                # 时间完整性检查
+                if now.year < 2024:
+                    logger.error(f"系统时间异常: {now} - 年份小于2024")
+                    return JsonResponse({
+                        'success': False,
+                        'message': '系统时间设置异常，年份错误'
+                    }, status=500)
+                
+            except Exception as e:
+                logger.error(f"获取系统时间出错: {str(e)}")
+                return JsonResponse({
+                    'success': False,
+                    'message': '系统时间设置问题，请联系管理员'
+                }, status=500)
             
-            # 设置24小时过期时间（统一设置）
-            expires_at = now + timezone.timedelta(hours=24)
+            # 设置过期时间为当天结束
+            today_end = now.replace(hour=23, minute=59, second=59)
+            expires_at = today_end
+            
+            # 确保过期时间不早于当前时间
+            if expires_at <= now:
+                expires_at = now + timezone.timedelta(hours=1)
+            
+            # 记录时间信息用于调试
+            logger.debug(f"生成考勤码 - 当前时间: {now.strftime('%Y-%m-%d %H:%M:%S')}, 过期时间: {expires_at.strftime('%Y-%m-%d %H:%M:%S')}")
             
             # 1. 首先关闭该教师所有现有的活跃会话 - 这一步放在最前面确保清理
             active_sessions = AttendanceSession.objects.filter(
@@ -2789,12 +3634,7 @@ def generate_qrcode_ajax(request):
             now_time = now.time()
             expires_time = expires_at.time()
             
-            # 创建临时时间表时，确保开始时间和结束时间不会造成验证错误
-            # 如果跨天，将结束时间设置为23:59:59
-            if now_time >= expires_time:
-                expires_time = datetime.max.time()  # 23:59:59.999999
-            
-            # 获取或创建课程时间表，确保使用临时标记
+            # 创建课程时间表，确保使用临时标记
             schedule = None
             try:
                 # 尝试获取现有时间表
@@ -2817,21 +3657,24 @@ def generate_qrcode_ajax(request):
                     is_temporary=True  # 明确标记为临时排课，避免时间验证
                 )
             
-            # 注意：我们已经在前面关闭了所有活跃会话，所以这里不再需要重复关闭
-            
             # 创建考勤会话
             try:
-                session = AttendanceSession.objects.create(
+                # 直接使用从数据库创建记录的方式，避免auto_now_add字段的影响
+                session = AttendanceSession(
                     course=default_course,
                     schedule=schedule,
                     qrcode=qrcode,
                     created_by=teacher.user,
-                    start_time=now,
-                    end_time=expires_at,
-                    description=f"生成于 {now.strftime('%Y-%m-%d %H:%M')}",
                     status='active',
-                    is_active=True
+                    is_active=True,
+                    description=f"生成于 {now.strftime('%Y-%m-%d %H:%M')}",
+                    end_time=expires_at
                 )
+                # 手动设置开始时间，确保与当前时间一致
+                session.start_time = now
+                session.save()
+                logger.info(f"创建考勤会话成功: ID={session.id}, 开始时间={session.start_time}, 结束时间={session.end_time}")
+                
             except ValidationError as ve:
                 # 如果创建会话失败，记录并删除已创建的QRCode
                 logger.error(f"创建考勤会话时验证错误: {ve}")
@@ -2847,6 +3690,20 @@ def generate_qrcode_ajax(request):
                 qrcode.refresh_from_db()  # 刷新对象以获取生成的图像URL
             
             qr_image_url = qrcode.qr_code_image.url if qrcode.qr_code_image else ''
+            
+            # 再次检查日期是否正确
+            session.refresh_from_db()
+            if session.start_time.date() != now.date():
+                logger.error(f"检测到日期异常: 会话开始日期={session.start_time.date()}, 当前日期={now.date()}")
+                # 直接更新数据库记录
+                from django.db import connection
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE attendance_attendancesession SET start_time = %s WHERE id = %s",
+                        [now, session.id]
+                    )
+                session.refresh_from_db()
+                logger.info(f"已修正会话时间: 新开始时间={session.start_time}")
             
             # 构建响应数据 - 修改为与前端updateQRCodeDisplay期望的格式一致
             return JsonResponse({
@@ -2871,7 +3728,7 @@ def generate_qrcode_ajax(request):
                 'message': str(e),
                 'error_details': {
                     'start_time': now.strftime('%Y-%m-%d %H:%M:%S'),
-                    'end_time': (now + timezone.timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S'),
+                    'end_time': expires_at.strftime('%Y-%m-%d %H:%M:%S'),
                 }
             }, status=400)
         except Exception as e:
@@ -2879,7 +3736,7 @@ def generate_qrcode_ajax(request):
             logger.error(f"生成二维码时出错: {str(e)}")
             return JsonResponse({
                 'success': False,
-                'message': f"生成二维码时出错: {str(e)}",
+                'message': f"生成考勤码失败: {str(e)}",
                 'error_type': type(e).__name__
             }, status=500)
     

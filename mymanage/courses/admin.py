@@ -37,5 +37,6 @@ class SheetMusicAdmin(admin.ModelAdmin):
     list_display = ('title', 'composer', 'level', 'upload_date', 'is_public')
     list_filter = ('level', 'is_public', 'upload_date')
     search_fields = ('title', 'composer', 'description')
-    date_hierarchy = 'upload_date'
+    # 注释掉date_hierarchy以解决时区问题
+    # date_hierarchy = 'upload_date'
     readonly_fields = ('uploaded_by', 'upload_date')

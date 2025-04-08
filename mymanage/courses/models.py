@@ -43,6 +43,11 @@ class Piano(models.Model):
     last_tuned_date = models.DateField('最后调音日期', null=True, blank=True)
     is_active = models.BooleanField('是否可用', default=True)
     is_occupied = models.BooleanField('是否被占用', default=False)
+    # 新增预留相关字段
+    is_reserved = models.BooleanField('是否被预留', default=False)
+    reserved_until = models.DateTimeField('预留结束时间', null=True, blank=True)
+    reserved_for = models.ForeignKey('students.Student', on_delete=models.SET_NULL, 
+                                     null=True, blank=True, related_name='reserved_pianos')
     notes = models.TextField('备注', blank=True)
     
     class Meta:
@@ -61,6 +66,58 @@ class Piano(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
+    
+    def reserve_for_student(self, student, minutes=30):
+        """为学生预留钢琴"""
+        if self.is_occupied:
+            return False
+        
+        self.is_reserved = True
+        self.reserved_for = student
+        self.reserved_until = timezone.now() + timezone.timedelta(minutes=minutes)
+        self.save()
+        return True
+    
+    def cancel_reservation(self):
+        """取消预留"""
+        if self.is_reserved:
+            self.is_reserved = False
+            self.reserved_for = None
+            self.reserved_until = None
+            self.save()
+            return True
+        return False
+    
+    def start_using(self):
+        """开始使用钢琴"""
+        self.is_occupied = True
+        self.is_reserved = False
+        self.reserved_until = None
+        self.save()
+        return True
+    
+    def stop_using(self):
+        """停止使用钢琴"""
+        self.is_occupied = False
+        self.is_reserved = False
+        self.reserved_for = None
+        self.reserved_until = None
+        self.save()
+        return True
+    
+    @classmethod
+    def check_and_expire_reservations(cls):
+        """检查并过期所有过期预留"""
+        now = timezone.now()
+        expired_pianos = cls.objects.filter(
+            is_reserved=True,
+            reserved_until__lt=now
+        )
+        
+        for piano in expired_pianos:
+            piano.cancel_reservation()
+        
+        return len(expired_pianos)
 
 
 class Course(models.Model):

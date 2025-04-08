@@ -16,6 +16,7 @@ urlpatterns = [
     path('practice/status/', views.check_practice_status, name='practice_status'),
     path('practice/start/', views.start_practice, name='start_practice'),
     path('practice/join-waiting/', views.join_waiting_queue, name='join_waiting_queue'),
+    path('practice/cancel-waiting/', views.cancel_waiting, name='cancel_waiting'),
     path('practice/end/', views.end_practice, name='end_practice'),
     path('practice/check-status/', views.check_practice_status, name='check_practice_status'),
     path('practice/check-waiting-status/', views.check_waiting_status, name='check_waiting_status'),
