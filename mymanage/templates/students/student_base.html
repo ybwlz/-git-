@@ -118,7 +118,7 @@
         </div>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'students:profile' %}">
+                <a class="nav-link {% if request.resolver_match.url_name == 'profile' and not request.resolver_match.url_name == 'update_profile' %}active{% endif %}" href="{% url 'students:profile' %}">
                     <i class="fas fa-user"></i> 个人主页
                 </a>
             </li>
@@ -133,8 +133,13 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'sheet_music' or request.resolver_match.url_name == 'sheet_music_detail' %}active{% endif %}" href="{% url 'students:sheet_music' %}">
+                <a class="nav-link {% if request.resolver_match.url_name == 'sheet_music' %}active{% endif %}" href="{% url 'students:sheet_music' %}">
                     <i class="fas fa-file-alt"></i> 在线曲谱
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'update_profile' %}active{% endif %}" href="{% url 'students:update_profile' %}">
+                    <i class="fas fa-cog"></i> 账号设置
                 </a>
             </li>
             <li class="nav-item mt-5">

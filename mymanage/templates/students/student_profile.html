@@ -267,6 +267,11 @@
                     <i class="fas fa-file-alt"></i> 在线曲谱
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:update_profile' %}">
+                    <i class="fas fa-cog"></i> 账号设置
+                </a>
+            </li>
             <li class="nav-item mt-5">
                 <a class="nav-link" href="{% url 'logout' %}">
                     <i class="fas fa-sign-out-alt"></i> 退出登录
@@ -389,7 +394,7 @@
                         </div>
                         <div class="text-end mt-3">
                             <a href="{% url 'students:update_profile' %}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-edit me-1"></i> 编辑资料
+                                <i class="fas fa-cog me-1"></i> 账号设置
                             </a>
                         </div>
                     </div>

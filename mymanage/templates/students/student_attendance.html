@@ -11,11 +11,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
-    <!-- Chart.js -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
     <!-- 自定义CSS -->
     <link rel="stylesheet" href="{% static 'css/student.css' %}">
-    <link rel="stylesheet" href="../static/css/skin/default/layer.css">
+    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -615,6 +613,11 @@
                     <i class="fas fa-file-alt"></i> 在线曲谱
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:update_profile' %}">
+                    <i class="fas fa-cog"></i> 账号设置
+                </a>
+            </li>
             <li class="nav-item mt-5">
                 <a class="nav-link" href="{% url 'logout' %}">
                     <i class="fas fa-sign-out-alt"></i> 退出登录
@@ -806,7 +809,7 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/zh-cn.js"></script>
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/libs/chart.min.js' %}"></script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {

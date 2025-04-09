@@ -16,9 +16,10 @@ from django.db import connection
 import calendar
 import traceback
 import logging
+from django.contrib.auth import update_session_auth_hash
 
 from .models import Student, PracticeRecord, Attendance, StudentFavorite
-from .forms import StudentProfileForm, PracticeRecordForm, AttendanceForm, SheetMusicSearchForm
+from .forms import StudentProfileForm, PracticeRecordForm, AttendanceForm, SheetMusicSearchForm, PasswordChangeForm
 
 logger = logging.getLogger(__name__)
 
@@ -143,42 +144,67 @@ def profile(request):
 def update_profile(request):
     student = get_object_or_404(Student, user=request.user)
     if request.method == 'POST':
-        print(f"收到POST请求，FILES内容: {request.FILES}")
-        print(f"请求内容类型: {request.META.get('CONTENT_TYPE', '未知')}")
+        action = request.POST.get('action')
         
-        form = StudentProfileForm(request.POST, request.FILES, instance=student)
-        if form.is_valid():
-            form.save()
-            
-            # 处理头像上传
-            if request.FILES and 'avatar' in request.FILES:
-                avatar_file = request.FILES['avatar']
-                print(f"接收到头像文件: {avatar_file.name}, 大小: {avatar_file.size} 字节")
+        # 处理密码修改
+        if action == 'change_password':
+            password_form = PasswordChangeForm(request.POST)
+            if password_form.is_valid():
+                old_password = password_form.cleaned_data.get('old_password')
+                new_password = password_form.cleaned_data.get('new_password')
                 
-                # 确保用户获取正确的引用
-                user = request.user
-                user.avatar = avatar_file
-                user.save()
+                # 验证旧密码
+                if not request.user.check_password(old_password):
+                    messages.error(request, '当前密码不正确')
+                    return redirect('students:update_profile')
                 
-                # 输出保存后的路径
-                print(f"头像已保存到: {user.avatar.path if user.avatar else '无路径'}")
-                messages.success(request, f'个人信息和头像更新成功！头像大小: {avatar_file.size} 字节')
-            else:
-                print("请求中没有找到avatar文件")
-                messages.success(request, '个人信息更新成功！但没有接收到头像文件')
-            
-            return redirect('students:profile')
+                # 更新密码
+                request.user.set_password(new_password)
+                request.user.save()
+                # 更新会话，避免用户被登出
+                update_session_auth_hash(request, request.user)
+                messages.success(request, '密码修改成功！')
+                return redirect('students:update_profile')
+        # 处理个人信息更新
         else:
-            print(f"表单验证错误: {form.errors}")
-            messages.error(request, f'表单验证错误: {form.errors}')
+            print(f"收到POST请求，FILES内容: {request.FILES}")
+            print(f"请求内容类型: {request.META.get('CONTENT_TYPE', '未知')}")
+            
+            form = StudentProfileForm(request.POST, request.FILES, instance=student)
+            if form.is_valid():
+                form.save()
+                
+                # 处理头像上传
+                if request.FILES and 'avatar' in request.FILES:
+                    avatar_file = request.FILES['avatar']
+                    print(f"接收到头像文件: {avatar_file.name}, 大小: {avatar_file.size} 字节")
+                    
+                    # 确保用户获取正确的引用
+                    user = request.user
+                    user.avatar = avatar_file
+                    user.save()
+                    
+                    # 输出保存后的路径
+                    print(f"头像已保存到: {user.avatar.path if user.avatar else '无路径'}")
+                    messages.success(request, f'个人信息和头像更新成功！头像大小: {avatar_file.size} 字节')
+                else:
+                    print("请求中没有找到avatar文件")
+                    messages.success(request, '个人信息更新成功！但没有接收到头像文件')
+                
+                return redirect('students:update_profile')
+            else:
+                print(f"表单验证错误: {form.errors}")
+                messages.error(request, f'表单验证错误: {form.errors}')
     else:
         form = StudentProfileForm(instance=student)
+        password_form = PasswordChangeForm()
     
     context = {
         'form': form,
+        'password_form': password_form,
         'student': student
     }
-    return render(request, 'students/student_profile_update.html', context)
+    return render(request, 'students/student_settings.html', context)
 
 @login_required
 def practice(request):

@@ -16,6 +16,31 @@ class StudentProfileForm(forms.ModelForm):
             'school': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
+class PasswordChangeForm(forms.Form):
+    """修改密码表单"""
+    old_password = forms.CharField(
+        label='当前密码',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+    new_password = forms.CharField(
+        label='新密码',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+    confirm_password = forms.CharField(
+        label='确认新密码',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+        
+        if new_password and confirm_password and new_password != confirm_password:
+            self.add_error('confirm_password', '两次输入的密码不一致')
+        
+        return cleaned_data
+
 class PracticeRecordForm(forms.ModelForm):
     """练琴记录表单"""
     class Meta:

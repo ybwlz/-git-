@@ -6,7 +6,7 @@ app_name = 'students'
 urlpatterns = [
     # 学生个人主页
     path('profile/', views.profile, name='profile'),
-    path('profile/update/', views.update_profile, name='update_profile'),
+    path('settings/', views.update_profile, name='update_profile'),
     
     # 今日练琴
     path('practice/', views.practice, name='practice'),

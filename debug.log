@@ -1,588 +1,1522 @@
-INFO 2025-04-09 13:55:27,677 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 13:55:27,677 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 13:55:30,782 basehttp "GET / HTTP/1.1" 302 0
-INFO 2025-04-09 13:55:30,782 basehttp "GET / HTTP/1.1" 302 0
-INFO 2025-04-09 13:55:30,830 basehttp "GET /login/ HTTP/1.1" 200 8953
-INFO 2025-04-09 13:55:30,830 basehttp "GET /login/ HTTP/1.1" 200 8953
-INFO 2025-04-09 13:55:30,866 basehttp "GET /static/img/logo.jpg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:30,866 basehttp "GET /static/img/logo.jpg HTTP/1.1" 304 0
-WARNING 2025-04-09 13:55:31,040 log Not Found: /favicon.ico
-WARNING 2025-04-09 13:55:31,040 log Not Found: /favicon.ico
-WARNING 2025-04-09 13:55:31,041 basehttp "GET /favicon.ico HTTP/1.1" 404 4220
-WARNING 2025-04-09 13:55:31,041 basehttp "GET /favicon.ico HTTP/1.1" 404 4220
-INFO 2025-04-09 13:55:35,542 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:55:35,542 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:55:35,588 basehttp "GET /admin/ HTTP/1.1" 200 16362
-INFO 2025-04-09 13:55:35,588 basehttp "GET /admin/ HTTP/1.1" 200 16362
-INFO 2025-04-09 13:55:35,623 basehttp "GET /static/admin/css/base.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,623 basehttp "GET /static/admin/css/base.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,627 basehttp "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,627 basehttp "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,627 basehttp "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,627 basehttp "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,628 basehttp "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,629 basehttp "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,628 basehttp "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,629 basehttp "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,630 basehttp "GET /static/admin/js/theme.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,630 basehttp "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,630 basehttp "GET /static/admin/js/theme.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,630 basehttp "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,637 basehttp "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,637 basehttp "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,637 basehttp "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,637 basehttp "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,637 basehttp "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:35,637 basehttp "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
-WARNING 2025-04-09 13:55:35,651 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:55:35,651 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:55:37,037 basehttp "GET /admin/students/practicerecord/ HTTP/1.1" 200 25786
-INFO 2025-04-09 13:55:37,037 basehttp "GET /admin/students/practicerecord/ HTTP/1.1" 200 25786
-INFO 2025-04-09 13:55:37,066 basehttp "GET /static/admin/css/changelists.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,066 basehttp "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,068 basehttp "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,066 basehttp "GET /static/admin/css/changelists.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,066 basehttp "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,070 basehttp "GET /static/admin/js/core.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,068 basehttp "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,072 basehttp "GET /static/admin/js/actions.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,070 basehttp "GET /static/admin/js/core.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,072 basehttp "GET /static/admin/js/actions.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,076 basehttp "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,076 basehttp "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,076 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:55:37,076 basehttp "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,076 basehttp "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,076 basehttp "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,076 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:55:37,077 basehttp "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,077 basehttp "GET /static/admin/img/search.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,076 basehttp "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,077 basehttp "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,077 basehttp "GET /static/admin/img/search.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,084 basehttp "GET /static/admin/js/filters.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,084 basehttp "GET /static/admin/js/filters.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,099 basehttp "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,099 basehttp "GET /static/admin/img/sorting-icons.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,099 basehttp "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:37,099 basehttp "GET /static/admin/img/sorting-icons.svg HTTP/1.1" 304 0
-WARNING 2025-04-09 13:55:37,154 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:55:37,154 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:55:43,490 basehttp "POST /admin/students/practicerecord/ HTTP/1.1" 200 13282
-INFO 2025-04-09 13:55:43,490 basehttp "POST /admin/students/practicerecord/ HTTP/1.1" 200 13282
-INFO 2025-04-09 13:55:43,518 basehttp "GET /static/admin/js/cancel.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:43,518 basehttp "GET /static/admin/js/cancel.js HTTP/1.1" 304 0
-WARNING 2025-04-09 13:55:43,557 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:55:43,557 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:55:44,780 basehttp "POST /admin/students/practicerecord/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:55:44,780 basehttp "POST /admin/students/practicerecord/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:55:44,804 basehttp "GET /admin/students/practicerecord/ HTTP/1.1" 200 24897
-INFO 2025-04-09 13:55:44,804 basehttp "GET /admin/students/practicerecord/ HTTP/1.1" 200 24897
-INFO 2025-04-09 13:55:44,831 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:55:44,831 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:55:44,847 basehttp "GET /static/admin/img/icon-yes.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:55:44,847 basehttp "GET /static/admin/img/icon-yes.svg HTTP/1.1" 304 0
-WARNING 2025-04-09 13:55:44,882 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:55:44,882 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:55:46,586 basehttp "GET /admin/courses/piano/ HTTP/1.1" 200 17041
-INFO 2025-04-09 13:55:46,586 basehttp "GET /admin/courses/piano/ HTTP/1.1" 200 17041
-INFO 2025-04-09 13:55:46,620 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:55:46,620 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:55:46,656 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:55:46,656 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:55:59,150 basehttp "GET / HTTP/1.1" 302 0
-INFO 2025-04-09 13:55:59,150 basehttp "GET / HTTP/1.1" 302 0
-INFO 2025-04-09 13:55:59,155 basehttp "GET /login/ HTTP/1.1" 200 8953
-INFO 2025-04-09 13:55:59,155 basehttp "GET /login/ HTTP/1.1" 200 8953
-INFO 2025-04-09 13:56:05,949 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:56:05,949 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:56:05,987 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 20815
-INFO 2025-04-09 13:56:05,987 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 20815
-INFO 2025-04-09 13:56:06,017 basehttp "GET /static/css/teacher.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:06,017 basehttp "GET /static/css/teacher.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:06,024 basehttp "GET /static/css/skin/default/layer.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:06,024 basehttp "GET /media/teachers/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:06,024 basehttp "GET /static/js/skin/default/layer.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:06,024 basehttp "GET /static/css/skin/default/layer.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:06,024 basehttp "GET /media/teachers/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:06,024 basehttp "GET /static/js/skin/default/layer.js HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:07,200 basehttp "GET /teachers/students/ HTTP/1.1" 200 53841
-INFO 2025-04-09 13:56:07,200 basehttp "GET /teachers/students/ HTTP/1.1" 200 53841
-INFO 2025-04-09 13:56:07,753 views 当前时间: 2025-04-09 13:56:07
-INFO 2025-04-09 13:56:07,753 views 当前时间: 2025-04-09 13:56:07
-INFO 2025-04-09 13:56:07,753 views 当前教师: yaobowen
-INFO 2025-04-09 13:56:07,753 views 当前教师: yaobowen
-INFO 2025-04-09 13:56:07,755 views 系统中钢琴数量: 2
-INFO 2025-04-09 13:56:07,755 views 系统中钢琴数量: 2
-WARNING 2025-04-09 13:56:07,758 views 检测到异常长练习时间: 240分钟
-WARNING 2025-04-09 13:56:07,758 views 检测到异常长练习时间: 240分钟
-INFO 2025-04-09 13:56:07,758 views 钢琴1被李四使用中，已练习240分钟
-INFO 2025-04-09 13:56:07,758 views 钢琴1被李四使用中，已练习240分钟
-WARNING 2025-04-09 13:56:07,760 views 检测到异常长练习时间: 240分钟
-WARNING 2025-04-09 13:56:07,760 views 检测到异常长练习时间: 240分钟
-INFO 2025-04-09 13:56:07,760 views 钢琴2被王止舟使用中，已练习240分钟
-INFO 2025-04-09 13:56:07,760 views 钢琴2被王止舟使用中，已练习240分钟
-INFO 2025-04-09 13:56:07,760 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:56:07,760 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:56:07,761 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:56:07,761 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:56:07,766 views 等待队列学生数量: 0
-INFO 2025-04-09 13:56:07,766 views 等待队列学生数量: 0
-INFO 2025-04-09 13:56:07,767 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:56:07,767 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:56:07,767 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:56:07,767 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:56:07,767 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:56:07,767 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:56:07,772 views 今日总记录数: 0
-INFO 2025-04-09 13:56:07,772 views 今日总记录数: 0
-WARNING 2025-04-09 13:56:07,777 views 自动签退超时记录: 王止舟 - 签到时间: 2025-04-08 15:34:49.823928+00:00
-WARNING 2025-04-09 13:56:07,777 views 自动签退超时记录: 王止舟 - 签到时间: 2025-04-08 15:34:49.823928+00:00
-INFO 2025-04-09 13:56:07,778 models 正在释放钢琴: 编号=2
-INFO 2025-04-09 13:56:07,778 models 正在释放钢琴: 编号=2
-INFO 2025-04-09 13:56:07,782 models 钢琴已释放: 编号=2
-INFO 2025-04-09 13:56:07,782 models 钢琴已释放: 编号=2
-INFO 2025-04-09 13:56:07,784 models 等待队列为空，无需分配
-INFO 2025-04-09 13:56:07,784 models 等待队列为空，无需分配
-INFO 2025-04-09 13:56:07,790 views 为自动签退的学生王止舟创建了练琴记录
-INFO 2025-04-09 13:56:07,790 views 为自动签退的学生王止舟创建了练琴记录
-WARNING 2025-04-09 13:56:07,791 views 自动签退超时记录: 李四 - 签到时间: 2025-04-08 15:32:02.517161+00:00
-WARNING 2025-04-09 13:56:07,791 views 自动签退超时记录: 李四 - 签到时间: 2025-04-08 15:32:02.517161+00:00
-INFO 2025-04-09 13:56:07,792 models 正在释放钢琴: 编号=1
-INFO 2025-04-09 13:56:07,792 models 正在释放钢琴: 编号=1
-INFO 2025-04-09 13:56:07,796 models 钢琴已释放: 编号=1
-INFO 2025-04-09 13:56:07,796 models 钢琴已释放: 编号=1
-INFO 2025-04-09 13:56:07,799 models 等待队列为空，无需分配
-INFO 2025-04-09 13:56:07,799 models 等待队列为空，无需分配
-INFO 2025-04-09 13:56:07,803 views 为自动签退的学生李四创建了练琴记录
-INFO 2025-04-09 13:56:07,803 views 为自动签退的学生李四创建了练琴记录
-INFO 2025-04-09 13:56:07,810 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 50645
-INFO 2025-04-09 13:56:07,810 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 50645
-INFO 2025-04-09 13:56:07,860 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:56:07,860 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:56:11,658 views 当前时间: 2025-04-09 13:56:11
-INFO 2025-04-09 13:56:11,658 views 当前时间: 2025-04-09 13:56:11
-INFO 2025-04-09 13:56:11,658 views 当前教师: yaobowen
-INFO 2025-04-09 13:56:11,658 views 当前教师: yaobowen
-INFO 2025-04-09 13:56:11,659 views 系统中钢琴数量: 2
-INFO 2025-04-09 13:56:11,659 views 系统中钢琴数量: 2
-INFO 2025-04-09 13:56:11,661 views 钢琴1 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:11,661 views 钢琴1 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:11,662 views 钢琴2 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:11,662 views 钢琴2 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:11,663 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:56:11,663 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:56:11,663 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:56:11,663 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:56:11,668 views 等待队列学生数量: 0
-INFO 2025-04-09 13:56:11,668 views 等待队列学生数量: 0
-INFO 2025-04-09 13:56:11,668 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:56:11,668 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:56:11,669 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:56:11,669 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:56:11,669 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:56:11,669 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:56:11,672 views 今日总记录数: 0
-INFO 2025-04-09 13:56:11,672 views 今日总记录数: 0
-INFO 2025-04-09 13:56:11,677 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49465
-INFO 2025-04-09 13:56:11,677 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49465
-INFO 2025-04-09 13:56:11,727 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:56:11,727 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:56:12,831 views 当前时间: 2025-04-09 13:56:12
-INFO 2025-04-09 13:56:12,831 views 当前时间: 2025-04-09 13:56:12
-INFO 2025-04-09 13:56:12,832 views 当前教师: yaobowen
-INFO 2025-04-09 13:56:12,832 views 当前教师: yaobowen
-INFO 2025-04-09 13:56:12,833 views 系统中钢琴数量: 2
-INFO 2025-04-09 13:56:12,833 views 系统中钢琴数量: 2
-INFO 2025-04-09 13:56:12,835 views 钢琴1 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:12,835 views 钢琴1 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:12,836 views 钢琴2 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:12,836 views 钢琴2 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:12,836 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:56:12,836 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:56:12,837 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:56:12,837 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:56:12,842 views 等待队列学生数量: 0
-INFO 2025-04-09 13:56:12,842 views 等待队列学生数量: 0
-INFO 2025-04-09 13:56:12,842 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:56:12,842 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:56:12,843 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:56:12,843 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:56:12,843 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:56:12,843 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:56:12,847 views 今日总记录数: 0
-INFO 2025-04-09 13:56:12,847 views 今日总记录数: 0
-INFO 2025-04-09 13:56:12,854 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49465
-INFO 2025-04-09 13:56:12,854 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49465
-INFO 2025-04-09 13:56:12,900 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:56:12,900 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:56:13,928 views 当前时间: 2025-04-09 13:56:13
-INFO 2025-04-09 13:56:13,928 views 当前时间: 2025-04-09 13:56:13
-INFO 2025-04-09 13:56:13,928 views 当前教师: yaobowen
-INFO 2025-04-09 13:56:13,928 views 当前教师: yaobowen
-INFO 2025-04-09 13:56:13,929 views 系统中钢琴数量: 2
-INFO 2025-04-09 13:56:13,929 views 系统中钢琴数量: 2
-INFO 2025-04-09 13:56:13,931 views 钢琴1 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:13,931 views 钢琴1 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:13,932 views 钢琴2 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:13,932 views 钢琴2 - 状态: 可用，空闲
-INFO 2025-04-09 13:56:13,933 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:56:13,933 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:56:13,933 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:56:13,933 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:56:13,937 views 等待队列学生数量: 0
-INFO 2025-04-09 13:56:13,937 views 等待队列学生数量: 0
-INFO 2025-04-09 13:56:13,937 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:56:13,937 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:56:13,938 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:56:13,938 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:56:13,938 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:56:13,938 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:56:13,941 views 今日总记录数: 0
-INFO 2025-04-09 13:56:13,941 views 今日总记录数: 0
-INFO 2025-04-09 13:56:13,946 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49465
-INFO 2025-04-09 13:56:13,946 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49465
-INFO 2025-04-09 13:56:13,993 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:56:13,993 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:56:20,387 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 61230
-INFO 2025-04-09 13:56:20,387 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 61230
-INFO 2025-04-09 13:56:23,547 basehttp "GET /teachers/sheet-music/ HTTP/1.1" 200 38405
-INFO 2025-04-09 13:56:23,547 basehttp "GET /teachers/sheet-music/ HTTP/1.1" 200 38405
-INFO 2025-04-09 13:56:23,584 basehttp "GET /media/sheet_music/covers/f2b248c7e5f64298aa519c017930db43_8Ey50Q9.png HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:23,584 basehttp "GET /media/sheet_music/covers/%E5%B8%A6%E8%BA%AB%E4%BB%BD%E8%AF%81%E7%85%A7_0XVNy11.jpg HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:23,584 basehttp "GET /media/sheet_music/covers/f2b248c7e5f64298aa519c017930db43_8Ey50Q9.png HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:23,584 basehttp "GET /media/sheet_music/covers/%E5%B8%A6%E8%BA%AB%E4%BB%BD%E8%AF%81%E7%85%A7_0XVNy11.jpg HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:23,588 basehttp "GET /media/sheet_music/covers/%E5%B8%A6%E8%BA%AB%E4%BB%BD%E8%AF%81%E7%85%A7.jpg HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:23,588 basehttp "GET /media/sheet_music/covers/%E5%B8%A6%E8%BA%AB%E4%BB%BD%E8%AF%81%E7%85%A7.jpg HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:24,829 basehttp "GET /teachers/finance/ HTTP/1.1" 200 37071
-INFO 2025-04-09 13:56:24,829 basehttp "GET /teachers/finance/ HTTP/1.1" 200 37071
-INFO 2025-04-09 13:56:25,829 basehttp "GET /teachers/profile/ HTTP/1.1" 200 21646
-INFO 2025-04-09 13:56:25,829 basehttp "GET /teachers/profile/ HTTP/1.1" 200 21646
-INFO 2025-04-09 13:56:27,558 basehttp "GET /logout/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:56:27,558 basehttp "GET /logout/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:56:27,562 basehttp "GET /login/ HTTP/1.1" 200 9326
-INFO 2025-04-09 13:56:27,562 basehttp "GET /login/ HTTP/1.1" 200 9326
-INFO 2025-04-09 13:56:29,412 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:56:29,412 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:56:29,428 basehttp "GET /admin/ HTTP/1.1" 200 16362
-INFO 2025-04-09 13:56:29,428 basehttp "GET /admin/ HTTP/1.1" 200 16362
-WARNING 2025-04-09 13:56:29,495 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:29,495 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:56:34,367 basehttp "GET /admin/courses/piano/ HTTP/1.1" 200 17041
-INFO 2025-04-09 13:56:34,367 basehttp "GET /admin/courses/piano/ HTTP/1.1" 200 17041
-INFO 2025-04-09 13:56:34,401 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:34,401 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:34,402 basehttp "GET /static/admin/img/icon-no.svg HTTP/1.1" 304 0
-INFO 2025-04-09 13:56:34,402 basehttp "GET /static/admin/img/icon-no.svg HTTP/1.1" 304 0
-WARNING 2025-04-09 13:56:34,443 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:34,443 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:56:37,491 basehttp "GET /admin/courses/courseschedule/ HTTP/1.1" 200 23097
-INFO 2025-04-09 13:56:37,491 basehttp "GET /admin/courses/courseschedule/ HTTP/1.1" 200 23097
-INFO 2025-04-09 13:56:37,525 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:37,525 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:56:37,577 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:37,577 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:56:44,381 basehttp "GET /admin/courses/pianolevel/ HTTP/1.1" 200 14944
-INFO 2025-04-09 13:56:44,381 basehttp "GET /admin/courses/pianolevel/ HTTP/1.1" 200 14944
-INFO 2025-04-09 13:56:44,415 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:44,415 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:56:44,450 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:44,450 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:56:46,528 basehttp "GET /admin/courses/sheetmusic/ HTTP/1.1" 200 17943
-INFO 2025-04-09 13:56:46,528 basehttp "GET /admin/courses/sheetmusic/ HTTP/1.1" 200 17943
-INFO 2025-04-09 13:56:46,561 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:46,561 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:56:46,603 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:46,603 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:56:48,031 basehttp "GET /admin/teachers/privacysetting/ HTTP/1.1" 200 16524
-INFO 2025-04-09 13:56:48,031 basehttp "GET /admin/teachers/privacysetting/ HTTP/1.1" 200 16524
-INFO 2025-04-09 13:56:48,065 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:48,065 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:56:48,105 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:48,105 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:56:49,162 basehttp "GET /admin/teachers/teacherprofile/ HTTP/1.1" 200 16546
-INFO 2025-04-09 13:56:49,162 basehttp "GET /admin/teachers/teacherprofile/ HTTP/1.1" 200 16546
-INFO 2025-04-09 13:56:49,195 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:49,195 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:56:49,229 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:49,229 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:56:50,595 basehttp "GET /admin/students/practicerecord/ HTTP/1.1" 200 25790
-INFO 2025-04-09 13:56:50,595 basehttp "GET /admin/students/practicerecord/ HTTP/1.1" 200 25790
-INFO 2025-04-09 13:56:50,626 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:50,626 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:56:50,675 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:50,675 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:56:51,667 basehttp "GET /admin/students/student/ HTTP/1.1" 200 17985
-INFO 2025-04-09 13:56:51,667 basehttp "GET /admin/students/student/ HTTP/1.1" 200 17985
-INFO 2025-04-09 13:56:51,701 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:51,701 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:56:51,739 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:51,739 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:56:59,195 basehttp "GET /admin/students/practicerecord/ HTTP/1.1" 200 25790
-INFO 2025-04-09 13:56:59,195 basehttp "GET /admin/students/practicerecord/ HTTP/1.1" 200 25790
-INFO 2025-04-09 13:56:59,232 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:56:59,232 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:56:59,281 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:56:59,281 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:01,538 basehttp "GET /admin/teachers/teacherprofile/ HTTP/1.1" 200 16546
-INFO 2025-04-09 13:57:01,538 basehttp "GET /admin/teachers/teacherprofile/ HTTP/1.1" 200 16546
-INFO 2025-04-09 13:57:01,573 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:01,573 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:01,608 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:01,608 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:02,290 basehttp "GET /admin/teachers/privacysetting/ HTTP/1.1" 200 16524
-INFO 2025-04-09 13:57:02,290 basehttp "GET /admin/teachers/privacysetting/ HTTP/1.1" 200 16524
-INFO 2025-04-09 13:57:02,321 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:02,321 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:02,357 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:02,357 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:02,865 basehttp "GET /admin/teachers/teacherprofile/ HTTP/1.1" 200 16546
-INFO 2025-04-09 13:57:02,865 basehttp "GET /admin/teachers/teacherprofile/ HTTP/1.1" 200 16546
-INFO 2025-04-09 13:57:02,898 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:02,898 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:02,922 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:02,922 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:05,166 basehttp "GET /admin/teachers/privacysetting/ HTTP/1.1" 200 16524
-INFO 2025-04-09 13:57:05,166 basehttp "GET /admin/teachers/privacysetting/ HTTP/1.1" 200 16524
-INFO 2025-04-09 13:57:05,204 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:05,204 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:05,234 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:05,234 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:09,838 basehttp "GET /admin/courses/sheetmusic/ HTTP/1.1" 200 17943
-INFO 2025-04-09 13:57:09,838 basehttp "GET /admin/courses/sheetmusic/ HTTP/1.1" 200 17943
-INFO 2025-04-09 13:57:09,870 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:09,870 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:09,907 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:09,907 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:11,647 basehttp "GET /admin/courses/course/ HTTP/1.1" 200 15836
-INFO 2025-04-09 13:57:11,647 basehttp "GET /admin/courses/course/ HTTP/1.1" 200 15836
-INFO 2025-04-09 13:57:11,681 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:11,681 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:11,702 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:11,702 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:13,025 basehttp "GET /admin/courses/courseschedule/ HTTP/1.1" 200 23097
-INFO 2025-04-09 13:57:13,025 basehttp "GET /admin/courses/courseschedule/ HTTP/1.1" 200 23097
-INFO 2025-04-09 13:57:13,057 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:13,057 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:13,099 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:13,099 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:14,773 basehttp "GET /admin/courses/piano/ HTTP/1.1" 200 17041
-INFO 2025-04-09 13:57:14,773 basehttp "GET /admin/courses/piano/ HTTP/1.1" 200 17041
-INFO 2025-04-09 13:57:14,805 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:14,805 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:14,847 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:14,847 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:18,299 basehttp "GET /admin/courses/pianolevel/ HTTP/1.1" 200 14944
-INFO 2025-04-09 13:57:18,299 basehttp "GET /admin/courses/pianolevel/ HTTP/1.1" 200 14944
-INFO 2025-04-09 13:57:18,332 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:18,332 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:18,358 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:18,358 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:21,068 basehttp "GET /admin/attendance/qrcode/ HTTP/1.1" 200 43303
-INFO 2025-04-09 13:57:21,068 basehttp "GET /admin/attendance/qrcode/ HTTP/1.1" 200 43303
-INFO 2025-04-09 13:57:21,103 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:21,103 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:21,184 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:21,184 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:24,623 basehttp "GET /admin/attendance/waitingqueue/ HTTP/1.1" 200 19818
-INFO 2025-04-09 13:57:24,623 basehttp "GET /admin/attendance/waitingqueue/ HTTP/1.1" 200 19818
-INFO 2025-04-09 13:57:24,660 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:24,660 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:24,700 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:24,700 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:34,175 basehttp "GET /admin/attendance/attendancesession/ HTTP/1.1" 200 27986
-INFO 2025-04-09 13:57:34,175 basehttp "GET /admin/attendance/attendancesession/ HTTP/1.1" 200 27986
-INFO 2025-04-09 13:57:34,210 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:34,210 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:34,264 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:34,264 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:35,831 basehttp "GET /admin/attendance/attendancerecord/ HTTP/1.1" 200 31508
-INFO 2025-04-09 13:57:35,831 basehttp "GET /admin/attendance/attendancerecord/ HTTP/1.1" 200 31508
-INFO 2025-04-09 13:57:35,869 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:35,869 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:35,928 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:35,928 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:37,392 basehttp "GET /admin/finance/paymentcategory/ HTTP/1.1" 200 15033
-INFO 2025-04-09 13:57:37,392 basehttp "GET /admin/finance/paymentcategory/ HTTP/1.1" 200 15033
-INFO 2025-04-09 13:57:37,430 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:37,430 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:37,460 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:37,460 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:39,253 basehttp "GET /admin/finance/payment/ HTTP/1.1" 200 18912
-INFO 2025-04-09 13:57:39,253 basehttp "GET /admin/finance/payment/ HTTP/1.1" 200 18912
-INFO 2025-04-09 13:57:39,286 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:39,286 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:39,330 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:39,330 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:41,921 basehttp "GET /admin/users/user/ HTTP/1.1" 200 17729
-INFO 2025-04-09 13:57:41,921 basehttp "GET /admin/users/user/ HTTP/1.1" 200 17729
-INFO 2025-04-09 13:57:41,953 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-INFO 2025-04-09 13:57:41,953 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 8560
-WARNING 2025-04-09 13:57:41,993 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-WARNING 2025-04-09 13:57:41,993 basehttp "GET /static/admin/js/skin/default/layer.css?v=3.0.3303 HTTP/1.1" 404 1964
-INFO 2025-04-09 13:57:54,024 basehttp "GET / HTTP/1.1" 302 0
-INFO 2025-04-09 13:57:54,024 basehttp "GET / HTTP/1.1" 302 0
-INFO 2025-04-09 13:57:54,033 basehttp "GET /login/ HTTP/1.1" 200 8953
-INFO 2025-04-09 13:57:54,033 basehttp "GET /login/ HTTP/1.1" 200 8953
-INFO 2025-04-09 13:58:00,976 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:58:00,976 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:58:01,004 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 20815
-INFO 2025-04-09 13:58:01,004 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 20815
-INFO 2025-04-09 13:58:03,121 views 当前时间: 2025-04-09 13:58:03
-INFO 2025-04-09 13:58:03,121 views 当前时间: 2025-04-09 13:58:03
-INFO 2025-04-09 13:58:03,122 views 当前教师: yaobowen
-INFO 2025-04-09 13:58:03,122 views 当前教师: yaobowen
-INFO 2025-04-09 13:58:03,123 views 系统中钢琴数量: 2
-INFO 2025-04-09 13:58:03,123 views 系统中钢琴数量: 2
-INFO 2025-04-09 13:58:03,124 views 钢琴1 - 状态: 可用，空闲
-INFO 2025-04-09 13:58:03,124 views 钢琴1 - 状态: 可用，空闲
-INFO 2025-04-09 13:58:03,125 views 钢琴2 - 状态: 可用，空闲
-INFO 2025-04-09 13:58:03,125 views 钢琴2 - 状态: 可用，空闲
-INFO 2025-04-09 13:58:03,126 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:58:03,126 views 今日开始时间: 2025-04-09 00:00:00
-INFO 2025-04-09 13:58:03,126 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:58:03,126 views 今日结束时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:58:03,130 views 等待队列学生数量: 0
-INFO 2025-04-09 13:58:03,130 views 等待队列学生数量: 0
-INFO 2025-04-09 13:58:03,131 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:58:03,131 views 今日考勤记录签到学生数量: 0
-INFO 2025-04-09 13:58:03,131 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:58:03,131 views 今日练琴记录学生数量: 0
-INFO 2025-04-09 13:58:03,131 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:58:03,131 views 今日总签到学生数量(去重): 0
-INFO 2025-04-09 13:58:03,135 views 今日总记录数: 0
-INFO 2025-04-09 13:58:03,135 views 今日总记录数: 0
-INFO 2025-04-09 13:58:03,142 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49465
-INFO 2025-04-09 13:58:03,142 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49465
-INFO 2025-04-09 13:58:03,196 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:58:03,196 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
-INFO 2025-04-09 13:58:05,359 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 61230
-INFO 2025-04-09 13:58:05,359 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 61230
-INFO 2025-04-09 13:58:11,383 views 当前系统时间: 2025-04-09 13:58:11
-INFO 2025-04-09 13:58:11,383 views 当前系统时间: 2025-04-09 13:58:11
-DEBUG 2025-04-09 13:58:11,384 views 生成考勤码 - 当前时间: 2025-04-09 13:58:11, 过期时间: 2025-04-09 23:59:59
-DEBUG 2025-04-09 13:58:11,384 views 生成考勤码 - 当前时间: 2025-04-09 13:58:11, 过期时间: 2025-04-09 23:59:59
-INFO 2025-04-09 13:58:11,418 views 创建考勤会话成功: ID=28, 开始时间=2025-04-09 05:58:11.416842+00:00, 结束时间=2025-04-09 23:59:59.383276+08:00
-INFO 2025-04-09 13:58:11,418 views 创建考勤会话成功: ID=28, 开始时间=2025-04-09 05:58:11.416842+00:00, 结束时间=2025-04-09 23:59:59.383276+08:00
-INFO 2025-04-09 13:58:11,421 basehttp "GET /teachers/attendance/qrcode/ajax/ HTTP/1.1" 200 294
-INFO 2025-04-09 13:58:11,421 basehttp "GET /teachers/attendance/qrcode/ajax/ HTTP/1.1" 200 294
-INFO 2025-04-09 13:58:11,432 basehttp "GET /media/qrcodes/DEFAULT_202504090558.png HTTP/1.1" 200 806
-INFO 2025-04-09 13:58:11,432 basehttp "GET /media/qrcodes/DEFAULT_202504090558.png HTTP/1.1" 200 806
-INFO 2025-04-09 13:58:16,099 basehttp "GET /teachers/attendance/session/28/ HTTP/1.1" 200 30206
-INFO 2025-04-09 13:58:16,099 basehttp "GET /teachers/attendance/session/28/ HTTP/1.1" 200 30206
-INFO 2025-04-09 13:58:20,344 basehttp "GET /logout/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:58:20,344 basehttp "GET /logout/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:58:20,349 basehttp "GET /login/ HTTP/1.1" 200 9326
-INFO 2025-04-09 13:58:20,349 basehttp "GET /login/ HTTP/1.1" 200 9326
-INFO 2025-04-09 13:58:27,956 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:58:27,956 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 13:58:27,976 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 13:58:27,976 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 13:58:28,011 basehttp "GET /media/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
-INFO 2025-04-09 13:58:28,011 basehttp "GET /static/css/student.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:58:28,011 basehttp "GET /media/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
-INFO 2025-04-09 13:58:28,011 basehttp "GET /static/css/student.css HTTP/1.1" 304 0
-INFO 2025-04-09 13:58:28,750 basehttp "GET /students/practice/ HTTP/1.1" 200 27625
-INFO 2025-04-09 13:58:28,750 basehttp "GET /students/practice/ HTTP/1.1" 200 27625
-INFO 2025-04-09 14:03:58,345 basehttp "GET /students/attendance/ HTTP/1.1" 200 34930
-INFO 2025-04-09 14:03:58,345 basehttp "GET /students/attendance/ HTTP/1.1" 200 34930
-WARNING 2025-04-09 14:03:58,391 log Not Found: /students/static/css/skin/default/layer.css
-WARNING 2025-04-09 14:03:58,391 log Not Found: /students/static/css/skin/default/layer.css
-WARNING 2025-04-09 14:03:58,391 basehttp "GET /students/static/css/skin/default/layer.css HTTP/1.1" 404 9218
-WARNING 2025-04-09 14:03:58,391 basehttp "GET /students/static/css/skin/default/layer.css HTTP/1.1" 404 9218
-INFO 2025-04-09 14:04:26,450 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28449
-INFO 2025-04-09 14:04:26,450 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28449
-INFO 2025-04-09 14:04:30,052 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:04:30,052 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:04:31,522 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28449
-INFO 2025-04-09 14:04:31,522 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28449
-INFO 2025-04-09 14:04:32,292 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:04:32,292 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:04:33,105 basehttp "GET /students/practice/ HTTP/1.1" 200 27625
-INFO 2025-04-09 14:04:33,105 basehttp "GET /students/practice/ HTTP/1.1" 200 27625
-INFO 2025-04-09 14:04:34,551 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28449
-INFO 2025-04-09 14:04:34,551 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28449
-INFO 2025-04-09 14:04:35,265 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:04:35,265 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:05:55,677 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
-INFO 2025-04-09 14:05:55,677 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
-INFO 2025-04-09 14:05:56,270 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:05:56,270 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:06:08,793 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
-INFO 2025-04-09 14:06:08,793 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
-INFO 2025-04-09 14:06:09,356 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:06:09,356 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:08:02,648 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:08:02,648 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:08:11,018 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:08:11,018 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:08:12,154 basehttp "GET /students/practice/ HTTP/1.1" 200 40986
-INFO 2025-04-09 14:08:12,154 basehttp "GET /students/practice/ HTTP/1.1" 200 40986
-WARNING 2025-04-09 14:08:12,197 basehttp "GET /static/js/layer.js HTTP/1.1" 404 1893
-WARNING 2025-04-09 14:08:12,197 basehttp "GET /static/js/layer.js HTTP/1.1" 404 1893
-INFO 2025-04-09 14:10:00,921 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
-INFO 2025-04-09 14:10:00,921 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
-INFO 2025-04-09 14:10:00,958 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
-INFO 2025-04-09 14:10:00,958 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
-INFO 2025-04-09 14:10:01,553 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:10:01,553 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:10:01,592 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:10:01,592 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:10:41,654 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
-INFO 2025-04-09 14:10:41,654 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
-INFO 2025-04-09 14:10:41,680 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
-INFO 2025-04-09 14:10:41,680 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
-INFO 2025-04-09 14:10:42,295 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:10:42,295 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:10:42,307 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:10:42,307 autoreload Watching for file changes with StatReloader
-INFO 2025-04-09 14:11:13,816 basehttp "GET /students/practice/ HTTP/1.1" 200 123257
-INFO 2025-04-09 14:11:13,816 basehttp "GET /students/practice/ HTTP/1.1" 200 123257
-INFO 2025-04-09 14:11:14,402 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
-INFO 2025-04-09 14:11:14,402 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
-INFO 2025-04-09 14:11:14,406 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
-INFO 2025-04-09 14:11:14,406 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
-INFO 2025-04-09 14:11:14,412 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
-INFO 2025-04-09 14:11:14,412 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
-INFO 2025-04-09 14:11:34,887 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
-INFO 2025-04-09 14:11:34,887 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
-INFO 2025-04-09 14:11:54,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
-INFO 2025-04-09 14:11:54,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
-INFO 2025-04-09 14:12:10,933 basehttp "GET /logout/ HTTP/1.1" 302 0
-INFO 2025-04-09 14:12:10,933 basehttp "GET /logout/ HTTP/1.1" 302 0
-INFO 2025-04-09 14:12:10,944 basehttp "GET /login/ HTTP/1.1" 200 9326
-INFO 2025-04-09 14:12:10,944 basehttp "GET /login/ HTTP/1.1" 200 9326
-INFO 2025-04-09 14:12:17,709 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 14:12:17,709 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 14:12:17,737 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 20850
-INFO 2025-04-09 14:12:17,737 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 20850
-INFO 2025-04-09 14:12:17,771 basehttp "GET /media/qrcodes/DEFAULT_202504090558.png HTTP/1.1" 304 0
-INFO 2025-04-09 14:12:17,771 basehttp "GET /media/qrcodes/DEFAULT_202504090558.png HTTP/1.1" 304 0
-INFO 2025-04-09 14:12:19,801 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 62629
-INFO 2025-04-09 14:12:19,801 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 62629
-INFO 2025-04-09 14:12:30,850 basehttp "GET /logout/ HTTP/1.1" 302 0
-INFO 2025-04-09 14:12:30,850 basehttp "GET /logout/ HTTP/1.1" 302 0
-INFO 2025-04-09 14:12:30,855 basehttp "GET /login/ HTTP/1.1" 200 9326
-INFO 2025-04-09 14:12:30,855 basehttp "GET /login/ HTTP/1.1" 200 9326
-INFO 2025-04-09 14:12:37,990 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 14:12:37,990 basehttp "POST /login/ HTTP/1.1" 302 0
-INFO 2025-04-09 14:12:38,010 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:12:38,010 basehttp "GET /students/profile/ HTTP/1.1" 200 17665
-INFO 2025-04-09 14:12:39,150 basehttp "GET /students/practice/ HTTP/1.1" 200 123257
-INFO 2025-04-09 14:12:39,150 basehttp "GET /students/practice/ HTTP/1.1" 200 123257
-INFO 2025-04-09 14:12:40,085 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
-INFO 2025-04-09 14:12:40,085 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
-INFO 2025-04-09 14:12:40,088 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
-INFO 2025-04-09 14:12:40,088 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
-INFO 2025-04-09 14:12:40,096 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
-INFO 2025-04-09 14:12:40,096 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
-INFO 2025-04-09 14:12:43,565 basehttp "GET /students/attendance/ HTTP/1.1" 200 34930
-INFO 2025-04-09 14:12:43,565 basehttp "GET /students/attendance/ HTTP/1.1" 200 34930
-WARNING 2025-04-09 14:12:43,599 log Not Found: /students/static/css/skin/default/layer.css
-WARNING 2025-04-09 14:12:43,599 log Not Found: /students/static/css/skin/default/layer.css
-WARNING 2025-04-09 14:12:43,600 basehttp "GET /students/static/css/skin/default/layer.css HTTP/1.1" 404 9218
-WARNING 2025-04-09 14:12:43,600 basehttp "GET /students/static/css/skin/default/layer.css HTTP/1.1" 404 9218
-WARNING 2025-04-09 14:13:07,078 log Not Found: /students/static/css/skin/default/layer.css
-WARNING 2025-04-09 14:13:07,078 log Not Found: /students/static/css/skin/default/layer.css
-WARNING 2025-04-09 14:13:07,079 basehttp "GET /students/static/css/skin/default/layer.css HTTP/1.1" 404 9218
-WARNING 2025-04-09 14:13:07,079 basehttp "GET /students/static/css/skin/default/layer.css HTTP/1.1" 404 9218
+INFO 2025-04-09 15:06:09,471 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:06:09,471 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:06:26,687 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:06:26,687 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:07:22,355 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:07:22,355 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:08:17,397 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:08:17,397 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:08:55,121 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:08:55,121 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:08:55,625 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:08:55,625 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:09:05,377 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:09:05,377 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:09:05,898 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:09:05,898 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:09:21,924 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:09:21,924 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:09:22,425 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:09:22,425 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:09:28,221 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:09:28,221 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:09:28,811 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:09:28,811 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:09:28,814 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:09:28,814 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:09:28,819 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:09:28,819 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+ERROR 2025-04-09 15:09:29,949 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+ERROR 2025-04-09 15:09:29,949 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+ERROR 2025-04-09 15:09:29,959 basehttp "GET /students/settings/ HTTP/1.1" 500 142179
+ERROR 2025-04-09 15:09:29,959 basehttp "GET /students/settings/ HTTP/1.1" 500 142179
+INFO 2025-04-09 15:10:00,215 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:10:00,215 autoreload Watching for file changes with StatReloader
+ERROR 2025-04-09 15:10:04,644 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+ERROR 2025-04-09 15:10:04,644 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+ERROR 2025-04-09 15:10:04,652 basehttp "GET /students/settings/ HTTP/1.1" 500 142179
+ERROR 2025-04-09 15:10:04,652 basehttp "GET /students/settings/ HTTP/1.1" 500 142179
+ERROR 2025-04-09 15:10:50,031 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'settings' not found. 'settings' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:10:50,031 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'settings' not found. 'settings' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:10:50,043 basehttp "GET /students/settings/ HTTP/1.1" 500 182187
+ERROR 2025-04-09 15:10:50,043 basehttp "GET /students/settings/ HTTP/1.1" 500 182187
+ERROR 2025-04-09 15:11:07,533 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'settings' not found. 'settings' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:11:07,533 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'settings' not found. 'settings' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:11:07,542 basehttp "GET /students/settings/ HTTP/1.1" 500 182050
+ERROR 2025-04-09 15:11:07,542 basehttp "GET /students/settings/ HTTP/1.1" 500 182050
+INFO 2025-04-09 15:11:25,240 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 15:11:25,240 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 15:11:25,799 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:11:25,799 autoreload Watching for file changes with StatReloader
+ERROR 2025-04-09 15:11:32,130 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:11:32,130 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:11:32,139 basehttp "GET /students/settings/ HTTP/1.1" 500 159724
+ERROR 2025-04-09 15:11:32,139 basehttp "GET /students/settings/ HTTP/1.1" 500 159724
+INFO 2025-04-09 15:11:37,580 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:11:37,580 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:11:38,204 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:11:38,204 autoreload Watching for file changes with StatReloader
+ERROR 2025-04-09 15:11:54,557 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:11:54,557 log Internal Server Error: /students/settings/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 181, in update_profile
+    return render(request, 'students/student_settings.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:11:54,569 basehttp "GET /students/settings/ HTTP/1.1" 500 159724
+ERROR 2025-04-09 15:11:54,569 basehttp "GET /students/settings/ HTTP/1.1" 500 159724
+ERROR 2025-04-09 15:11:57,343 log Internal Server Error: /students/sheet-music/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 1908, in sheet_music
+    return render(request, 'students/sheet_music.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:11:57,343 log Internal Server Error: /students/sheet-music/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 1908, in sheet_music
+    return render(request, 'students/sheet_music.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:11:57,349 basehttp "GET /students/sheet-music/ HTTP/1.1" 500 136698
+ERROR 2025-04-09 15:11:57,349 basehttp "GET /students/sheet-music/ HTTP/1.1" 500 136698
+ERROR 2025-04-09 15:12:26,342 log Internal Server Error: /students/sheet-music/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 1908, in sheet_music
+    return render(request, 'students/sheet_music.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:12:26,342 log Internal Server Error: /students/sheet-music/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 1908, in sheet_music
+    return render(request, 'students/sheet_music.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:12:26,349 basehttp "GET /students/sheet-music/ HTTP/1.1" 500 136698
+ERROR 2025-04-09 15:12:26,349 basehttp "GET /students/sheet-music/ HTTP/1.1" 500 136698
+ERROR 2025-04-09 15:12:29,524 log Internal Server Error: /students/attendance/
+Traceback (most recent call last):
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 1719, in attendance
+    return render(request, 'students/student_attendance.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 1740, in attendance
+    return render(request, 'students/student_attendance.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:12:29,524 log Internal Server Error: /students/attendance/
+Traceback (most recent call last):
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 1719, in attendance
+    return render(request, 'students/student_attendance.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 1740, in attendance
+    return render(request, 'students/student_attendance.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:12:29,535 basehttp "GET /students/attendance/ HTTP/1.1" 500 240259
+ERROR 2025-04-09 15:12:29,535 basehttp "GET /students/attendance/ HTTP/1.1" 500 240259
+ERROR 2025-04-09 15:12:33,840 log Internal Server Error: /students/profile/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 140, in profile
+    return render(request, 'students/student_profile.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:12:33,840 log Internal Server Error: /students/profile/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 140, in profile
+    return render(request, 'students/student_profile.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:12:33,847 basehttp "GET /students/profile/ HTTP/1.1" 500 159390
+ERROR 2025-04-09 15:12:33,847 basehttp "GET /students/profile/ HTTP/1.1" 500 159390
+INFO 2025-04-09 15:12:39,513 basehttp "GET /students/settings/ HTTP/1.1" 200 14030
+INFO 2025-04-09 15:12:39,513 basehttp "GET /students/settings/ HTTP/1.1" 200 14030
+ERROR 2025-04-09 15:12:48,086 log Internal Server Error: /students/profile/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 140, in profile
+    return render(request, 'students/student_profile.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:12:48,086 log Internal Server Error: /students/profile/
+Traceback (most recent call last):
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\VSCODEPROJECTS\mym\mymanage\students\views.py", line 140, in profile
+    return render(request, 'students/student_profile.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\VSCODEPROJECTS\mym\.venv\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'update_profile' not found. 'update_profile' is not a valid view function or pattern name.
+ERROR 2025-04-09 15:12:48,092 basehttp "GET /students/profile/ HTTP/1.1" 500 159010
+ERROR 2025-04-09 15:12:48,092 basehttp "GET /students/profile/ HTTP/1.1" 500 159010
+INFO 2025-04-09 15:12:58,697 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:12:58,697 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:12:59,373 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:12:59,373 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:13:06,721 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:13:06,721 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:13:07,339 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:13:07,339 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:13:11,410 basehttp "GET /students/profile/ HTTP/1.1" 200 17855
+INFO 2025-04-09 15:13:11,410 basehttp "GET /students/profile/ HTTP/1.1" 200 17855
+INFO 2025-04-09 15:13:12,325 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:13:12,325 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:13:12,824 basehttp "GET /students/attendance/ HTTP/1.1" 200 34996
+INFO 2025-04-09 15:13:12,824 basehttp "GET /students/attendance/ HTTP/1.1" 200 34996
+INFO 2025-04-09 15:13:12,862 basehttp "GET /static/js/libs/chart.min.js HTTP/1.1" 304 0
+INFO 2025-04-09 15:13:12,862 basehttp "GET /static/js/libs/chart.min.js HTTP/1.1" 304 0
+INFO 2025-04-09 15:13:13,465 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:13:13,465 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:13:14,089 basehttp "GET /students/settings/ HTTP/1.1" 200 18045
+INFO 2025-04-09 15:13:14,089 basehttp "GET /students/settings/ HTTP/1.1" 200 18045
+INFO 2025-04-09 15:13:24,832 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:13:24,832 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:13:26,363 basehttp "GET /students/attendance/ HTTP/1.1" 200 34996
+INFO 2025-04-09 15:13:26,363 basehttp "GET /students/attendance/ HTTP/1.1" 200 34996
+INFO 2025-04-09 15:13:27,879 basehttp "GET /students/settings/ HTTP/1.1" 200 18045
+INFO 2025-04-09 15:13:27,879 basehttp "GET /students/settings/ HTTP/1.1" 200 18045
+INFO 2025-04-09 15:13:28,984 basehttp "GET /students/profile/ HTTP/1.1" 200 17855
+INFO 2025-04-09 15:13:28,984 basehttp "GET /students/profile/ HTTP/1.1" 200 17855
+INFO 2025-04-09 15:13:29,631 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:13:29,631 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:13:29,934 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:13:29,934 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:13:29,940 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:13:29,940 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:13:29,945 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:13:29,945 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:13:30,193 basehttp "GET /students/attendance/ HTTP/1.1" 200 34996
+INFO 2025-04-09 15:13:30,193 basehttp "GET /students/attendance/ HTTP/1.1" 200 34996
+INFO 2025-04-09 15:13:30,790 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:13:30,790 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:13:32,393 basehttp "GET /students/settings/ HTTP/1.1" 200 18045
+INFO 2025-04-09 15:13:32,393 basehttp "GET /students/settings/ HTTP/1.1" 200 18045
+INFO 2025-04-09 15:16:44,268 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\forms.py changed, reloading.
+INFO 2025-04-09 15:16:44,268 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\forms.py changed, reloading.
+INFO 2025-04-09 15:16:44,835 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:16:44,835 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:17:14,246 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:17:14,246 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:17:14,850 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:17:14,850 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:17:40,554 basehttp "GET /students/settings/ HTTP/1.1" 200 20481
+INFO 2025-04-09 15:17:40,554 basehttp "GET /students/settings/ HTTP/1.1" 200 20481
+INFO 2025-04-09 15:17:59,101 basehttp "POST /students/settings/ HTTP/1.1" 302 0
+INFO 2025-04-09 15:17:59,101 basehttp "POST /students/settings/ HTTP/1.1" 302 0
+INFO 2025-04-09 15:17:59,113 basehttp "GET /students/settings/ HTTP/1.1" 200 20736
+INFO 2025-04-09 15:17:59,113 basehttp "GET /students/settings/ HTTP/1.1" 200 20736
+INFO 2025-04-09 15:18:07,208 basehttp "GET /students/profile/ HTTP/1.1" 200 17855
+INFO 2025-04-09 15:18:07,208 basehttp "GET /students/profile/ HTTP/1.1" 200 17855
+INFO 2025-04-09 15:18:08,607 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:18:08,607 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:18:09,076 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:18:09,076 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:18:09,080 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:18:09,080 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:18:09,086 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:18:09,086 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:18:09,288 basehttp "GET /students/attendance/ HTTP/1.1" 200 34996
+INFO 2025-04-09 15:18:09,288 basehttp "GET /students/attendance/ HTTP/1.1" 200 34996
+INFO 2025-04-09 15:18:09,328 basehttp "GET /static/js/libs/chart.min.js HTTP/1.1" 304 0
+INFO 2025-04-09 15:18:09,328 basehttp "GET /static/js/libs/chart.min.js HTTP/1.1" 304 0
+INFO 2025-04-09 15:18:10,256 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:18:10,256 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:18:12,232 basehttp "GET /students/settings/ HTTP/1.1" 200 20481
+INFO 2025-04-09 15:18:12,232 basehttp "GET /students/settings/ HTTP/1.1" 200 20481
+INFO 2025-04-09 15:18:17,286 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:18:17,286 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28646
+INFO 2025-04-09 15:18:17,901 basehttp "GET /students/profile/ HTTP/1.1" 200 17855
+INFO 2025-04-09 15:18:17,901 basehttp "GET /students/profile/ HTTP/1.1" 200 17855
+INFO 2025-04-09 15:18:25,109 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:18:25,109 basehttp "GET /students/practice/ HTTP/1.1" 200 123454
+INFO 2025-04-09 15:18:25,187 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:18:25,187 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:18:25,190 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:18:25,190 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:18:25,195 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 15:18:25,195 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+DEBUG 2025-04-09 15:18:37,256 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 15:18:37,256 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 15:18:37,256 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['KgG2FV4bpfIuZyvEvRnLvsYeBSfONWD2tCRr4KhwyDrjpHslSvLZP9hXXxAi0bDn'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 15:18:37,256 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['KgG2FV4bpfIuZyvEvRnLvsYeBSfONWD2tCRr4KhwyDrjpHslSvLZP9hXXxAi0bDn'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 15:18:37,257 views 处理学生ID: 1, 姓名: 张三
+DEBUG 2025-04-09 15:18:37,257 views 处理学生ID: 1, 姓名: 张三
+DEBUG 2025-04-09 15:18:37,258 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 15:18:37,258 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 15:18:37,258 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 15:18:37,258 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 15:18:37,261 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 15:18:37,261 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 15:18:37,261 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 15:18:37,261 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 15:18:37,265 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 15:18:37,265 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 15:18:37,265 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 15:18:37,265 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 15:18:37,265 views 处理学生ID: 1, 姓名: 张三
+DEBUG 2025-04-09 15:18:37,265 views 处理学生ID: 1, 姓名: 张三
+DEBUG 2025-04-09 15:18:37,265 views 使用会话ID处理: 28
+DEBUG 2025-04-09 15:18:37,265 views 使用会话ID处理: 28
+INFO 2025-04-09 15:18:37,275 views 有2台可用钢琴
+INFO 2025-04-09 15:18:37,275 views 有2台可用钢琴
+INFO 2025-04-09 15:18:37,278 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 263
+INFO 2025-04-09 15:18:37,278 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 263
+INFO 2025-04-09 15:18:40,079 views 开始练琴请求 - 学生: 张三, 会话ID: 28, 预留ID: None
+INFO 2025-04-09 15:18:40,079 views 开始练琴请求 - 学生: 张三, 会话ID: 28, 预留ID: None
+INFO 2025-04-09 15:18:40,084 views 无预留情况下为学生分配钢琴：1
+INFO 2025-04-09 15:18:40,084 views 无预留情况下为学生分配钢琴：1
+INFO 2025-04-09 15:18:40,087 views 创建新的练琴记录: ID=34, 日期=2025-04-09, 钢琴=1
+INFO 2025-04-09 15:18:40,087 views 创建新的练琴记录: ID=34, 日期=2025-04-09, 钢琴=1
+INFO 2025-04-09 15:18:40,090 views 创建新的考勤记录，学生=张三, 钢琴=1
+INFO 2025-04-09 15:18:40,090 views 创建新的考勤记录，学生=张三, 钢琴=1
+INFO 2025-04-09 15:18:40,096 views 创建兼容性旧版考勤记录，日期=2025-04-09
+INFO 2025-04-09 15:18:40,096 views 创建兼容性旧版考勤记录，日期=2025-04-09
+INFO 2025-04-09 15:18:40,097 basehttp "POST /students/practice/start/ HTTP/1.1" 200 183
+INFO 2025-04-09 15:18:40,097 basehttp "POST /students/practice/start/ HTTP/1.1" 200 183
+INFO 2025-04-09 15:18:45,196 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:18:45,196 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 15:18:52,301 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:18:52,301 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 15:18:52,873 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 15:18:52,873 autoreload Watching for file changes with StatReloader
