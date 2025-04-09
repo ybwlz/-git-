@@ -606,11 +606,39 @@ def scan_qrcode(request):
             else:
                 # 没有空闲钢琴，返回信息让前端提示加入等待队列
                 logger.info("没有可用钢琴，返回等待队列信息")
+                
+                # 计算预估等待时间
+                active_practices = PracticeRecord.objects.filter(
+                    date=timezone.now().date(),
+                    status='active'
+                ).order_by('end_time')
+                
+                # 计算等待队列长度
+                queue_length = WaitingQueue.objects.filter(
+                    session=session,
+                    is_active=True
+                ).count()
+                
+                # 计算预计等待时间
+                if active_practices.exists():
+                    # 如果有正在练琴的记录，基于最早结束时间计算
+                    earliest_available_time = active_practices.first().end_time
+                    wait_minutes = max(0, int((earliest_available_time - timezone.now()).total_seconds() / 60))
+                    # 加上队列位置的影响（每人在队列中增加5分钟）
+                    estimated_wait_time = wait_minutes + (queue_length * 5)
+                else:
+                    # 如果没有正在练琴的记录，但所有钢琴都被预留，给一个基础等待时间
+                    estimated_wait_time = 5 + (queue_length * 5)
+                
+                logger.info(f"计算的等待时间: {estimated_wait_time}分钟, 队列长度: {queue_length}")
+                
                 return JsonResponse({
                     'success': True,
                     'no_piano': True,
                     'message': '当前没有可用的钢琴，请加入等待队列',
-                    'session_id': session.id
+                    'session_id': session.id,
+                    'wait_minutes': estimated_wait_time,
+                    'queue_length': queue_length + 1  # 加1表示包括当前用户
                 })
                 
         except Exception as e:
@@ -837,11 +865,36 @@ def start_practice(request):
                     
                     # 无钢琴可用，建议加入等待队列
                     if not waiting_record:
+                        # 计算预估等待时间
+                        active_practices = PracticeRecord.objects.filter(
+                            date=timezone.now().date(),
+                            status='active'
+                        ).order_by('end_time')
+                        
+                        # 计算等待队列长度
+                        queue_length = WaitingQueue.objects.filter(
+                            session=session,
+                            is_active=True
+                        ).count()
+                        
+                        # 计算预计等待时间
+                        if active_practices.exists():
+                            # 如果有正在练琴的记录，基于最早结束时间计算
+                            earliest_available_time = active_practices.first().end_time
+                            wait_minutes = max(0, int((earliest_available_time - timezone.now()).total_seconds() / 60))
+                            # 加上队列位置的影响（每人在队列中增加5分钟）
+                            estimated_wait_time = wait_minutes + (queue_length * 5)
+                        else:
+                            # 如果没有正在练琴的记录，使用基础等待时间
+                            estimated_wait_time = 5 + (queue_length * 5)
+                        
                         return JsonResponse({
                             'success': False,
                             'no_piano': True,
                             'message': '当前没有可用的钢琴，请加入等待队列',
-                            'session_id': session_id
+                            'session_id': session_id,
+                            'wait_minutes': estimated_wait_time,
+                            'queue_length': queue_length + 1  # 加1表示包括当前用户
                         })
                     else:
                         # 已在等待队列，返回队列信息
@@ -1047,7 +1100,7 @@ def check_waiting_status(request):
                     queue_position = WaitingQueue.objects.filter(
                         session=waiting.session,
                         is_active=True,
-                        join_time__lte=waiting.join_time
+                        join_time__lt=waiting.join_time
                     ).count()
                     remaining_minutes = wait_minutes + ((queue_position - 1) * 5)
                 else:
@@ -1168,16 +1221,31 @@ def join_waiting_queue(request):
             
             # 如果已在队列中，直接返回信息
             if existing_queue:
-                # 计算剩余等待时间
-                total_wait_time = existing_queue.estimated_wait_time
-                elapsed_minutes = int((timezone.now() - existing_queue.join_time).total_seconds() / 60)
-                remaining_minutes = max(0, total_wait_time - elapsed_minutes)
+                # 重新计算等待时间，确保始终有准确的等待时间
+                active_practices = PracticeRecord.objects.filter(
+                    date=timezone.now().date(),
+                    status='active'
+                ).order_by('end_time')
                 
                 queue_position = WaitingQueue.objects.filter(
                     session=session,
                     is_active=True,
                     join_time__lt=existing_queue.join_time
                 ).count() + 1
+                
+                # 计算更准确的等待时间
+                if active_practices.exists():
+                    earliest_available_time = active_practices.first().end_time
+                    wait_minutes = max(0, int((earliest_available_time - timezone.now()).total_seconds() / 60))
+                    remaining_minutes = wait_minutes + ((queue_position - 1) * 5)
+                else:
+                    remaining_minutes = 5 + ((queue_position - 1) * 5)
+                
+                # 更新等待记录
+                existing_queue.estimated_wait_time = remaining_minutes
+                existing_queue.save()
+                
+                logger.info(f"更新已存在等待记录的等待时间: ID={existing_queue.id}, 预计等待={remaining_minutes}分钟, 队列位置={queue_position}")
                 
                 return JsonResponse({
                     'success': True,
@@ -1212,32 +1280,29 @@ def join_waiting_queue(request):
                 })
             
             # 计算预计等待时间
-            # 1. 获取所有正在练琴的记录
             active_practices = PracticeRecord.objects.filter(
                 date=timezone.now().date(),
                 status='active'
             ).order_by('end_time')
             
-            # 2. 计算最早可用的钢琴时间
-            earliest_available_time = None
-            if active_practices.exists():
-                earliest_available_time = active_practices.first().end_time
-            
-            # 3. 计算等待队列长度
+            # 计算等待队列长度
             queue_length = WaitingQueue.objects.filter(
                 session=session,
                 is_active=True
             ).count()
             
-            # 4. 计算预计等待时间
-            if earliest_available_time:
+            # 计算预计等待时间
+            if active_practices.exists():
                 # 如果有正在练琴的记录，基于最早结束时间计算
+                earliest_available_time = active_practices.first().end_time
                 wait_minutes = max(0, int((earliest_available_time - timezone.now()).total_seconds() / 60))
                 # 加上队列位置的影响（每人在队列中增加5分钟）
                 estimated_wait_time = wait_minutes + (queue_length * 5)
             else:
-                # 如果没有正在练琴的记录，使用基础等待时间
+                # 如果没有正在练琴的记录，但所有钢琴都被预留，给一个基础等待时间
                 estimated_wait_time = 5 + (queue_length * 5)
+            
+            logger.info(f"计算的新等待时间: {estimated_wait_time}分钟, 队列长度: {queue_length}, 学生: {student.name}")
             
             # 创建等待队列记录
             waiting_record = WaitingQueue.objects.create(
@@ -1399,7 +1464,7 @@ def check_practice_status(request):
             })
         
         try:
-            from mymanage.attendance.models import PracticeRecord
+            from mymanage.students.models import PracticeRecord
             from mymanage.courses.models import Piano
             
             practice = get_object_or_404(PracticeRecord, id=practice_id)
@@ -1935,6 +2000,7 @@ def check_active_practice(request):
     
     try:
         # 查找是否有进行中的练琴记录
+        from mymanage.students.models import PracticeRecord
         from mymanage.courses.models import Piano
         active_practice = PracticeRecord.objects.filter(
             student=student,

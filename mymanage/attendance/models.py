@@ -327,6 +327,12 @@ class WaitingQueue(models.Model):
     join_time = models.DateTimeField('加入时间', auto_now_add=True)
     estimated_wait_time = models.IntegerField('预计等待时间(分钟)', default=0)
     is_active = models.BooleanField('是否在队列中', default=True)
+    practice_record = models.ForeignKey('students.PracticeRecord', 
+                                      on_delete=models.SET_NULL, 
+                                      null=True, 
+                                      blank=True, 
+                                      related_name='waiting_queue_record',
+                                      verbose_name='关联练琴记录')
     
     class Meta:
         verbose_name = '等待队列'
