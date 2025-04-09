@@ -1646,21 +1646,24 @@ def attendance(request):
         # 计算到今天为止的天数
         days_so_far = today.day
         
-        # 获取最近7天的不同练琴日期数量
-        week_start = today - timezone.timedelta(days=6)  # 一周前
+        # 获取本周的开始和结束日期
+        week_start = today - timezone.timedelta(days=today.weekday())  # 获取本周一
+        week_end = week_start + timezone.timedelta(days=6)  # 获取本周日
+        
+        # 获取本周的不同练琴日期数量
         distinct_practice_days = PracticeRecord.objects.filter(
             student=student,
             date__gte=week_start,
-            date__lte=today
+            date__lte=week_end
         ).filter(
             Q(status='completed') | Q(status='active')
         ).values('date').distinct().count()
         
-        # 计算出勤率 - 最近7天的不同练琴日期数 / 7天
+        # 计算出勤率 - 本周的不同练琴日期数 / 7天
         attendance_rate = (distinct_practice_days / 7 * 100)
         
         # 为了调试输出相关信息
-        print(f"计算周期: {week_start.strftime('%Y-%m-%d')} 至 {today.strftime('%Y-%m-%d')}")
+        print(f"计算周期: {week_start.strftime('%Y-%m-%d')} (周一) 至 {week_end.strftime('%Y-%m-%d')} (周日)")
         print(f"本周不同练琴日期数: {distinct_practice_days}天")
         print(f"本周出勤率: {attendance_rate:.2f}%")
         
