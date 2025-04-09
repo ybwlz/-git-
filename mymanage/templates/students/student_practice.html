@@ -475,6 +475,35 @@
             font-weight: 600;
             font-size: 18px;
         }
+
+        .waiting-status {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .waiting-icon {
+            color: #007bff;
+        }
+
+        .waiting-info h4 {
+            color: #343a40;
+            font-size: 1.2rem;
+        }
+
+        .waiting-info p {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+
+        #cancelWaitingBtn {
+            transition: all 0.3s ease;
+        }
+
+        #cancelWaitingBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(220, 53, 69, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -601,6 +630,25 @@
                         {% else %}
                             请扫描二维码开始练琴
                         {% endif %}
+                    </div>
+                </div>
+                
+                <!-- 添加等待状态卡片 -->
+                <div class="practice-card" id="waitingStatusCard" style="display: none;">
+                    <div class="practice-header">
+                        <h2><i class="fas fa-clock me-2"></i>等待状态</h2>
+                    </div>
+                    <div class="waiting-status text-center py-4">
+                        <div class="waiting-icon mb-3">
+                            <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+                        </div>
+                        <div class="waiting-info mb-3">
+                            <h4 class="waiting-position mb-2">排队位置：<span id="queuePosition">--</span></h4>
+                            <p class="waiting-time mb-0">预计等待时间：<span id="waitTime">--</span>分钟</p>
+                        </div>
+                        <button class="btn btn-danger" id="cancelWaitingBtn" onclick="cancelWaiting()">
+                            <i class="fas fa-times me-2"></i>取消等待
+                        </button>
                     </div>
                 </div>
                 
@@ -2671,7 +2719,133 @@
             });
         }
 
-        
+        // 添加等待队列相关函数
+        let waitingCheckInterval;
+        let currentWaitingId;
+
+        function showWaitingStatus(waitingId, position, waitMinutes) {
+            currentWaitingId = waitingId;
+            const waitingCard = document.getElementById('waitingStatusCard');
+            const queuePosition = document.getElementById('queuePosition');
+            const waitTime = document.getElementById('waitTime');
+            
+            // 更新等待信息
+            queuePosition.textContent = position;
+            waitTime.textContent = waitMinutes;
+            
+            // 显示等待状态卡片
+            waitingCard.style.display = 'block';
+            
+            // 开始定期检查等待状态
+            if (waitingCheckInterval) {
+                clearInterval(waitingCheckInterval);
+            }
+            waitingCheckInterval = setInterval(checkWaitingStatus, 10000); // 每10秒检查一次
+        }
+
+        function hideWaitingStatus() {
+            const waitingCard = document.getElementById('waitingStatusCard');
+            waitingCard.style.display = 'none';
+            if (waitingCheckInterval) {
+                clearInterval(waitingCheckInterval);
+                waitingCheckInterval = null;
+            }
+            currentWaitingId = null;
+        }
+
+        function checkWaitingStatus() {
+            if (!currentWaitingId) return;
+            
+            fetch(`/students/check_waiting_status/?waiting_id=${currentWaitingId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.ready) {
+                            // 如果可以开始练琴了
+                            hideWaitingStatus();
+                            showMessage('success', data.message);
+                            if (data.assignment_id) {
+                                location.reload(); // 刷新页面以显示新状态
+                            }
+                        } else if (data.waiting) {
+                            // 更新等待信息
+                            document.getElementById('queuePosition').textContent = data.queue_position;
+                            document.getElementById('waitTime').textContent = data.wait_minutes;
+                        } else {
+                            // 等待已结束但未分配钢琴
+                            hideWaitingStatus();
+                            showMessage('info', data.message);
+                        }
+                    } else {
+                        showMessage('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('检查等待状态时出错:', error);
+                    showMessage('error', '检查等待状态时出错');
+                });
+        }
+
+        function cancelWaiting() {
+            if (!currentWaitingId) return;
+            
+            if (!confirm('确定要取消等待吗？')) return;
+            
+            fetch('/students/cancel_waiting/', {
+                method: 'POST',
+                body: JSON.stringify({ waiting_id: currentWaitingId }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    hideWaitingStatus();
+                    showMessage('success', data.message);
+                    location.reload(); // 刷新页面以更新状态
+                } else {
+                    showMessage('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('取消等待时出错:', error);
+                showMessage('error', '取消等待时出错');
+            });
+        }
+
+        // 修改加入等待队列的处理函数
+        function handleJoinWaitingQueue(sessionId) {
+            fetch('/students/join_waiting_queue/', {
+                method: 'POST',
+                body: JSON.stringify({ session_id: sessionId }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.waiting_id) {
+                        // 显示等待状态
+                        showWaitingStatus(data.waiting_id, data.queue_position, data.wait_minutes);
+                        showMessage('success', data.message);
+                    } else if (data.available_pianos) {
+                        // 有钢琴可用
+                        showMessage('success', data.message);
+                        location.reload(); // 刷新页面以显示新状态
+                    }
+                } else {
+                    showMessage('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('加入等待队列时出错:', error);
+                showMessage('error', '加入等待队列时出错');
+            });
+        }
     </script>
 
     <!-- 练琴状态显示 -->

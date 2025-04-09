@@ -7948,3 +7948,613 @@ INFO 2025-04-09 23:00:25,024 basehttp "GET /students/check-active-practice/ HTTP
 INFO 2025-04-09 23:00:25,024 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
 INFO 2025-04-09 23:00:25,031 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
 INFO 2025-04-09 23:00:25,031 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:00:45,882 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:00:45,882 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:01:05,876 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:01:05,876 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:01:25,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:01:25,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:02:17,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:02:17,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:03:17,882 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:03:17,882 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:04:17,879 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:04:17,879 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:05:17,885 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:05:17,885 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:05:29,760 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:05:29,760 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:05:30,316 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:05:30,316 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:06:06,370 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:06:06,370 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:06:25,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:06:25,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:06:45,876 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:06:45,876 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:07:05,887 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:07:05,887 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:08:17,878 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:08:17,878 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:09:17,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:09:17,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:10:05,365 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:10:05,365 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:10:25,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:10:25,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:10:45,878 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:10:45,878 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:11:05,878 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:11:05,878 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:11:25,880 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:11:25,880 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:11:45,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:11:45,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:12:05,027 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:12:05,027 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:12:25,028 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:12:25,028 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:12:29,673 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:12:29,673 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:12:30,322 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:12:30,322 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:12:43,938 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:12:43,938 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:12:44,515 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:12:44,515 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:12:56,335 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:12:56,335 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:12:56,836 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:12:56,836 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:14:54,424 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:14:54,424 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:14:54,942 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:14:54,942 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:19:14,004 basehttp "GET /students/practice/ HTTP/1.1" 200 128617
+INFO 2025-04-09 23:19:14,004 basehttp "GET /students/practice/ HTTP/1.1" 200 128617
+INFO 2025-04-09 23:19:14,572 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:19:14,572 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:19:14,577 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:19:14,577 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:19:14,585 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:19:14,585 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:19:34,579 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:19:34,579 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:19:54,882 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:19:54,882 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:20:14,887 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:20:14,887 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:20:34,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:20:34,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:20:54,880 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:20:54,880 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:21:14,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:21:14,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:21:34,877 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:21:34,877 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:22:17,874 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:22:17,874 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:23:17,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:23:17,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:24:17,887 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:24:17,887 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:24:34,590 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:24:34,590 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:24:45,516 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:24:45,516 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:24:46,257 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:24:46,257 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:24:54,578 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:24:54,578 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:25:14,573 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:25:14,573 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:25:30,338 basehttp "GET /students/practice/ HTTP/1.1" 200 123424
+INFO 2025-04-09 23:25:30,338 basehttp "GET /students/practice/ HTTP/1.1" 200 123424
+INFO 2025-04-09 23:25:31,266 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:25:31,266 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:25:31,268 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:25:31,268 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:25:31,274 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:25:31,274 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+DEBUG 2025-04-09 23:25:36,253 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:25:36,253 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:25:36,253 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['kPKW5sIZs5fQFilOID5rCHI3Mr9bsDxkxKoTUgPb8gaiu3fs9UUokkzy3AL6HaRx'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:25:36,253 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['kPKW5sIZs5fQFilOID5rCHI3Mr9bsDxkxKoTUgPb8gaiu3fs9UUokkzy3AL6HaRx'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:25:36,255 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:25:36,255 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:25:36,255 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:25:36,255 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:25:36,256 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:25:36,256 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:25:36,259 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:25:36,259 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:25:36,259 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:25:36,259 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:25:36,261 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:25:36,261 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:25:36,262 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:25:36,262 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:25:36,262 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:25:36,262 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:25:36,263 views 使用会话ID处理: 28
+DEBUG 2025-04-09 23:25:36,263 views 使用会话ID处理: 28
+INFO 2025-04-09 23:25:36,267 views 学生在等待队列中: ID=6, 排队位置=1, 剩余时间=67分钟
+INFO 2025-04-09 23:25:36,267 views 学生在等待队列中: ID=6, 排队位置=1, 剩余时间=67分钟
+INFO 2025-04-09 23:25:36,267 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 229
+INFO 2025-04-09 23:25:36,267 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 229
+INFO 2025-04-09 23:25:36,289 basehttp "GET /students/practice/check-waiting-status/?waiting_id=6 HTTP/1.1" 200 278
+INFO 2025-04-09 23:25:36,289 basehttp "GET /students/practice/check-waiting-status/?waiting_id=6 HTTP/1.1" 200 278
+INFO 2025-04-09 23:25:46,282 basehttp "GET /students/practice/check-waiting-status/?waiting_id=6 HTTP/1.1" 200 278
+INFO 2025-04-09 23:25:46,282 basehttp "GET /students/practice/check-waiting-status/?waiting_id=6 HTTP/1.1" 200 278
+INFO 2025-04-09 23:25:51,266 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:25:51,266 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:25:56,881 basehttp "GET /students/practice/check-waiting-status/?waiting_id=6 HTTP/1.1" 200 278
+INFO 2025-04-09 23:25:56,881 basehttp "GET /students/practice/check-waiting-status/?waiting_id=6 HTTP/1.1" 200 278
+INFO 2025-04-09 23:25:59,690 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:25:59,690 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:26:00,272 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:26:00,272 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:26:56,691 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:26:56,691 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\urls.py changed, reloading.
+INFO 2025-04-09 23:26:57,232 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:26:57,232 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:26:57,670 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:26:57,670 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:26:57,687 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:26:57,687 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:27:14,671 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:27:14,671 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:27:14,706 basehttp "GET /students/profile/ HTTP/1.1" 200 17854
+INFO 2025-04-09 23:27:14,706 basehttp "GET /students/profile/ HTTP/1.1" 200 17854
+INFO 2025-04-09 23:27:15,692 basehttp "GET /students/practice/ HTTP/1.1" 200 123855
+INFO 2025-04-09 23:27:15,692 basehttp "GET /students/practice/ HTTP/1.1" 200 123855
+INFO 2025-04-09 23:27:16,238 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:27:16,238 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:27:16,240 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:27:16,240 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:27:16,251 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:27:16,251 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:27:18,285 basehttp "GET /students/practice/piano/?practice_id=38 HTTP/1.1" 200 38353
+INFO 2025-04-09 23:27:18,285 basehttp "GET /students/practice/piano/?practice_id=38 HTTP/1.1" 200 38353
+INFO 2025-04-09 23:27:20,359 basehttp "GET /students/practice/ HTTP/1.1" 200 123855
+INFO 2025-04-09 23:27:20,359 basehttp "GET /students/practice/ HTTP/1.1" 200 123855
+INFO 2025-04-09 23:27:20,465 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:27:20,465 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:27:20,467 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:27:20,467 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:27:20,476 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:27:20,476 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:27:21,838 basehttp "GET /students/settings/ HTTP/1.1" 200 20481
+INFO 2025-04-09 23:27:21,838 basehttp "GET /students/settings/ HTTP/1.1" 200 20481
+INFO 2025-04-09 23:27:22,450 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:27:22,450 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:27:22,455 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:27:22,455 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:27:29,734 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:27:29,734 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:27:29,752 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:27:29,752 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:27:29,804 basehttp "GET /static/img/anime_boy.jpg?v=1744212449 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:27:29,804 basehttp "GET /static/img/anime_boy.jpg?v=1744212449 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:27:30,839 basehttp "GET /students/practice/ HTTP/1.1" 200 123424
+INFO 2025-04-09 23:27:30,839 basehttp "GET /students/practice/ HTTP/1.1" 200 123424
+INFO 2025-04-09 23:27:30,927 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:27:30,927 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:27:30,931 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:27:30,931 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:27:30,936 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:27:30,936 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:27:50,915 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:27:50,915 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:28:11,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:28:11,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:28:31,884 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:28:31,884 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:28:51,876 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:28:51,876 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:29:17,884 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:29:17,884 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:29:30,921 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:29:30,921 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:29:50,908 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:29:50,908 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:30:11,877 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:30:11,877 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:30:31,874 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:30:31,874 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:30:51,875 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:30:51,875 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:30:58,445 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:30:58,445 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:30:59,097 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:30:59,097 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:31:11,876 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:31:11,876 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:31:40,431 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:31:40,431 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:31:50,908 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:31:50,908 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:10,908 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:10,908 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:31,185 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:31,185 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:32,367 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:32:32,367 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:32:32,829 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:32,829 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:32,831 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:32,831 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:32,838 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:32,838 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:33,333 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:32:33,333 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:32:33,368 basehttp "GET /static/img/anime_boy.jpg?v=1744212753 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:32:33,368 basehttp "GET /static/img/anime_boy.jpg?v=1744212753 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:32:34,028 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:32:34,028 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:32:34,111 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:34,111 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:34,114 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:34,114 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:34,121 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:34,121 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:34,631 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:32:34,631 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:32:34,676 basehttp "GET /static/js/libs/chart.min.js HTTP/1.1" 304 0
+INFO 2025-04-09 23:32:34,676 basehttp "GET /static/js/libs/chart.min.js HTTP/1.1" 304 0
+INFO 2025-04-09 23:32:35,668 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:32:35,668 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:32:35,750 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:35,750 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:35,752 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:35,752 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:35,760 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:35,760 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:32:55,879 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:32:55,879 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:33:12,851 basehttp "GET /students/settings/ HTTP/1.1" 200 20330
+INFO 2025-04-09 23:33:12,851 basehttp "GET /students/settings/ HTTP/1.1" 200 20330
+INFO 2025-04-09 23:33:14,557 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28616
+INFO 2025-04-09 23:33:14,557 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28616
+INFO 2025-04-09 23:33:15,630 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:33:15,630 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:33:16,266 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:33:16,266 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:33:16,347 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:33:16,347 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:33:16,349 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:33:16,349 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:33:16,356 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:33:16,356 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:33:17,147 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:33:17,147 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:33:17,185 basehttp "GET /static/img/anime_boy.jpg?v=1744212797 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:33:17,185 basehttp "GET /static/img/anime_boy.jpg?v=1744212797 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:33:17,593 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:33:17,593 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:34:23,582 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:34:23,582 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:34:24,303 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:34:24,303 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:34:43,763 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:34:43,763 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:35:21,525 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:35:21,525 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:35:22,216 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:35:22,216 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:36:08,592 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:36:08,592 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:36:09,376 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:36:09,376 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:36:18,811 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:36:18,811 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:36:19,575 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:36:19,575 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:36:32,307 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:36:32,307 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:36:36,275 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:36:36,275 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:36:44,590 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:36:44,590 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:36:44,606 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:36:44,606 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:36:53,114 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:36:53,114 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:36:53,134 basehttp "GET /students/profile/ HTTP/1.1" 200 17854
+INFO 2025-04-09 23:36:53,134 basehttp "GET /students/profile/ HTTP/1.1" 200 17854
+INFO 2025-04-09 23:36:54,544 basehttp "GET /students/practice/ HTTP/1.1" 200 123852
+INFO 2025-04-09 23:36:54,544 basehttp "GET /students/practice/ HTTP/1.1" 200 123852
+INFO 2025-04-09 23:36:55,064 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:36:55,064 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:36:55,067 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:36:55,067 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:36:55,074 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:36:55,074 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:36:56,222 basehttp "GET /students/attendance/ HTTP/1.1" 200 34533
+INFO 2025-04-09 23:36:56,222 basehttp "GET /students/attendance/ HTTP/1.1" 200 34533
+INFO 2025-04-09 23:36:56,259 basehttp "GET /media/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
+INFO 2025-04-09 23:36:56,259 basehttp "GET /media/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
+INFO 2025-04-09 23:37:08,953 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:37:08,953 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:37:08,958 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:37:08,958 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:37:20,922 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:37:20,922 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:37:20,938 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:37:20,938 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:37:20,974 basehttp "GET /static/img/anime_boy.jpg?v=1744213040 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:37:20,974 basehttp "GET /static/img/anime_boy.jpg?v=1744213040 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:37:21,892 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:37:21,892 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:37:21,968 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:37:21,968 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:37:21,970 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:37:21,970 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:37:21,977 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:37:21,977 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:37:29,524 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:37:29,524 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:37:30,240 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:37:30,240 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:37:42,885 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:37:42,885 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:37:51,781 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:37:51,781 basehttp "GET /students/practice/ HTTP/1.1" 200 123421
+INFO 2025-04-09 23:37:51,846 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:37:51,846 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:37:51,849 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:37:51,849 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:37:51,857 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:37:51,857 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:38:11,872 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:38:11,872 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:38:31,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:38:31,886 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:38:51,884 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:38:51,884 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:39:17,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:39:17,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:39:48,480 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:39:48,480 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:39:49,579 basehttp "GET /students/practice/ HTTP/1.1" 200 130350
+INFO 2025-04-09 23:39:49,579 basehttp "GET /students/practice/ HTTP/1.1" 200 130350
+INFO 2025-04-09 23:39:50,149 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:39:50,149 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:39:50,152 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:39:50,152 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:39:50,158 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:39:50,158 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+DEBUG 2025-04-09 23:40:07,134 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:40:07,134 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:40:07,134 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['YpUQHPQu2JD6MrbTAy6HjgoLyp0KyMromNFfdTPWszS2cyKMiPl1y3zeFRe8DeYS'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:40:07,134 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['YpUQHPQu2JD6MrbTAy6HjgoLyp0KyMromNFfdTPWszS2cyKMiPl1y3zeFRe8DeYS'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:40:07,135 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:40:07,135 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:40:07,135 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:40:07,135 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:40:07,136 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:40:07,136 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:40:07,137 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:40:07,137 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:40:07,137 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:40:07,137 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:40:07,139 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:40:07,139 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:40:07,139 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:40:07,139 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:40:07,140 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:40:07,140 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:40:07,140 views 使用会话ID处理: 28
+DEBUG 2025-04-09 23:40:07,140 views 使用会话ID处理: 28
+INFO 2025-04-09 23:40:07,146 views 学生在等待队列中: ID=6, 排队位置=1, 剩余时间=26分钟
+INFO 2025-04-09 23:40:07,146 views 学生在等待队列中: ID=6, 排队位置=1, 剩余时间=26分钟
+INFO 2025-04-09 23:40:07,148 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 229
+INFO 2025-04-09 23:40:07,148 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 229
+INFO 2025-04-09 23:40:10,152 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:40:10,152 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:40:30,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:40:30,883 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:40:50,162 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:40:50,162 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:41:10,877 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:41:10,877 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:41:30,888 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:41:30,888 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:41:50,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:41:50,881 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:42:10,879 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:42:10,879 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:42:30,874 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:42:30,874 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:43:17,875 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:43:17,875 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:43:33,079 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:43:33,079 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:43:34,187 basehttp "GET /students/practice/ HTTP/1.1" 200 130561
+INFO 2025-04-09 23:43:34,187 basehttp "GET /students/practice/ HTTP/1.1" 200 130561
+INFO 2025-04-09 23:43:34,715 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:43:34,715 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:43:34,717 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:43:34,717 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:43:34,724 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:43:34,724 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+DEBUG 2025-04-09 23:43:44,716 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:43:44,716 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:43:44,716 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['5iZg94GhcMG5g2F28e4PFw65Ta2dKQuetGKFF8FJCCV1G9eVQvj9Ujhy0CgBPi1I'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:43:44,716 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['5iZg94GhcMG5g2F28e4PFw65Ta2dKQuetGKFF8FJCCV1G9eVQvj9Ujhy0CgBPi1I'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:43:44,717 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:43:44,717 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:43:44,717 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:43:44,717 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:43:44,719 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:43:44,719 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:43:44,722 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:43:44,722 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:43:44,723 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:43:44,723 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:43:44,724 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:43:44,724 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:43:44,725 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:43:44,725 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:43:44,725 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:43:44,725 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:43:44,725 views 使用会话ID处理: 28
+DEBUG 2025-04-09 23:43:44,725 views 使用会话ID处理: 28
+INFO 2025-04-09 23:43:44,729 views 学生在等待队列中: ID=6, 排队位置=1, 剩余时间=22分钟
+INFO 2025-04-09 23:43:44,729 views 学生在等待队列中: ID=6, 排队位置=1, 剩余时间=22分钟
+INFO 2025-04-09 23:43:44,732 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 229
+INFO 2025-04-09 23:43:44,732 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 229
+INFO 2025-04-09 23:43:54,729 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:43:54,729 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:44:06,334 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:44:06,334 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:44:07,272 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:44:07,272 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:44:07,310 basehttp "GET /static/img/anime_boy.jpg?v=1744213447 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:44:07,310 basehttp "GET /static/img/anime_boy.jpg?v=1744213447 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:44:08,328 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:44:08,328 basehttp "GET /students/attendance/ HTTP/1.1" 200 31247
+INFO 2025-04-09 23:44:09,248 basehttp "GET /students/practice/ HTTP/1.1" 200 130561
+INFO 2025-04-09 23:44:09,248 basehttp "GET /students/practice/ HTTP/1.1" 200 130561
+INFO 2025-04-09 23:44:09,345 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:44:09,345 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:44:09,348 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:09,348 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:09,355 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:09,355 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:10,289 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:44:10,289 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:44:10,301 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:44:10,301 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:44:18,936 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:44:18,936 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:44:18,955 basehttp "GET /students/profile/ HTTP/1.1" 200 17854
+INFO 2025-04-09 23:44:18,955 basehttp "GET /students/profile/ HTTP/1.1" 200 17854
+INFO 2025-04-09 23:44:20,046 basehttp "GET /students/practice/ HTTP/1.1" 200 130992
+INFO 2025-04-09 23:44:20,046 basehttp "GET /students/practice/ HTTP/1.1" 200 130992
+INFO 2025-04-09 23:44:20,146 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:44:20,146 basehttp "GET /students/check-practice-status/ HTTP/1.1" 200 59
+INFO 2025-04-09 23:44:20,149 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:44:20,149 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:44:20,159 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:44:20,159 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 393
+INFO 2025-04-09 23:44:22,204 basehttp "GET /students/practice/piano/?practice_id=38 HTTP/1.1" 200 38353
+INFO 2025-04-09 23:44:22,204 basehttp "GET /students/practice/piano/?practice_id=38 HTTP/1.1" 200 38353
+INFO 2025-04-09 23:44:36,169 views 收到结束练琴请求: 练习ID=38
+INFO 2025-04-09 23:44:36,169 views 收到结束练琴请求: 练习ID=38
+INFO 2025-04-09 23:44:36,176 views 钢琴已释放: 编号=1
+INFO 2025-04-09 23:44:36,176 views 钢琴已释放: 编号=1
+INFO 2025-04-09 23:44:36,180 views 考勤记录已更新为签退状态: ID=25
+INFO 2025-04-09 23:44:36,180 views 考勤记录已更新为签退状态: ID=25
+INFO 2025-04-09 23:44:36,185 basehttp "POST /students/practice/end/ HTTP/1.1" 200 116
+INFO 2025-04-09 23:44:36,185 basehttp "POST /students/practice/end/ HTTP/1.1" 200 116
+INFO 2025-04-09 23:44:38,219 basehttp "GET /students/practice/ HTTP/1.1" 200 130989
+INFO 2025-04-09 23:44:38,219 basehttp "GET /students/practice/ HTTP/1.1" 200 130989
+INFO 2025-04-09 23:44:38,525 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:38,525 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:38,533 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:38,533 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:40,725 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:44:40,725 basehttp "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:44:40,729 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:44:40,729 basehttp "GET /login/ HTTP/1.1" 200 9326
+INFO 2025-04-09 23:44:47,371 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:44:47,371 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-09 23:44:47,389 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:44:47,389 basehttp "GET /students/profile/ HTTP/1.1" 200 17744
+INFO 2025-04-09 23:44:47,429 basehttp "GET /static/img/anime_boy.jpg?v=1744213487 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:44:47,429 basehttp "GET /static/img/anime_boy.jpg?v=1744213487 HTTP/1.1" 200 20825
+INFO 2025-04-09 23:44:48,296 basehttp "GET /students/practice/ HTTP/1.1" 200 130561
+INFO 2025-04-09 23:44:48,296 basehttp "GET /students/practice/ HTTP/1.1" 200 130561
+INFO 2025-04-09 23:44:48,381 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:48,381 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:48,387 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+INFO 2025-04-09 23:44:48,387 basehttp "GET /students/check-active-practice/ HTTP/1.1" 200 134
+DEBUG 2025-04-09 23:44:53,145 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:44:53,145 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:44:53,145 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['NVVGrn2ISqkke07DKaen6QOmI6GdNnGSPgeXiWeikXjbx1W2IyKE4rB4Q2poEadz'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:44:53,145 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['NVVGrn2ISqkke07DKaen6QOmI6GdNnGSPgeXiWeikXjbx1W2IyKE4rB4Q2poEadz'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:44:53,146 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:44:53,146 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:44:53,147 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:44:53,147 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:44:53,147 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:44:53,147 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:44:53,149 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:44:53,149 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:44:53,149 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:44:53,149 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:44:53,151 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:44:53,151 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:44:53,151 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:44:53,151 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:44:53,152 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:44:53,152 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:44:53,152 views 使用会话ID处理: 28
+DEBUG 2025-04-09 23:44:53,152 views 使用会话ID处理: 28
+INFO 2025-04-09 23:44:53,158 views 学生在等待队列中: ID=6, 排队位置=1, 剩余时间=21分钟
+INFO 2025-04-09 23:44:53,158 views 学生在等待队列中: ID=6, 排队位置=1, 剩余时间=21分钟
+INFO 2025-04-09 23:44:53,159 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 229
+INFO 2025-04-09 23:44:53,159 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 229
+INFO 2025-04-09 23:48:31,630 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:48:31,630 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:48:32,244 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:48:32,244 autoreload Watching for file changes with StatReloader
+DEBUG 2025-04-09 23:48:50,799 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:48:50,799 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:48:50,800 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['NVVGrn2ISqkke07DKaen6QOmI6GdNnGSPgeXiWeikXjbx1W2IyKE4rB4Q2poEadz'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:48:50,800 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['NVVGrn2ISqkke07DKaen6QOmI6GdNnGSPgeXiWeikXjbx1W2IyKE4rB4Q2poEadz'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:48:50,801 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:48:50,801 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:48:50,801 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:48:50,801 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:48:50,802 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:48:50,802 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:48:50,804 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:48:50,804 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:48:50,804 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:48:50,804 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:48:50,806 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:48:50,806 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:48:50,806 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:48:50,806 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:48:50,806 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:48:50,806 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:48:50,806 views 使用会话ID处理: 28
+DEBUG 2025-04-09 23:48:50,806 views 使用会话ID处理: 28
+INFO 2025-04-09 23:48:50,818 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 320
+INFO 2025-04-09 23:48:50,818 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 320
+DEBUG 2025-04-09 23:49:04,702 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:49:04,702 views 扫描二维码请求方法: POST
+DEBUG 2025-04-09 23:49:04,703 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['NVVGrn2ISqkke07DKaen6QOmI6GdNnGSPgeXiWeikXjbx1W2IyKE4rB4Q2poEadz'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:49:04,703 views POST数据: <QueryDict: {'csrfmiddlewaretoken': ['NVVGrn2ISqkke07DKaen6QOmI6GdNnGSPgeXiWeikXjbx1W2IyKE4rB4Q2poEadz'], 'qrcode_data': ['45e58746-70d4-4d11-8063-2114d0bc0f41']}>
+DEBUG 2025-04-09 23:49:04,704 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:49:04,704 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:49:04,704 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:49:04,704 views 使用二维码数据处理: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:49:04,705 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:49:04,705 views 处理后的二维码数据: 45e58746-70d4-4d11-8063-2114d0bc0f41
+DEBUG 2025-04-09 23:49:04,706 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:49:04,706 views 通过UUID查找结果: 二维码-通用考勤-2025-04-09 05:58
+DEBUG 2025-04-09 23:49:04,706 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:49:04,706 views 找到二维码: ID=73, 过期时间=2025-04-09 15:59:59.383276+00:00
+DEBUG 2025-04-09 23:49:04,708 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:49:04,708 views 使用会话ID: 28 重新处理请求
+DEBUG 2025-04-09 23:49:04,708 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:49:04,708 views 扫描二维码请求方法: GET
+DEBUG 2025-04-09 23:49:04,709 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:49:04,709 views 处理学生ID: 3, 姓名: 王止舟
+DEBUG 2025-04-09 23:49:04,709 views 使用会话ID处理: 28
+DEBUG 2025-04-09 23:49:04,709 views 使用会话ID处理: 28
+INFO 2025-04-09 23:49:04,714 views 找到钢琴预留: ID=27, 钢琴=1, 剩余时间=0.3分钟
+INFO 2025-04-09 23:49:04,714 views 找到钢琴预留: ID=27, 钢琴=1, 剩余时间=0.3分钟
+INFO 2025-04-09 23:49:04,716 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 320
+INFO 2025-04-09 23:49:04,716 basehttp "POST /students/practice/scan-qrcode/ HTTP/1.1" 200 320
+INFO 2025-04-09 23:49:05,150 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:49:05,150 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:49:05,728 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:49:05,728 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:49:23,533 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:49:23,533 autoreload D:\VSCODEPROJECTS\mym\mymanage\students\views.py changed, reloading.
+INFO 2025-04-09 23:49:24,105 autoreload Watching for file changes with StatReloader
+INFO 2025-04-09 23:49:24,105 autoreload Watching for file changes with StatReloader

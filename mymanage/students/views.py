@@ -576,7 +576,42 @@ def scan_qrcode(request):
                 is_active=True
             ).first()
             
-            # 如果已在等待队列中，返回等待信息
+            # 检查是否有可用钢琴
+            available_pianos = Piano.objects.filter(
+                is_active=True,
+                is_occupied=False,
+                is_reserved=False
+            ).order_by('number')
+
+            # 如果有空闲钢琴且学生在等待队列中，自动取消等待状态
+            if available_pianos.exists() and waiting_record:
+                waiting_record.is_active = False
+                waiting_record.save()
+                piano = available_pianos.first()
+                
+                # 为学生预留钢琴
+                reservation_time = 0.5  # 30秒
+                expiration_time = timezone.now() + timezone.timedelta(minutes=reservation_time)
+                assignment = PianoAssignment.objects.create(
+                    session=session,
+                    student=student,
+                    piano=piano,
+                    expiration_time=expiration_time,
+                    status='reserved'
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'ready': True,
+                    'message': f'有钢琴可用！已为您预留{piano.number}号钢琴，请在{int(reservation_time*60)}秒内点击"开始练琴"',
+                    'piano_number': piano.number,
+                    'piano_brand': piano.brand,
+                    'piano_model': piano.model,
+                    'session_id': session.id,
+                    'assignment_id': assignment.id
+                })
+            
+            # 如果学生在等待队列中，返回等待信息
             if waiting_record:
                 # 计算剩余等待时间
                 total_wait_time = waiting_record.estimated_wait_time
@@ -1425,6 +1460,32 @@ def end_practice(request):
                     piano.is_occupied = False
                     piano.save()
                     logger.info(f"钢琴已释放: 编号={piano.number}")
+                    
+                    # 检查等待队列中的第一个学生
+                    waiting_student = WaitingQueue.objects.filter(
+                        session=practice.attendance_session,
+                        is_active=True
+                    ).order_by('join_time').first()
+                    
+                    if waiting_student:
+                        # 为等待队列中的第一个学生预留钢琴
+                        reservation_time = 0.5  # 30秒
+                        expiration_time = timezone.now() + timezone.timedelta(minutes=reservation_time)
+                        
+                        # 创建钢琴预留
+                        assignment = PianoAssignment.objects.create(
+                            session=practice.attendance_session,
+                            student=waiting_student.student,
+                            piano=piano,
+                            expiration_time=expiration_time,
+                            status='reserved'
+                        )
+                        
+                        # 更新等待记录状态
+                        waiting_student.is_active = False
+                        waiting_student.save()
+                        
+                        logger.info(f"已为等待队列中的学生预留钢琴: 学生={waiting_student.student.name}, 钢琴={piano.number}")
                 else:
                     logger.info(f"钢琴仍有其他学生使用，保持占用状态: 编号={piano.number}")
             except Piano.DoesNotExist:
