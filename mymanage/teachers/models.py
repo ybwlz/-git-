@@ -53,38 +53,6 @@ def create_default_course_for_teacher(sender, instance, created, **kwargs):
             default_course.save()
             print(f"教师 {instance.name} 已关联到系统默认课程")
 
-class TeacherCertificate(models.Model):
-    """教师证书模型"""
-    teacher = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='certificates')
-    title = models.CharField('证书名称', max_length=100)
-    issue_date = models.DateField('发证日期')
-    expire_date = models.DateField('有效期至', null=True, blank=True)
-    issuing_authority = models.CharField('发证机构', max_length=100)
-    certificate_no = models.CharField('证书编号', max_length=50, blank=True)
-    image = models.ImageField('证书图片', upload_to='teachers/certificates/')
-    is_verified = models.BooleanField('已验证', default=False)
-    created_at = models.DateTimeField('创建时间', auto_now_add=True)
-    
-    class Meta:
-        verbose_name = '教师证书'
-        verbose_name_plural = verbose_name
-        
-    def __str__(self):
-        return f"{self.teacher.name} - {self.title}"
-
-class NotificationSetting(models.Model):
-    """教师通知设置模型"""
-    teacher = models.OneToOneField(TeacherProfile, on_delete=models.CASCADE, related_name='notification_setting')
-    course_reminder = models.BooleanField('课程提醒', default=True)
-    attendance_reminder = models.BooleanField('考勤提醒', default=True)
-    fee_reminder = models.BooleanField('学费提醒', default=True)
-    in_app = models.BooleanField('站内消息', default=True)
-    sms = models.BooleanField('短信通知', default=False)
-    email = models.BooleanField('邮件通知', default=False)
-
-    class Meta:
-        verbose_name = '通知设置'
-        verbose_name_plural = verbose_name
 
 class PrivacySetting(models.Model):
     """教师隐私设置模型"""

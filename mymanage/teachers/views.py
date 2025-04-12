@@ -19,8 +19,8 @@ import uuid as uuid_lib
 from django.views.decorators.csrf import csrf_exempt
 
 from mymanage.users.decorators import teacher_required
-from .models import TeacherProfile, TeacherCertificate, PrivacySetting
-from .forms import TeacherProfileForm, TeacherCertificateForm, TeacherRegistrationForm, PrivacySettingForm, PasswordChangeForm
+from .models import TeacherProfile, PrivacySetting
+from .forms import TeacherProfileForm, TeacherRegistrationForm, PrivacySettingForm, PasswordChangeForm
 from mymanage.students.models import Student, PracticeRecord
 from mymanage.courses.models import Course, CourseSchedule, SheetMusic, PianoLevel, Piano
 from mymanage.attendance.models import AttendanceRecord, AttendanceSession, QRCode, WaitingQueue
@@ -208,7 +208,6 @@ def teacher_dashboard(request):
 def teacher_profile(request):
     """教师个人资料"""
     teacher = request.user.teacher_profile
-    certificates = TeacherCertificate.objects.filter(teacher=teacher)
     
     # 获取或创建教师个人信息
     teacher_profile, created = TeacherProfile.objects.get_or_create(
@@ -351,7 +350,6 @@ def teacher_profile(request):
     
     context = {
         'teacher': teacher,
-        'certificates': certificates,
         'teacher_profile': teacher_profile,
         'privacy_settings': privacy_settings,
         'profile_form': TeacherProfileForm(instance=teacher_profile),

@@ -226,3 +226,35 @@ INFO 2025-04-13 01:29:32,212 autoreload D:\VSCODEPROJECTS\mym\mymanage\settings.
 INFO 2025-04-13 01:29:32,212 autoreload D:\VSCODEPROJECTS\mym\mymanage\settings.py changed, reloading.
 INFO 2025-04-13 01:30:11,744 autoreload Watching for file changes with StatReloader
 INFO 2025-04-13 01:30:11,744 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 03:42:30,039 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 03:42:30,039 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 03:42:34,964 basehttp "GET / HTTP/1.1" 200 14496
+INFO 2025-04-13 03:42:34,964 basehttp "GET / HTTP/1.1" 200 14496
+INFO 2025-04-13 04:01:34,589 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:01:34,589 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:01:35,237 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:01:35,237 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:05:45,574 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:05:45,574 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:05:46,148 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:05:46,148 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:08:57,499 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:08:57,499 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:09:09,124 basehttp "GET / HTTP/1.1" 200 14496
+INFO 2025-04-13 04:09:09,124 basehttp "GET / HTTP/1.1" 200 14496
+INFO 2025-04-13 04:15:10,460 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:15:10,460 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:15:11,006 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:15:11,006 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:16:29,179 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\forms.py changed, reloading.
+INFO 2025-04-13 04:16:29,179 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\forms.py changed, reloading.
+INFO 2025-04-13 04:16:29,687 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:16:29,687 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:16:43,271 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\forms.py changed, reloading.
+INFO 2025-04-13 04:16:43,271 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\forms.py changed, reloading.
+INFO 2025-04-13 04:16:43,826 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:16:43,826 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:17:05,869 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\views.py changed, reloading.
+INFO 2025-04-13 04:17:05,869 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\views.py changed, reloading.
+INFO 2025-04-13 04:17:06,441 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:17:06,441 autoreload Watching for file changes with StatReloader

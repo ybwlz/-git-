@@ -66,21 +66,4 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': '隐私设置',
             },
         ),
-        migrations.CreateModel(
-            name='NotificationSetting',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('course_reminder', models.BooleanField(default=True, verbose_name='课程提醒')),
-                ('attendance_reminder', models.BooleanField(default=True, verbose_name='考勤提醒')),
-                ('fee_reminder', models.BooleanField(default=True, verbose_name='学费提醒')),
-                ('in_app', models.BooleanField(default=True, verbose_name='站内消息')),
-                ('sms', models.BooleanField(default=False, verbose_name='短信通知')),
-                ('email', models.BooleanField(default=False, verbose_name='邮件通知')),
-                ('teacher', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='notification_setting', to='teachers.teacherprofile')),
-            ],
-            options={
-                'verbose_name': '通知设置',
-                'verbose_name_plural': '通知设置',
-            },
-        ),
     ]

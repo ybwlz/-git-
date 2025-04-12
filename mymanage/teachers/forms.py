@@ -1,5 +1,5 @@
 from django import forms
-from .models import TeacherProfile, NotificationSetting, PrivacySetting, TeacherCertificate
+from .models import TeacherProfile, PrivacySetting
 
 class TeacherProfileForm(forms.ModelForm):
     """教师个人信息表单"""
@@ -9,8 +9,8 @@ class TeacherProfileForm(forms.ModelForm):
         model = TeacherProfile
         fields = ['name', 'gender', 'phone', 'avatar', 'bio', 'specialties']
         widgets = {
-            'specialties': forms.SelectMultiple(attrs={'class': 'form-select'}),
-            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'specialties': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'bio': forms.Textarea(attrs={'rows': 4}),
         }
     
     def __init__(self, *args, **kwargs):
@@ -19,41 +19,15 @@ class TeacherProfileForm(forms.ModelForm):
         if self.instance and self.instance.user:
             self.fields['email'].initial = self.instance.user.email
 
-class TeacherCertificateForm(forms.ModelForm):
-    """教师证书表单"""
-    class Meta:
-        model = TeacherCertificate
-        fields = ['title', 'issue_date', 'expire_date', 'issuing_authority', 
-                 'certificate_no', 'image']
-        widgets = {
-            'issue_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'expire_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        }
-
-class NotificationSettingForm(forms.ModelForm):
-    """通知设置表单"""
-    class Meta:
-        model = NotificationSetting
-        fields = ['course_reminder', 'attendance_reminder', 'fee_reminder', 
-                 'in_app', 'sms', 'email']
-        widgets = {
-            'course_reminder': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'attendance_reminder': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'fee_reminder': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'in_app': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'sms': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'email': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
-
 class PrivacySettingForm(forms.ModelForm):
     """隐私设置表单"""
     class Meta:
         model = PrivacySetting
         fields = ['phone_visibility', 'email_visibility', 'bio_visibility']
         widgets = {
-            'phone_visibility': forms.Select(attrs={'class': 'form-select'}),
-            'email_visibility': forms.Select(attrs={'class': 'form-select'}),
-            'bio_visibility': forms.Select(attrs={'class': 'form-select'}),
+            'phone_visibility': forms.Select(attrs={'class': 'form-control'}),
+            'email_visibility': forms.Select(attrs={'class': 'form-control'}),
+            'bio_visibility': forms.Select(attrs={'class': 'form-control'}),
         }
 
 class TeacherRegistrationForm(forms.Form):
