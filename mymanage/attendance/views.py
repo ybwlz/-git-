@@ -419,12 +419,12 @@ def generate_qrcode(request):
                     )
                 
                 # 检查是否已存在默认课程
-                default_course = Course.objects.filter(
-                    code="DEFAULT",
-                    teacher=teacher
-                ).first()
+                default_course = Course.objects.filter(code='DEFAULT').first()
                 
                 if default_course:
+                    # 如果存在默认课程，更新教师为当前教师
+                    default_course.teacher = teacher
+                    default_course.save()
                     course = default_course
                 else:
                     # 创建新的默认课程
@@ -432,7 +432,7 @@ def generate_qrcode(request):
                         name="通用考勤",
                         code="DEFAULT",
                         teacher=teacher,
-                        description='自动生成的通用考勤课程',
+                        description='系统通用考勤课程',
                         level=piano_level  # 确保提供有效的级别
                     )
             

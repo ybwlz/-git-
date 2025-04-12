@@ -25,7 +25,7 @@ class TeacherProfile(models.Model):
 # 添加信号处理器，自动为新教师创建默认课程
 @receiver(post_save, sender=TeacherProfile)
 def create_default_course_for_teacher(sender, instance, created, **kwargs):
-    """当新教师被创建时，自动创建默认通用课程"""
+    """当新教师被创建时，关联到系统默认课程"""
     if created:  # 只在教师首次创建时执行
         from mymanage.courses.models import Course, PianoLevel
         # 获取或创建默认钢琴等级
@@ -34,22 +34,24 @@ def create_default_course_for_teacher(sender, instance, created, **kwargs):
             defaults={'description': '初级'}
         )
         
-        # 检查该教师是否已经有默认课程
-        default_course_exists = Course.objects.filter(
-            code='DEFAULT',
-            teacher=instance
-        ).exists()
+        # 尝试获取已存在的默认课程
+        default_course = Course.objects.filter(code='DEFAULT').first()
         
-        # 如果没有，则创建
-        if not default_course_exists:
-            course = Course.objects.create(
+        if not default_course:
+            # 如果没有默认课程，创建一个新的
+            default_course = Course.objects.create(
                 name='通用考勤',
                 code='DEFAULT',
-                teacher=instance,
-                description='自动生成的通用考勤课程',
+                teacher=instance,  # 第一个创建的教师将成为默认课程的教师
+                description='系统通用考勤课程',
                 level=piano_level
             )
-            print(f"为教师 {instance.name} 创建了默认通用课程")
+            print(f"创建了系统默认课程，教师为 {instance.name}")
+        else:
+            # 如果已经存在默认课程，将新教师添加为该课程的教师
+            default_course.teacher = instance
+            default_course.save()
+            print(f"教师 {instance.name} 已关联到系统默认课程")
 
 class TeacherCertificate(models.Model):
     """教师证书模型"""
