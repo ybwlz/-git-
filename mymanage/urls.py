@@ -17,7 +17,7 @@ urlpatterns = [
     path('password-reset/', user_views.password_reset_view, name='password_reset'),
     
     # 应用模块
-    path('', RedirectView.as_view(url='/login/')),
+    path('', TemplateView.as_view(template_name='index.html'), name='home'),
     path('', include('mymanage.users.urls')),
     path('students/', include('mymanage.students.urls')),
     path('teachers/', include('mymanage.teachers.urls')),
