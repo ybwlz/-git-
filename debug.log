@@ -258,3 +258,189 @@ INFO 2025-04-13 04:17:05,869 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\
 INFO 2025-04-13 04:17:05,869 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\views.py changed, reloading.
 INFO 2025-04-13 04:17:06,441 autoreload Watching for file changes with StatReloader
 INFO 2025-04-13 04:17:06,441 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:21:03,987 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\migrations\0001_initial.py changed, reloading.
+INFO 2025-04-13 04:21:03,987 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\migrations\0001_initial.py changed, reloading.
+INFO 2025-04-13 04:21:04,649 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:21:04,649 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:25:00,000 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:25:00,000 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:25:00,697 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:25:00,697 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:25:12,227 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:25:12,227 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:25:13,012 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:25:13,012 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:26:06,794 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:26:06,794 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:26:07,539 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:26:07,539 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:26:48,674 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:26:48,674 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\models.py changed, reloading.
+INFO 2025-04-13 04:26:49,358 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:26:49,358 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:27:08,258 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\admin.py changed, reloading.
+INFO 2025-04-13 04:27:08,258 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\admin.py changed, reloading.
+INFO 2025-04-13 04:27:08,958 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:27:08,958 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:27:29,961 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\forms.py changed, reloading.
+INFO 2025-04-13 04:27:29,961 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\forms.py changed, reloading.
+INFO 2025-04-13 04:27:30,663 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:27:30,663 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:27:53,869 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\views.py changed, reloading.
+INFO 2025-04-13 04:27:53,869 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\views.py changed, reloading.
+INFO 2025-04-13 04:27:54,601 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:27:54,601 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:28:55,800 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\migrations\0001_initial.py changed, reloading.
+INFO 2025-04-13 04:28:55,800 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\migrations\0001_initial.py changed, reloading.
+INFO 2025-04-13 04:28:56,624 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:28:56,624 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:29:18,811 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\migrations\0001_initial.py changed, reloading.
+INFO 2025-04-13 04:29:18,811 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\migrations\0001_initial.py changed, reloading.
+INFO 2025-04-13 04:29:19,486 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:29:19,486 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:33:18,077 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\migrations\0001_initial.py changed, reloading.
+INFO 2025-04-13 04:33:18,077 autoreload D:\VSCODEPROJECTS\mym\mymanage\teachers\migrations\0001_initial.py changed, reloading.
+INFO 2025-04-13 04:33:18,615 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 04:33:18,615 autoreload Watching for file changes with StatReloader
+INFO 2025-04-13 05:35:32,434 basehttp "GET / HTTP/1.1" 200 14496
+INFO 2025-04-13 05:35:32,434 basehttp "GET / HTTP/1.1" 200 14496
+INFO 2025-04-13 05:35:34,463 basehttp "GET /login/ HTTP/1.1" 200 8953
+INFO 2025-04-13 05:35:34,463 basehttp "GET /login/ HTTP/1.1" 200 8953
+INFO 2025-04-13 05:35:46,442 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-13 05:35:46,442 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-13 05:35:46,483 basehttp "GET /students/profile/ HTTP/1.1" 200 17858
+INFO 2025-04-13 05:35:46,483 basehttp "GET /students/profile/ HTTP/1.1" 200 17858
+INFO 2025-04-13 05:35:46,528 basehttp "GET /static/css/student.css HTTP/1.1" 304 0
+INFO 2025-04-13 05:35:46,528 basehttp "GET /static/css/student.css HTTP/1.1" 304 0
+INFO 2025-04-13 05:35:46,532 basehttp "GET /media/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
+INFO 2025-04-13 05:35:46,532 basehttp "GET /media/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
+INFO 2025-04-13 05:35:47,671 basehttp "GET /students/practice/ HTTP/1.1" 200 130593
+INFO 2025-04-13 05:35:47,671 basehttp "GET /students/practice/ HTTP/1.1" 200 130593
+INFO 2025-04-13 05:35:48,291 basehttp "GET /students/attendance/ HTTP/1.1" 200 35115
+INFO 2025-04-13 05:35:48,291 basehttp "GET /students/attendance/ HTTP/1.1" 200 35115
+INFO 2025-04-13 05:35:48,331 basehttp "GET /static/js/libs/chart.min.js HTTP/1.1" 304 0
+INFO 2025-04-13 05:35:48,331 basehttp "GET /static/js/libs/chart.min.js HTTP/1.1" 304 0
+INFO 2025-04-13 05:35:58,513 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28647
+INFO 2025-04-13 05:35:58,513 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28647
+INFO 2025-04-13 05:35:59,622 basehttp "GET /students/settings/ HTTP/1.1" 200 20482
+INFO 2025-04-13 05:35:59,622 basehttp "GET /students/settings/ HTTP/1.1" 200 20482
+INFO 2025-04-13 05:36:00,270 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28647
+INFO 2025-04-13 05:36:00,270 basehttp "GET /students/sheet-music/ HTTP/1.1" 200 28647
+INFO 2025-04-13 05:36:02,752 basehttp "GET /students/settings/ HTTP/1.1" 200 20482
+INFO 2025-04-13 05:36:02,752 basehttp "GET /students/settings/ HTTP/1.1" 200 20482
+INFO 2025-04-13 05:36:03,322 basehttp "GET /students/attendance/ HTTP/1.1" 200 35115
+INFO 2025-04-13 05:36:03,322 basehttp "GET /students/attendance/ HTTP/1.1" 200 35115
+INFO 2025-04-14 16:37:10,324 autoreload Watching for file changes with StatReloader
+INFO 2025-04-14 16:37:10,324 autoreload Watching for file changes with StatReloader
+INFO 2025-04-14 16:37:23,206 basehttp "GET / HTTP/1.1" 200 14496
+INFO 2025-04-14 16:37:23,206 basehttp "GET / HTTP/1.1" 200 14496
+INFO 2025-04-14 16:37:25,293 basehttp "GET /login/ HTTP/1.1" 200 8953
+INFO 2025-04-14 16:37:25,293 basehttp "GET /login/ HTTP/1.1" 200 8953
+INFO 2025-04-14 16:37:25,329 basehttp "GET /static/img/logo.jpg HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:25,329 basehttp "GET /static/img/logo.jpg HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:31,557 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-14 16:37:31,557 basehttp "POST /login/ HTTP/1.1" 302 0
+INFO 2025-04-14 16:37:31,614 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 17303
+INFO 2025-04-14 16:37:31,614 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 17303
+INFO 2025-04-14 16:37:31,662 basehttp "GET /static/css/teacher.css HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:31,662 basehttp "GET /static/css/teacher.css HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:31,665 basehttp "GET /static/js/skin/default/layer.js HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:31,665 basehttp "GET /static/css/skin/default/layer.css HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:31,665 basehttp "GET /media/teachers/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:31,665 basehttp "GET /static/js/skin/default/layer.js HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:31,665 basehttp "GET /static/css/skin/default/layer.css HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:31,665 basehttp "GET /media/teachers/avatars/%E8%AF%81%E4%BB%B6%E7%85%A7%E4%B8%80%E5%AF%B8.jpg HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:32,825 basehttp "GET /teachers/students/ HTTP/1.1" 200 53846
+INFO 2025-04-14 16:37:32,825 basehttp "GET /teachers/students/ HTTP/1.1" 200 53846
+INFO 2025-04-14 16:37:34,527 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 44470
+INFO 2025-04-14 16:37:34,527 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 44470
+INFO 2025-04-14 16:37:38,020 basehttp "GET /teachers/sheet-music/ HTTP/1.1" 200 38406
+INFO 2025-04-14 16:37:38,020 basehttp "GET /teachers/sheet-music/ HTTP/1.1" 200 38406
+INFO 2025-04-14 16:37:38,056 basehttp "GET /media/sheet_music/covers/f2b248c7e5f64298aa519c017930db43_8Ey50Q9.png HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:38,056 basehttp "GET /media/sheet_music/covers/f2b248c7e5f64298aa519c017930db43_8Ey50Q9.png HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:38,059 basehttp "GET /media/sheet_music/covers/%E5%B8%A6%E8%BA%AB%E4%BB%BD%E8%AF%81%E7%85%A7_0XVNy11.jpg HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:38,059 basehttp "GET /media/sheet_music/covers/%E5%B8%A6%E8%BA%AB%E4%BB%BD%E8%AF%81%E7%85%A7_0XVNy11.jpg HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:38,067 basehttp "GET /media/sheet_music/covers/%E5%B8%A6%E8%BA%AB%E4%BB%BD%E8%AF%81%E7%85%A7.jpg HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:38,067 basehttp "GET /media/sheet_music/covers/%E5%B8%A6%E8%BA%AB%E4%BB%BD%E8%AF%81%E7%85%A7.jpg HTTP/1.1" 304 0
+INFO 2025-04-14 16:37:39,362 basehttp "GET /teachers/finance/ HTTP/1.1" 200 30991
+INFO 2025-04-14 16:37:39,362 basehttp "GET /teachers/finance/ HTTP/1.1" 200 30991
+INFO 2025-04-14 16:37:47,358 basehttp "GET /teachers/profile/ HTTP/1.1" 200 21647
+INFO 2025-04-14 16:37:47,358 basehttp "GET /teachers/profile/ HTTP/1.1" 200 21647
+INFO 2025-04-14 16:37:50,343 basehttp "GET /teachers/finance/ HTTP/1.1" 200 30991
+INFO 2025-04-14 16:37:50,343 basehttp "GET /teachers/finance/ HTTP/1.1" 200 30991
+INFO 2025-04-14 16:37:52,728 basehttp "GET /teachers/sheet-music/ HTTP/1.1" 200 38406
+INFO 2025-04-14 16:37:52,728 basehttp "GET /teachers/sheet-music/ HTTP/1.1" 200 38406
+INFO 2025-04-14 16:37:55,248 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 44470
+INFO 2025-04-14 16:37:55,248 basehttp "GET /teachers/attendance/ HTTP/1.1" 200 44470
+INFO 2025-04-14 16:37:57,081 views 当前时间: 2025-04-14 16:37:57
+INFO 2025-04-14 16:37:57,081 views 当前时间: 2025-04-14 16:37:57
+INFO 2025-04-14 16:37:57,081 views 当前教师: yaobowen
+INFO 2025-04-14 16:37:57,081 views 当前教师: yaobowen
+INFO 2025-04-14 16:37:57,083 views 系统中钢琴数量: 2
+INFO 2025-04-14 16:37:57,083 views 系统中钢琴数量: 2
+INFO 2025-04-14 16:37:57,087 views 钢琴1 - 状态: 可用，空闲
+INFO 2025-04-14 16:37:57,087 views 钢琴1 - 状态: 可用，空闲
+INFO 2025-04-14 16:37:57,088 views 钢琴2 - 状态: 可用，空闲
+INFO 2025-04-14 16:37:57,088 views 钢琴2 - 状态: 可用，空闲
+INFO 2025-04-14 16:37:57,089 views 今日开始时间: 2025-04-14 00:00:00
+INFO 2025-04-14 16:37:57,089 views 今日开始时间: 2025-04-14 00:00:00
+INFO 2025-04-14 16:37:57,089 views 今日结束时间: 2025-04-14 23:59:59
+INFO 2025-04-14 16:37:57,089 views 今日结束时间: 2025-04-14 23:59:59
+INFO 2025-04-14 16:37:57,096 views 等待队列学生数量: 0
+INFO 2025-04-14 16:37:57,096 views 等待队列学生数量: 0
+INFO 2025-04-14 16:37:57,096 views 今日考勤记录签到学生数量: 0
+INFO 2025-04-14 16:37:57,096 views 今日考勤记录签到学生数量: 0
+INFO 2025-04-14 16:37:57,096 views 今日练琴记录学生数量: 0
+INFO 2025-04-14 16:37:57,096 views 今日练琴记录学生数量: 0
+INFO 2025-04-14 16:37:57,097 views 今日总签到学生数量(去重): 0
+INFO 2025-04-14 16:37:57,097 views 今日总签到学生数量(去重): 0
+INFO 2025-04-14 16:37:57,101 views 今日总记录数: 0
+INFO 2025-04-14 16:37:57,101 views 今日总记录数: 0
+INFO 2025-04-14 16:37:57,112 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49466
+INFO 2025-04-14 16:37:57,112 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49466
+INFO 2025-04-14 16:37:57,166 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
+INFO 2025-04-14 16:37:57,166 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
+INFO 2025-04-14 16:38:02,149 basehttp "GET /teachers/students/ HTTP/1.1" 200 53846
+INFO 2025-04-14 16:38:02,149 basehttp "GET /teachers/students/ HTTP/1.1" 200 53846
+INFO 2025-04-14 16:38:09,902 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 17303
+INFO 2025-04-14 16:38:09,902 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 17303
+INFO 2025-04-14 16:38:10,948 basehttp "GET /teachers/students/ HTTP/1.1" 200 53846
+INFO 2025-04-14 16:38:10,948 basehttp "GET /teachers/students/ HTTP/1.1" 200 53846
+INFO 2025-04-14 16:38:13,367 basehttp "GET /teachers/students/?search=%E5%A7%9A%E5%8D%9A%E6%96%87 HTTP/1.1" 200 42191
+INFO 2025-04-14 16:38:13,367 basehttp "GET /teachers/students/?search=%E5%A7%9A%E5%8D%9A%E6%96%87 HTTP/1.1" 200 42191
+INFO 2025-04-14 16:38:16,873 views 当前时间: 2025-04-14 16:38:16
+INFO 2025-04-14 16:38:16,873 views 当前时间: 2025-04-14 16:38:16
+INFO 2025-04-14 16:38:16,874 views 当前教师: yaobowen
+INFO 2025-04-14 16:38:16,874 views 当前教师: yaobowen
+INFO 2025-04-14 16:38:16,875 views 系统中钢琴数量: 2
+INFO 2025-04-14 16:38:16,875 views 系统中钢琴数量: 2
+INFO 2025-04-14 16:38:16,878 views 钢琴1 - 状态: 可用，空闲
+INFO 2025-04-14 16:38:16,878 views 钢琴1 - 状态: 可用，空闲
+INFO 2025-04-14 16:38:16,880 views 钢琴2 - 状态: 可用，空闲
+INFO 2025-04-14 16:38:16,880 views 钢琴2 - 状态: 可用，空闲
+INFO 2025-04-14 16:38:16,881 views 今日开始时间: 2025-04-14 00:00:00
+INFO 2025-04-14 16:38:16,881 views 今日开始时间: 2025-04-14 00:00:00
+INFO 2025-04-14 16:38:16,881 views 今日结束时间: 2025-04-14 23:59:59
+INFO 2025-04-14 16:38:16,881 views 今日结束时间: 2025-04-14 23:59:59
+INFO 2025-04-14 16:38:16,888 views 等待队列学生数量: 0
+INFO 2025-04-14 16:38:16,888 views 等待队列学生数量: 0
+INFO 2025-04-14 16:38:16,888 views 今日考勤记录签到学生数量: 0
+INFO 2025-04-14 16:38:16,888 views 今日考勤记录签到学生数量: 0
+INFO 2025-04-14 16:38:16,889 views 今日练琴记录学生数量: 0
+INFO 2025-04-14 16:38:16,889 views 今日练琴记录学生数量: 0
+INFO 2025-04-14 16:38:16,889 views 今日总签到学生数量(去重): 0
+INFO 2025-04-14 16:38:16,889 views 今日总签到学生数量(去重): 0
+INFO 2025-04-14 16:38:16,895 views 今日总记录数: 0
+INFO 2025-04-14 16:38:16,895 views 今日总记录数: 0
+INFO 2025-04-14 16:38:16,902 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49466
+INFO 2025-04-14 16:38:16,902 basehttp "GET /teachers/piano-arrangement/ HTTP/1.1" 200 49466
+INFO 2025-04-14 16:38:16,977 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
+INFO 2025-04-14 16:38:16,977 basehttp "GET /teachers/piano-arrangement/refresh/ HTTP/1.1" 200 273
+INFO 2025-04-14 16:38:17,394 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 17303
+INFO 2025-04-14 16:38:17,394 basehttp "GET /teachers/dashboard/ HTTP/1.1" 200 17303
+INFO 2025-04-14 16:40:59,497 autoreload Watching for file changes with StatReloader
+INFO 2025-04-14 16:40:59,497 autoreload Watching for file changes with StatReloader
+DEBUG 2025-04-17 13:53:05,132 proactor_events Using proactor: IocpProactor
+DEBUG 2025-04-17 13:54:38,012 proactor_events Using proactor: IocpProactor
+DEBUG 2025-04-17 13:54:43,595 proactor_events Using proactor: IocpProactor
+DEBUG 2025-04-17 14:02:11,152 proactor_events Using proactor: IocpProactor

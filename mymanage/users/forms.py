@@ -71,6 +71,10 @@ class UserLoginForm(AuthenticationForm):
             'class': 'form-control',
             'placeholder': '密码'
         })
+        # 重写错误消息
+        self.error_messages = {
+            'invalid_login': '用户名或密码错误，请重试'
+        }
 
 
 class UserPasswordResetForm(PasswordResetForm):

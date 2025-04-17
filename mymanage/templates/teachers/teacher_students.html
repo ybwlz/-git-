@@ -155,16 +155,12 @@
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
-                height: auto;
                 position: relative;
+                height: auto;
             }
             
             .main-content {
                 margin-left: 0;
-            }
-            
-            .sidebar .nav-link:hover {
-                transform: none;
             }
         }
         
@@ -189,10 +185,6 @@
     </style>
 </head>
 <body>
-    <button class="mobile-toggle btn">
-        <i class="fas fa-bars"></i>
-    </button>
-    
     <div class="sidebar col-md-3 col-lg-2 d-md-block">
         <div class="text-center mb-4">
             {% if teacher.avatar %}
@@ -732,22 +724,20 @@
             };
         }
         
-        // 移动端侧边栏切换
-        document.querySelector('.mobile-toggle').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
-            
-            if (sidebar.style.width === '280px') {
-                sidebar.style.width = '0';
-                mainContent.style.marginLeft = '0';
-            } else {
-                sidebar.style.width = '280px';
-                mainContent.style.marginLeft = '280px';
-            }
-        });
-        
-        // 添加学生详情查看事件
         document.addEventListener('DOMContentLoaded', function() {
+            // 添加系统时间显示功能
+            function updateSystemTime() {
+                const now = new Date();
+                const timeElement = document.getElementById('currentTime');
+                if(timeElement) {
+                    timeElement.textContent = now.toTimeString().substring(0, 8);
+                }
+            }
+            
+            // 初始化并每秒更新一次
+            updateSystemTime();
+            setInterval(updateSystemTime, 1000);
+
             const studentDetailModal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
             const editStudentModal = new bootstrap.Modal(document.getElementById('editStudentModal'));
             
@@ -770,13 +760,16 @@
             });
             
             // 详情模态框中的编辑按钮
-            document.getElementById('edit-student-link').addEventListener('click', function(e) {
-                e.preventDefault();
-                const studentId = this.getAttribute('data-student-id');
-                studentDetailModal.hide();
-                fetchStudentForEdit(studentId);
-                editStudentModal.show();
-            });
+            const editStudentLink = document.getElementById('edit-student-link');
+            if (editStudentLink) {
+                editStudentLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const studentId = this.getAttribute('data-student-id');
+                    studentDetailModal.hide();
+                    fetchStudentForEdit(studentId);
+                    editStudentModal.show();
+                });
+            }
             
             // 获取URL参数
             function getUrlParameter(name) {
@@ -930,75 +923,64 @@
             
             // 初始化编辑表单的AJAX提交
             const editForm = document.getElementById('edit-student-form');
-            editForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                
-                // 添加AJAX头
-                const headers = new Headers({
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                });
-                
-                // 显示加载提示 - 使用原生alert替代layer如果layer未加载
-                let loadingIndex;
-                if (typeof layer !== 'undefined') {
-                    loadingIndex = layer.load(1, {shade: [0.3, '#000']});
-                } else {
-                    console.log('正在提交...');
-                }
-                
-                // 发送表单数据
-                fetch(this.action, {
-                    method: 'POST',
-                    headers: headers,
-                    body: formData,
-                    credentials: 'same-origin'
-                })
-                .then(response => response.json())
-                .then(data => {
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    
+                    // 添加AJAX头
+                    const headers = new Headers({
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    });
+                    
+                    // 显示加载提示 - 使用原生alert替代layer如果layer未加载
+                    let loadingIndex;
                     if (typeof layer !== 'undefined') {
-                        layer.close(loadingIndex);
+                        loadingIndex = layer.load(1, {shade: [0.3, '#000']});
+                    } else {
+                        console.log('正在提交...');
                     }
                     
-                    if (data.success) {
-                        // 先关闭模态框，再刷新页面
-                        editStudentModal.hide();
-                        window.location.reload();
-                    } else {
+                    // 发送表单数据
+                    fetch(this.action, {
+                        method: 'POST',
+                        headers: headers,
+                        body: formData,
+                        credentials: 'same-origin'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
                         if (typeof layer !== 'undefined') {
-                            layer.msg(data.message || '保存失败', {icon: 2});
-                        } else {
-                            alert(data.message || '保存失败');
+                            layer.close(loadingIndex);
                         }
-                    }
-                })
-                .catch(error => {
-                    if (typeof layer !== 'undefined') {
-                        layer.close(loadingIndex);
-                    }
-                    console.error('提交失败:', error);
-                    if (typeof layer !== 'undefined') {
-                        layer.msg('系统错误，请查看控制台获取详细信息', {icon: 2});
-                    } else {
-                        alert('系统错误，请查看控制台获取详细信息');
-                    }
+                        
+                        if (data.success) {
+                            // 先关闭模态框，再刷新页面
+                            editStudentModal.hide();
+                            window.location.reload();
+                        } else {
+                            if (typeof layer !== 'undefined') {
+                                layer.msg(data.message || '保存失败', {icon: 2});
+                            } else {
+                                alert(data.message || '保存失败');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        if (typeof layer !== 'undefined') {
+                            layer.close(loadingIndex);
+                        }
+                        console.error('提交失败:', error);
+                        if (typeof layer !== 'undefined') {
+                            layer.msg('系统错误，请查看控制台获取详细信息', {icon: 2});
+                        } else {
+                            alert('系统错误，请查看控制台获取详细信息');
+                        }
+                    });
                 });
-            });
+            }
         });
-        
-        // 添加系统时间显示功能
-        function updateSystemTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
-        }
-        
-        // 初始化并每秒更新一次
-        updateSystemTime();
-        setInterval(updateSystemTime, 1000);
     </script>
 </body>
 </html> 

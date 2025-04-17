@@ -194,7 +194,7 @@
                             <td class="text-center">{{ record.date|date:"Y-m-d" }}</td>
                             <td class="text-center">{{ record.start_time|time:"H:i:s" }}</td>
                             <td class="text-center">
-                                {% if record.end_time %}
+                                {% if record.status == 'completed' and record.end_time %}
                                     {{ record.end_time|time:"H:i:s" }}
                                 {% else %}
                                     -

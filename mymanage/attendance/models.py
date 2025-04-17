@@ -226,8 +226,8 @@ class AttendanceRecord(models.Model):
     check_in_time = models.DateTimeField('签到时间', auto_now_add=True)
     check_out_time = models.DateTimeField('签退时间', null=True, blank=True)
     status = models.CharField('状态', max_length=20, choices=STATUS_CHOICES, default='checked_in')
-    duration = models.FloatField('学习时长(小时)', null=True, blank=True)
-    duration_minutes = models.FloatField('学习时长(分钟)', null=True, blank=True)
+    duration = models.DecimalField('学习时长(小时)', max_digits=4, decimal_places=1, null=True, blank=True)
+    duration_minutes = models.DecimalField('学习时长(分钟)', max_digits=5, decimal_places=1, null=True, blank=True)
     notes = models.TextField('备注', blank=True)
     note = models.TextField('签到备注', blank=True)
     check_in_method = models.CharField('签到方式', max_length=20, default='qrcode', blank=True)
@@ -240,6 +240,35 @@ class AttendanceRecord(models.Model):
     
     def __str__(self):
         return f"{self.student.name} - {self.check_in_time.strftime('%Y-%m-%d %H:%M')}"
+    
+    def save(self, *args, **kwargs):
+        """重写保存方法，添加时区检查"""
+        from django.utils import timezone
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # 检查签到时间是否有时区信息
+        if self.check_in_time and timezone.is_naive(self.check_in_time):
+            logger.warning(f"签到时间没有时区信息: {self.check_in_time}")
+            self.check_in_time = timezone.make_aware(self.check_in_time)
+        
+        # 检查签退时间是否有时区信息
+        if self.check_out_time and timezone.is_naive(self.check_out_time):
+            logger.warning(f"签退时间没有时区信息: {self.check_out_time}")
+            self.check_out_time = timezone.make_aware(self.check_out_time)
+        
+        # 如果有签到和签退时间，重新计算持续时间
+        if self.check_in_time and self.check_out_time:
+            # 确保两个时间都是aware的
+            duration = (self.check_out_time - self.check_in_time).total_seconds()
+            if duration < 0:
+                logger.error(f"时间计算异常: 签退时间早于签到时间 - 签到: {self.check_in_time}, 签退: {self.check_out_time}")
+                # 使用默认30分钟
+                duration = 1800
+            self.duration = duration / 3600  # 转换为小时
+            self.duration_minutes = duration / 60  # 转换为分钟
+        
+        super().save(*args, **kwargs)
     
     def check_out(self):
         """签退方法，更新签退时间和状态"""

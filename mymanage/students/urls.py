@@ -21,6 +21,7 @@ urlpatterns = [
     path('practice/check-status/', views.check_practice_status, name='check_practice_status'),
     path('practice/check-waiting-status/', views.check_waiting_status, name='check_waiting_status'),
     path('practice/piano/', views.piano_practice, name='piano_practice'),
+    path('waiting/', views.waiting, name='waiting'),
     
     # 考勤记录
     path('attendance/', views.attendance, name='attendance'),

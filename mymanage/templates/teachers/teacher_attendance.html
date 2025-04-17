@@ -262,16 +262,12 @@
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
-                height: auto;
                 position: relative;
+                height: auto;
             }
             
             .main-content {
                 margin-left: 0;
-            }
-            
-            .sidebar .nav-link:hover {
-                transform: none;
             }
         }
         
@@ -304,10 +300,6 @@
     </style>
 </head>
 <body>
-    <button class="mobile-toggle btn">
-        <i class="fas fa-bars"></i>
-    </button>
-    
     <div class="sidebar col-md-3 col-lg-2 d-md-block">
         <div class="text-center mb-4">
             {% if teacher.avatar %}
@@ -1086,6 +1078,14 @@
             submitManualAttendanceBtn.addEventListener('click', function() {
                 var form = document.getElementById('manualAttendanceForm');
                 var formData = new FormData(form);
+                
+                // 获取时间并确保使用正确的时区
+                var checkInTime = document.getElementById('check_in_time').value;
+                if (checkInTime) {
+                    // 将本地时间转换为ISO格式字符串，保留时区信息
+                    var date = new Date(checkInTime);
+                    formData.set('check_in_time', date.toISOString());
+                }
                 
                 // 获取CSRF令牌
                 var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;

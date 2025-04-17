@@ -175,32 +175,12 @@
     <script>
         // 确保DOM加载完成后再执行
         document.addEventListener('DOMContentLoaded', function() {
-            // 移动端侧边栏切换
-            const mobileToggle = document.querySelector('.mobile-toggle');
-            const sidebar = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
-            
-            if (mobileToggle && sidebar && mainContent) {
-                mobileToggle.addEventListener('click', function() {
-                    if (sidebar.style.width === '280px') {
-                        sidebar.style.width = '0';
-                        mainContent.style.marginLeft = '0';
-                    } else {
-                        sidebar.style.width = '280px';
-                        mainContent.style.marginLeft = '280px';
-                    }
-                });
-            }
-            
             // 添加系统时间显示功能
             function updateSystemTime() {
                 const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                const currentTimeElement = document.getElementById('currentTime');
-                if (currentTimeElement) {
-                    currentTimeElement.textContent = `${hours}:${minutes}:${seconds}`;
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = now.toTimeString().substring(0, 8);
                 }
             }
             

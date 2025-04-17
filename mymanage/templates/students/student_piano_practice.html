@@ -31,10 +31,105 @@
             min-height: 100vh;
         }
         
-        .main-container {
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            margin-left: 250px;
             padding: 2rem;
-            max-width: 1000px;
+            min-height: 100vh;
+            background-color: #f5f7fb;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar .nav-link:hover {
+                transform: none;
+            }
+            
+            .large-timer {
+                padding: 1rem !important;
+            }
+            
+            .timer-value {
+                font-size: 3rem !important;
+            }
+            
+            .practice-card {
+                padding: 15px !important;
+            }
+            
+            .btn-action {
+                width: 100% !important;
+                max-width: none !important;
+            }
+            
+            .piano-info {
+                padding: 15px !important;
+            }
+            
+            .piano-details {
+                flex-direction: column;
+            }
+            
+            .piano-detail-item {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        
+        .main-container {
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 0 15px;
         }
         
         .practice-card {
@@ -334,65 +429,126 @@
     <!-- 添加CSRF令牌隐藏字段 -->
     {% csrf_token %}
     
-    <div class="main-container">
-        <div class="practice-card">
-            <div class="practice-header">
-                <h2><i class="fas fa-music"></i> 钢琴练习中</h2>
-                <p class="mb-0">
-                    <span class="status-indicator status-active"></span>
-                    正在练习，请保持良好的演奏状态
-                </p>
-            </div>
-            
-            <!-- 大型计时器 -->
-            <div class="large-timer">
-                <div class="timer-wave"></div>
-                <div class="timer-value" id="practiceTimer">00:00:00</div>
-                <div class="timer-label">练习时间</div>
-            </div>
-            
-            <!-- 钢琴信息 -->
-            <div class="piano-info">
-                <h4><i class="fas fa-piano"></i> 当前使用的钢琴</h4>
-                <div class="piano-details">
-                    <div class="piano-detail-item">
-                        <div class="piano-detail-label">钢琴编号</div>
-                        <div class="piano-detail-value" id="pianoNumber">{{ piano_number }}</div>
-                    </div>
-                    <div class="piano-detail-item">
-                        <div class="piano-detail-label">钢琴品牌</div>
-                        <div class="piano-detail-value" id="pianoBrand">{{ piano_brand }}</div>
-                    </div>
-                    <div class="piano-detail-item">
-                        <div class="piano-detail-label">钢琴型号</div>
-                        <div class="piano-detail-value" id="pianoModel">{{ piano_model }}</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 操作按钮 -->
-            <div class="text-center">
-                <div class="time-requirement mb-3" id="timeRequirement">练习满30分钟后才能结束练习</div>
-                <button id="endPracticeBtn" class="btn btn-action btn-end-practice" disabled>
-                    <i class="fas fa-stop-circle"></i> 结束练习
-                </button>
-            </div>
-            
-            <!-- 扫描二维码区域 (默认隐藏) -->
-            <div id="qrScannerContainer" class="qr-scanner-container" style="display: none;">
-                <div id="qrScannerVideo" class="qr-scanner-video"></div>
-                <div class="qr-scanner-frame"></div>
-                <div class="text-center mt-3">
-                    <button id="cancelScanBtn" class="btn btn-sm btn-secondary">
-                        <i class="fas fa-times"></i> 取消扫描
-                    </button>
-                </div>
-            </div>
-            
-            <div class="text-center mt-4">
-                <a href="{% url 'students:practice' %}" class="return-link">
-                    <i class="fas fa-arrow-left"></i> 返回练琴主页
+    <!-- 侧边栏 -->
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            {% if student.user.avatar %}
+                <img src="{{ student.user.avatar.url }}" alt="{{ student.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/anime_boy.jpg' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ student.name }}</h5>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:profile' %}">
+                    <i class="fas fa-user"></i> 个人主页
                 </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'students:practice' %}">
+                    <i class="fas fa-music"></i> 今日练琴
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:attendance' %}">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:sheet_music' %}">
+                    <i class="fas fa-file-alt"></i> 在线曲谱
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:update_profile' %}">
+                    <i class="fas fa-cog"></i> 账号设置
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="main-content">
+        <div class="container-fluid">
+            <!-- 顶部栏 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div></div>
+                <div>
+                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
+                    <div class="btn btn-sm btn-outline-secondary system-time">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <div class="practice-card">
+                    <div class="practice-header">
+                        <h2><i class="fas fa-music"></i> 钢琴练习中</h2>
+                        <p class="mb-0">
+                            <span class="status-indicator status-active"></span>
+                            正在练习，请保持良好的演奏状态
+                        </p>
+                    </div>
+                    
+                    <!-- 大型计时器 -->
+                    <div class="large-timer">
+                        <div class="timer-wave"></div>
+                        <div class="timer-value" id="practiceTimer">00:00:00</div>
+                        <div class="timer-label">练习时间</div>
+                    </div>
+                    
+                    <!-- 钢琴信息 -->
+                    <div class="piano-info">
+                        <h4><i class="fas fa-piano"></i> 当前使用的钢琴</h4>
+                        <div class="piano-details">
+                            <div class="piano-detail-item">
+                                <div class="piano-detail-label">钢琴编号</div>
+                                <div class="piano-detail-value" id="pianoNumber">{{ piano_number }}</div>
+                            </div>
+                            <div class="piano-detail-item">
+                                <div class="piano-detail-label">钢琴品牌</div>
+                                <div class="piano-detail-value" id="pianoBrand">{{ piano_brand }}</div>
+                            </div>
+                            <div class="piano-detail-item">
+                                <div class="piano-detail-label">钢琴型号</div>
+                                <div class="piano-detail-value" id="pianoModel">{{ piano_model }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="text-center">
+                        <div class="time-requirement mb-3" id="timeRequirement">练习满30分钟后才能结束练习</div>
+                        <button id="endPracticeBtn" class="btn btn-action btn-end-practice" disabled>
+                            <i class="fas fa-stop-circle"></i> 结束练习
+                        </button>
+                    </div>
+                    
+                    <!-- 扫描二维码区域 (默认隐藏) -->
+                    <div id="qrScannerContainer" class="qr-scanner-container" style="display: none;">
+                        <div id="qrScannerVideo" class="qr-scanner-video"></div>
+                        <div class="qr-scanner-frame"></div>
+                        <div class="text-center mt-3">
+                            <button id="cancelScanBtn" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-times"></i> 取消扫描
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'students:practice' %}" class="return-link">
+                            <i class="fas fa-arrow-left"></i> 返回练琴主页
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -444,6 +600,19 @@
     
     <script>
         $(document).ready(function() {
+            // 更新系统时间
+            function updateSystemTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('currentTime').textContent = hours + ':' + minutes + ':' + seconds;
+            }
+
+            // 每秒更新时间
+            setInterval(updateSystemTime, 1000);
+            updateSystemTime();  // 立即执行一次
+
             // 获取CSRF令牌
             const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
             
@@ -722,35 +891,50 @@
                 // 设置扫描活跃状态
                 scanActive = true;
                 
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    // 尝试多种视频约束，以提高兼容性
-                    const constraints = { 
+                // 尝试多种视频约束，以提高兼容性
+                const constraints = [
+                    { 
                         audio: false,
                         video: { 
-                            facingMode: "environment", // 使用后置摄像头
+                            facingMode: "environment",
                             width: { ideal: 1280 },
                             height: { ideal: 720 }
                         } 
-                    };
-                    
-                    const fallbackConstraints = {
+                    },
+                    {
                         audio: false,
-                        video: true // 使用默认摄像头设置
-                    };
+                        video: { 
+                            facingMode: "environment"
+                        }
+                    },
+                    {
+                        audio: false,
+                        video: true
+                    }
+                ];
+                
+                // 递归尝试不同的约束
+                function tryNextConstraint(index) {
+                    if (index >= constraints.length) {
+                        handleCameraError(new Error("无法访问摄像头，请检查权限设置"));
+                        return;
+                    }
                     
-                    console.log("请求摄像头权限...");
-                    navigator.mediaDevices.getUserMedia(constraints)
+                    console.log(`尝试摄像头配置 ${index + 1}/${constraints.length}`);
+                    navigator.mediaDevices.getUserMedia(constraints[index])
                         .then(handleCameraStream)
-                        .catch(function(error) {
-                            console.log("尝试备用摄像头设置...");
-                            navigator.mediaDevices.getUserMedia(fallbackConstraints)
-                                .then(handleCameraStream)
-                                .catch(handleCameraError);
+                        .catch(error => {
+                            console.log(`配置 ${index + 1} 失败:`, error);
+                            tryNextConstraint(index + 1);
                         });
+                }
+                
+                // 开始尝试第一个配置
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    tryNextConstraint(0);
                 } else {
                     $('#scanResult').removeClass('alert-info').addClass('alert-danger')
                         .html('<i class="fas fa-exclamation-triangle"></i> 您的浏览器不支持摄像头访问，请尝试使用Chrome、Firefox或Safari浏览器。');
-                    
                     scanActive = false;
                 }
             }
@@ -770,37 +954,38 @@
                 // 确保视频元素可见
                 $(video).show();
                 
-                try {
+                // 等待视频元素完全加载
+                video.addEventListener('loadedmetadata', function() {
+                    console.log("视频元数据已加载");
                     video.play()
                         .then(() => {
                             console.log("视频播放已开始");
-                            
-                            // 更新扫描状态提示
                             $('#scanResult').removeClass('alert-danger').addClass('alert-info')
                                 .html('<i class="fas fa-qrcode"></i> 请将钢琴上的二维码对准扫码框...');
-                            
-                            // 启动QR码扫描
                             startQRScan();
                         })
                         .catch(err => {
                             console.error("视频播放错误:", err);
                             handleCameraError(err);
                         });
-                } catch (err) {
-                    console.error("视频播放异常:", err);
-                    handleCameraError(err);
-                }
+                });
             }
             
             // 处理摄像头错误
             function handleCameraError(error) {
                 console.error("摄像头访问错误:", error);
-                
                 scanActive = false;
                 
                 // 显示错误信息
                 $('#scanResult').removeClass('alert-info').addClass('alert-danger')
                     .html(`<i class="fas fa-exclamation-triangle"></i> 无法访问摄像头: ${error.message || '请检查摄像头权限'}`);
+                
+                // 自动尝试重新启动
+                setTimeout(() => {
+                    if ($('#qrScanModal').is(':visible')) {
+                        startScanner();
+                    }
+                }, 1000);  // 1秒后重试
             }
             
             // 停止扫描器
@@ -886,9 +1071,6 @@
                 // 显示加载状态
                 $('#scanResult').html('<i class="fas fa-spinner fa-spin"></i> 正在验证...');
                 
-                // 获取CSRF令牌
-                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                
                 // 发送结束练琴请求
                 $.ajax({
                     url: "{% url 'students:end_practice' %}",
@@ -930,7 +1112,7 @@
                                 if ($('#qrScanModal').is(':visible')) {
                                     startScanner();
                                 }
-                            }, 3000);
+                            }, 1000);  // 1秒后重试
                         }
                     },
                     error: function(xhr, status, error) {
@@ -945,7 +1127,7 @@
                             if ($('#qrScanModal').is(':visible')) {
                                 startScanner();
                             }
-                        }, 3000);
+                        }, 1000);  // 1秒后重试
                     }
                 });
             }

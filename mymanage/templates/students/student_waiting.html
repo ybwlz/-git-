@@ -1,0 +1,741 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>等待钢琴 - 苗韵琴行管理系统</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 自定义CSS -->
+    <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+    <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --warning-color: #f39c12;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            padding: 1rem;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            min-height: 100vh;
+            background-color: #f5f7fb;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar .nav-link:hover {
+                transform: none;
+            }
+            
+            .large-timer {
+                padding: 1rem !important;
+            }
+            
+            .timer-value {
+                font-size: 3rem !important;
+            }
+            
+            .waiting-card {
+                padding: 15px !important;
+            }
+            
+            .btn-action {
+                width: 100% !important;
+                max-width: none !important;
+            }
+            
+            .queue-info {
+                padding: 15px !important;
+            }
+            
+            .queue-details {
+                flex-direction: column;
+            }
+            
+            .queue-detail-item {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        
+        .main-container {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .waiting-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .waiting-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .waiting-header h2 {
+            color: var(--warning-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .waiting-header p {
+            color: #777;
+            font-size: 16px;
+        }
+        
+        .large-timer {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timer-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.2' d='M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+        }
+        
+        .timer-value {
+            font-size: 5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .timer-label {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .queue-info {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .queue-info h4 {
+            color: var(--warning-color);
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .queue-info h4 i {
+            margin-right: 10px;
+        }
+        
+        .queue-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .queue-detail-item {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .queue-detail-label {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 5px;
+        }
+        
+        .queue-detail-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--warning-color);
+        }
+        
+        .btn-action {
+            padding: 15px 35px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin: 0 auto;
+            width: 80%;
+            max-width: 300px;
+        }
+        
+        .btn-action i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .btn-cancel {
+            background-color: #e74c3c;
+            border: none;
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-waiting {
+            background-color: var(--warning-color);
+            box-shadow: 0 0 5px var(--warning-color);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.5;
+            }
+        }
+        
+        .return-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .return-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        #refreshStatusBtn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        #refreshStatusBtn:hover {
+            transform: rotate(180deg);
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #refreshStatusBtn i {
+            transition: all 0.3s ease;
+        }
+
+        #refreshStatusBtn.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- CSRF Token -->
+    {% csrf_token %}
+    
+    <!-- 侧边栏 -->
+    <div class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="text-center mb-4">
+            {% if student.user.avatar %}
+                <img src="{{ student.user.avatar.url }}" alt="{{ student.name }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% else %}
+                <img src="{% static 'img/anime_boy.jpg' %}" alt="默认头像" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);">
+            {% endif %}
+            <h5 class="mt-2">{{ student.name }}</h5>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:profile' %}">
+                    <i class="fas fa-user"></i> 个人主页
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'students:practice' %}">
+                    <i class="fas fa-music"></i> 今日练琴
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:attendance' %}">
+                    <i class="fas fa-calendar-check"></i> 考勤记录
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:sheet_music' %}">
+                    <i class="fas fa-file-alt"></i> 在线曲谱
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'students:update_profile' %}">
+                    <i class="fas fa-cog"></i> 账号设置
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="main-content">
+        <div class="container-fluid">
+            <!-- 顶部栏 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div></div>
+                <div>
+                    <span class="me-2">今日日期：{% now "Y年n月j日" %}</span>
+                    <div class="btn btn-sm btn-outline-secondary system-time">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="currentTime"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <div class="waiting-card">
+                    <div class="waiting-header">
+                        <h2><i class="fas fa-hourglass-half"></i> 等待钢琴中</h2>
+                        <p class="mb-0">
+                            <span class="status-indicator status-waiting"></span>
+                            正在等待钢琴分配，请耐心等待
+                        </p>
+                    </div>
+                    
+                    <!-- 等待时间计时器 -->
+                    <div class="large-timer">
+                        <div class="timer-wave"></div>
+                        <div class="timer-value" id="waitingTimer">00:00:00</div>
+                        <div class="timer-label">已等待时间</div>
+                    </div>
+                    
+                    <!-- 队列信息 -->
+                    <div class="queue-info">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4><i class="fas fa-users"></i> 等待队列信息</h4>
+                            <button id="refreshStatusBtn" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-sync-alt me-1"></i> 刷新状态
+                            </button>
+                        </div>
+                        <div class="queue-details">
+                            <div class="queue-detail-item">
+                                <div class="queue-detail-label">当前排队位置</div>
+                                <div class="queue-detail-value" id="queuePosition">--</div>
+                            </div>
+                            <div class="queue-detail-item">
+                                <div class="queue-detail-label">预计等待时间</div>
+                                <div class="queue-detail-value" id="estimatedTime">--</div>
+                                <div class="queue-detail-label">分钟</div>
+                            </div>
+                            <div class="queue-detail-item">
+                                <div class="queue-detail-label">前方等待人数</div>
+                                <div class="queue-detail-value" id="peopleAhead">--</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 钢琴就绪时的开始练琴按钮 -->
+                    <div id="startPracticeDiv" class="text-center mb-4" style="display: none;">
+                        <button id="startPracticeBtn" class="btn btn-action" style="background-color: var(--primary-color); color: white;">
+                            <i class="fas fa-play-circle"></i> 开始练琴
+                        </button>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="text-center">
+                        <button id="cancelWaitingBtn" class="btn btn-action btn-cancel">
+                            <i class="fas fa-times-circle"></i> 取消等待
+                        </button>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'students:practice' %}" class="return-link">
+                            <i class="fas fa-arrow-left"></i> 返回练琴主页
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS依赖 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/skin/default/layer.js' %}"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // 更新系统时间
+            function updateSystemTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('currentTime').textContent = hours + ':' + minutes + ':' + seconds;
+            }
+
+            // 每秒更新时间
+            setInterval(updateSystemTime, 1000);
+            updateSystemTime();  // 立即执行一次
+
+            // 全局变量
+            let waitingId = null;
+            let startTime = null;
+            let timerInterval = null;
+            let checkStatusInterval = null;
+            
+            // 从URL参数中获取会话ID和等待ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+            waitingId = urlParams.get('waiting_id');
+            
+            // 初始化页面
+            initializePage();
+            
+            // 初始化页面功能
+            function initializePage() {
+                if (!sessionId || !waitingId) {
+                    // 如果没有会话ID或等待ID，返回练琴主页
+                    window.location.href = "{% url 'students:practice' %}";
+                    return;
+                }
+                
+                // 获取等待状态
+                checkWaitingStatus();
+                
+                // 绑定取消等待按钮事件
+                $('#cancelWaitingBtn').on('click', cancelWaiting);
+
+                // 绑定刷新状态按钮事件
+                $('#refreshStatusBtn').on('click', function() {
+                    const $btn = $(this);
+                    $btn.prop('disabled', true).addClass('loading');
+                    
+                    // 执行状态检查
+                    $.ajax({
+                        url: "{% url 'students:check_waiting_status' %}",
+                        type: "GET",
+                        data: {
+                            waiting_id: waitingId
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // 更新队列信息
+                                updateQueueInfo(response);
+                                // 显示成功提示
+                                layer.msg('状态已更新', {icon: 1});
+                                
+                                if (response.status === 'ready') {
+                                    // 钢琴已准备就绪
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: '钢琴已就绪',
+                                        text: '已为您分配钢琴，即将跳转到练琴界面',
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        window.location.href = "{% url 'students:piano_practice' %}?practice_id=" + response.practice_id;
+                                    });
+                                }
+                            } else {
+                                layer.msg(response.message || '刷新状态失败', {icon: 2});
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("刷新状态失败:", error);
+                            layer.msg('网络请求失败，请重试', {icon: 2});
+                        },
+                        complete: function() {
+                            // 恢复按钮状态
+                            setTimeout(function() {
+                                $btn.prop('disabled', false).removeClass('loading');
+                            }, 500);
+                        }
+                    });
+                });
+            }
+            
+            // 检查等待状态
+            function checkWaitingStatus() {
+                if (!waitingId) return;
+                
+                $.ajax({
+                    url: "{% url 'students:check_waiting_status' %}",
+                    type: "GET",
+                    data: {
+                        waiting_id: waitingId
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // 更新队列信息
+                            updateQueueInfo(response);
+                            
+                            if (response.status === 'ready') {
+                                // 钢琴已准备就绪
+                                clearInterval(checkStatusInterval);
+                                
+                                // 显示开始练琴按钮
+                                $('#startPracticeDiv').show();
+                                $('#cancelWaitingBtn').hide();
+                                
+                                // 显示提示
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '钢琴已就绪',
+                                    text: '请点击"开始练琴"按钮开始练琴',
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                            } else if (response.waiting) {
+                                // 更新等待信息
+                                if (!startTime && response.join_time) {
+                                    // 设置开始等待时间
+                                    startTime = new Date(response.join_time);
+                                    // 启动计时器
+                                    startTimer();
+                                }
+                                
+                                // 开始定期检查状态（如果还没有启动的话）
+                                if (!checkStatusInterval) {
+                                    startStatusCheck();
+                                }
+                            }
+                        } else {
+                            console.error("检查状态失败:", response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("检查状态请求失败:", error);
+                    }
+                });
+            }
+            
+            // 更新队列信息
+            function updateQueueInfo(data) {
+                $('#queuePosition').text(data.queue_position || '--');
+                $('#estimatedTime').text(data.wait_minutes || '--');
+                $('#peopleAhead').text(data.queue_position > 0 ? data.queue_position - 1 : 0);
+            }
+            
+            // 启动计时器
+            function startTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                timerInterval = setInterval(function() {
+                    const now = new Date();
+                    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                    updateTimer(elapsedSeconds);
+                }, 1000);
+                
+                // 立即执行一次更新
+                const now = new Date();
+                const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                updateTimer(elapsedSeconds);
+            }
+            
+            // 更新计时器显示
+            function updateTimer(totalSeconds) {
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                
+                // 格式化为 HH:MM:SS
+                const formattedTime = 
+                    (hours < 10 ? '0' + hours : hours) + ':' +
+                    (minutes < 10 ? '0' + minutes : minutes) + ':' +
+                    (seconds < 10 ? '0' + seconds : seconds);
+                
+                $('#waitingTimer').text(formattedTime);
+            }
+            
+            // 开始状态检查
+            function startStatusCheck() {
+                if (checkStatusInterval) {
+                    clearInterval(checkStatusInterval);
+                }
+                
+                // 每10秒检查一次状态
+                checkStatusInterval = setInterval(checkWaitingStatus, 10000);
+            }
+            
+            // 取消等待
+            function cancelWaiting() {
+                if (!waitingId) return;
+                
+                Swal.fire({
+                    title: '确定取消等待？',
+                    text: '取消后将失去当前的队列位置',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '确定取消',
+                    cancelButtonText: '继续等待'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{% url 'students:cancel_waiting' %}",
+                            type: "POST",
+                            data: {
+                                waiting_id: waitingId,
+                                csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: '已取消等待',
+                                        text: '即将返回练琴主页',
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        window.location.href = "{% url 'students:practice' %}";
+                                    });
+                                } else {
+                                    layer.msg(response.message || "取消等待失败", {icon: 2});
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                layer.msg("请求失败，请重试", {icon: 2});
+                                console.error("取消等待失败:", error);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // 绑定开始练琴按钮事件
+            $('#startPracticeBtn').on('click', function() {
+                if (!waitingId) return;
+                
+                $.ajax({
+                    url: "{% url 'students:check_waiting_status' %}",
+                    type: "GET",
+                    data: {
+                        waiting_id: waitingId
+                    },
+                    success: function(response) {
+                        if (response.success && response.status === 'ready') {
+                            // 跳转到练琴页面
+                            window.location.href = "{% url 'students:piano_practice' %}?practice_id=" + response.practice_id;
+                        } else {
+                            layer.msg('钢琴状态已变更，请刷新页面重试', {icon: 2});
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        layer.msg('网络请求失败，请重试', {icon: 2});
+                    }
+                });
+            });
+            
+            // 页面关闭前清理
+            window.onbeforeunload = function() {
+                if (timerInterval) clearInterval(timerInterval);
+                if (checkStatusInterval) clearInterval(checkStatusInterval);
+            };
+        });
+    </script>
+</body>
+</html> 

@@ -74,6 +74,12 @@ class PracticeRecord(models.Model):
     def __str__(self):
         return f"{self.student.name} - {self.date}"
 
+    def save(self, *args, **kwargs):
+        # 如果是新创建的记录，确保不设置end_time
+        if not self.pk and not self.end_time:
+            self.end_time = None
+        super().save(*args, **kwargs)
+
     @property
     def check_in_time(self):
         """兼容AttendanceRecord API，返回开始时间"""

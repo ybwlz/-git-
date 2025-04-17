@@ -714,38 +714,39 @@
                             <div class="attendance-item">
                                 <div class="attendance-info">
                                     <div class="attendance-date">
-                                        {{ record.check_in_time|date:"Y年m月d日" }}
+                                        {{ record.date|date:"Y年m月d日" }}
                                         <small class="text-muted">(ID: {{ record.id }})</small>
                                     </div>
                                     <div class="attendance-time">
-                                        签到: {{ record.check_in_time|time:"H:i:s" }}
-                                        {% if record.check_out_time %}
-                                            | 签退: {{ record.check_out_time|time:"H:i:s" }}
+                                        签到: {{ record.start_time|time:"H:i:s" }}
+                                        {% if record.status == 'completed' and record.end_time %}
+                                            | 签退: {{ record.end_time|time:"H:i:s" }}
                                         {% endif %}
                                     </div>
                                     <div class="ms-3">
-                                        <span class="attendance-status {% if record.status == 'checked_in' %}status-checked-in{% elif record.status == 'checked_out' %}status-checked-out{% endif %}">
-                                            {{ record.get_status_display }}
+                                        <span class="attendance-status {% if record.status == 'active' %}status-checked-in{% elif record.status == 'completed' %}status-checked-out{% endif %}">
+                                            {% if record.status == 'completed' %}已完成{% elif record.status == 'active' %}练习中{% else %}{{ record.status }}{% endif %}
                                         </span>
                                     </div>
                                 </div>
                                 
-                                {% if record.piano or record.duration_minutes %}
+                                {% if record.piano or record.duration %}
                                     <div class="practice-summary">
-                                        {% if record.piano %}
+                                        {% if record.piano_number %}
                                             <div class="mb-1">
                                                 <i class="fas fa-music me-2 text-muted"></i>
-                                                <span>钢琴编号: {{ record.piano.number }} 号</span>
-                                                {% if record.piano.brand %}
-                                                    <span class="ms-2">品牌: {{ record.piano.brand }}</span>
-                                                {% endif %}
+                                                <span>钢琴编号: {{ record.piano_number }} 号</span>
                                             </div>
                                         {% endif %}
                                         
-                                        {% if record.duration_minutes %}
+                                        {% if record.duration %}
                                             <div>
                                                 <i class="fas fa-clock me-2 text-muted"></i>
-                                                <span>练习时长: {{ record.duration_minutes|floatformat:0 }} 分钟</span>
+                                                {% if record.status == 'completed' %}
+                                                    <span>练习时长: {{ record.duration|floatformat:0 }} 分钟</span>
+                                                {% else %}
+                                                    <span>练习时长: 进行中</span>
+                                                {% endif %}
                                             </div>
                                         {% endif %}
                                     </div>

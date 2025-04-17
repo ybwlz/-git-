@@ -133,6 +133,18 @@
             border-radius: 20px;
             font-weight: 500;
         }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
     </style>
     <!-- 添加页面自动刷新功能，每30秒刷新一次 -->
     <meta http-equiv="refresh" content="30">
@@ -346,13 +358,13 @@
                                                 </td>
                                                 <td>
                                                     {% if record.duration_minutes %}
-                                                        {{ record.duration_minutes|floatformat:"0" }} 分钟
+                                                        {{ record.duration_minutes|floatformat:"1" }} 分钟
                                                     {% else %}
                                                         <span class="text-muted">进行中</span>
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-info">{{ record.total_practice_time|default:"0" }} 分钟</span>
+                                                    <span class="badge bg-info">{{ record.total_practice_time|default:"0"|floatformat:"1" }} 分钟</span>
                                                 </td>
                                                 <td>
                                                     {% if record.status == 'checked_in' %}

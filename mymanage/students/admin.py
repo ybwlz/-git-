@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import Student, PracticeRecord
+from .models import Student, PracticeRecord, Attendance
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib import messages
+from django.utils import timezone
 
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'level', 'phone', 'school', 'created_at')
@@ -32,21 +33,34 @@ class StudentAdmin(admin.ModelAdmin):
     
     reset_password.short_description = "重置所选学生的密码"
 
+@admin.register(PracticeRecord)
 class PracticeRecordAdmin(admin.ModelAdmin):
     """练琴记录（主要考勤记录）的管理配置"""
-    list_display = ('student', 'date', 'start_time', 'end_time', 'duration', 'piano_number', 'status')
-    search_fields = ('student__name',)
-    list_filter = ('date', 'status', 'piano_number')
-    date_hierarchy = 'date'
+    list_display = ('student', 'date', 'start_time', 'get_end_time_display', 'get_duration_display', 'piano_number', 'status')
+    list_filter = ('status', 'date', 'student')
+    search_fields = ('student__name', 'piano_number')
+    ordering = ('-date', '-start_time')
     
-    def get_queryset(self, request):
-        """默认显示最近7天的记录"""
-        qs = super().get_queryset(request)
-        from django.utils import timezone
-        from datetime import timedelta
-        seven_days_ago = timezone.now().date() - timedelta(days=7)
-        return qs.filter(date__gte=seven_days_ago)
+    def get_end_time_display(self, obj):
+        if obj.status == 'active':
+            return '练琴中'
+        return obj.end_time
+    get_end_time_display.short_description = '结束时间'
+    
+    def get_duration_display(self, obj):
+        if obj.status == 'active':
+            # 如果是进行中的记录，计算当前时长
+            current_time = timezone.now()
+            duration_minutes = int((current_time - obj.start_time).total_seconds() / 60)
+            return f'{duration_minutes}分钟（进行中）'
+        if obj.duration is not None:
+            return f'{obj.duration}分钟'
+        if obj.end_time and obj.start_time:
+            # 如果有开始和结束时间但没有duration，计算时长
+            duration_minutes = int((obj.end_time - obj.start_time).total_seconds() / 60)
+            return f'{duration_minutes}分钟'
+        return '-'
+    get_duration_display.short_description = '练习时长'
 
 # 注册模型到管理后台
 admin.site.register(Student, StudentAdmin)
-admin.site.register(PracticeRecord, PracticeRecordAdmin)

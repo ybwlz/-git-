@@ -126,7 +126,7 @@ class Course(models.Model):
     code = models.CharField('课程代码', max_length=20, unique=True)
     description = models.TextField('课程描述', blank=True)
     level = models.ForeignKey(PianoLevel, on_delete=models.CASCADE, related_name='courses', verbose_name='钢琴等级')
-    teacher = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='courses', verbose_name='教师')
+    teacher = models.ForeignKey(TeacherProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='courses', verbose_name='教师')
     duration = models.DurationField('标准练习时长', default=datetime.timedelta(minutes=30))
     created_at = models.DateTimeField('创建时间', auto_now_add=True)
     students = models.ManyToManyField('students.Student', related_name='courses', verbose_name='学生', blank=True)

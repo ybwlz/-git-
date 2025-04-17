@@ -23,7 +23,7 @@ from .models import TeacherProfile, PrivacySetting
 from .forms import TeacherProfileForm, TeacherRegistrationForm, PrivacySettingForm, PasswordChangeForm
 from mymanage.students.models import Student, PracticeRecord
 from mymanage.courses.models import Course, CourseSchedule, SheetMusic, PianoLevel, Piano
-from mymanage.attendance.models import AttendanceRecord, AttendanceSession, QRCode, WaitingQueue
+from mymanage.attendance.models import AttendanceRecord, AttendanceSession, QRCode, WaitingQueue, PianoAssignment
 from mymanage.finance.models import Payment, PaymentCategory, Fee
 
 # 设置日志记录器
@@ -1315,26 +1315,26 @@ def attendance_session_detail(request, session_id):
             
             # 检测并修复异常时间
             if record.check_out_local < record.check_in_local:
-                record.duration_minutes = 30  # 设置一个默认值
+                record.duration_minutes = 30.0  # 设置一个默认值
             else:
                 time_diff = record.check_out_local - record.check_in_local
-                minutes = time_diff.total_seconds() / 60
+                minutes = round(time_diff.total_seconds() / 60, 1)
                 
                 # 限制最大持续时间为4小时
                 if minutes > 240:
-                    record.duration_minutes = 240
+                    record.duration_minutes = 240.0
                 else:
                     record.duration_minutes = minutes
         else:
             # 如果未签退，计算从签到到当前的时间
             time_diff = current_time - record.check_in_local
-            minutes = time_diff.total_seconds() / 60
+            minutes = round(time_diff.total_seconds() / 60, 1)
             
             # 限制合理范围
             if minutes < 0:
-                record.duration_minutes = 0
+                record.duration_minutes = 0.0
             elif minutes > 240:
-                record.duration_minutes = 240
+                record.duration_minutes = 240.0
             else:
                 record.duration_minutes = minutes
     
@@ -1903,102 +1903,10 @@ def piano_arrangement(request):
     pianos = Piano.objects.all().order_by('number')
     logger.info(f"系统中钢琴数量: {pianos.count()}")
     
-    # 获取所有活跃的PracticeRecord
-    from mymanage.students.models import PracticeRecord
-    active_practice_records = PracticeRecord.objects.filter(
-        status='active',
-        date=current_time.date()
-    ).select_related('student')
-    
-    # 为每个钢琴添加当前使用学生信息
-    for piano in pianos:
-        # 先检查AttendanceRecord中的记录
-        if piano.is_active and piano.is_occupied:
-            # 查找当前使用此钢琴的学生
-            current_record = AttendanceRecord.objects.filter(
-                piano=piano,
-                status='checked_in'
-            ).order_by('-check_in_time').first()
-            
-            if current_record:
-                piano.current_student = current_record.student
-                piano.start_time = timezone.localtime(current_record.check_in_time)
-                piano.end_time = piano.start_time + timedelta(minutes=30)  # 标准练习时长30分钟
-                
-                # 计算已练习时间，使用本地时间
-                time_diff = current_time - piano.start_time
-                practiced_minutes = int(time_diff.total_seconds() / 60)
-                
-                # 如果计算结果异常（负数或超大值），进行修正
-                if practiced_minutes < 0:
-                    practiced_minutes = 0
-                    logger.warning(f"检测到异常练习时间计算: {piano.start_time} > {current_time}")
-                elif practiced_minutes > 240:  # 超过4小时可能是异常
-                    practiced_minutes = 240
-                    logger.warning(f"检测到异常长练习时间: {practiced_minutes}分钟")
-                
-                piano.practiced_time = f"{practiced_minutes}分钟"
-                logger.info(f"钢琴{piano.number}被{current_record.student.name}使用中，已练习{practiced_minutes}分钟")
-            else:
-                # 检查是否有PracticeRecord正在使用此钢琴
-                practice_record = active_practice_records.filter(
-                    piano_number=piano.number,
-                ).first()
-                
-                if practice_record:
-                    # 有PracticeRecord正在使用此钢琴
-                    piano.current_student = practice_record.student
-                    piano.start_time = timezone.localtime(practice_record.start_time)
-                    piano.end_time = timezone.localtime(practice_record.end_time) if practice_record.end_time else (piano.start_time + timedelta(minutes=30))
-                    
-                    # 计算已练习时间
-                    time_diff = current_time - piano.start_time
-                    practiced_minutes = int(time_diff.total_seconds() / 60)
-                    
-                    # 修正异常值
-                    if practiced_minutes < 0:
-                        practiced_minutes = 0
-                    elif practiced_minutes > 240:
-                        practiced_minutes = 240
-                    
-                    piano.practiced_time = f"{practiced_minutes}分钟"
-                    logger.info(f"钢琴{piano.number}被{practice_record.student.name}使用中 (PracticeRecord)，已练习{practiced_minutes}分钟")
-                else:
-                    # 这里是错误状态：钢琴标记为占用，但没有对应的考勤记录
-                    logger.warning(f"警告: 钢琴{piano.number}标记为占用，但找不到对应的考勤记录")
-                    # 修正钢琴状态
-                    piano.is_occupied = False
-                    piano.save()
-        else:
-            # 检查是否有PracticeRecord正在使用此钢琴，但钢琴状态未更新
-            practice_record = active_practice_records.filter(
-                piano_number=piano.number,
-            ).first()
-            
-            if practice_record and piano.is_active and not piano.is_occupied:
-                # 将钢琴状态更新为占用
-                piano.is_occupied = True
-                piano.save()
-                
-                # 更新钢琴信息
-                piano.current_student = practice_record.student
-                piano.start_time = timezone.localtime(practice_record.start_time)
-                piano.end_time = timezone.localtime(practice_record.end_time) if practice_record.end_time else (piano.start_time + timedelta(minutes=30))
-                
-                # 计算已练习时间
-                time_diff = current_time - piano.start_time
-                practiced_minutes = int(time_diff.total_seconds() / 60)
-                
-                # 修正异常值
-                if practiced_minutes < 0:
-                    practiced_minutes = 0
-                elif practiced_minutes > 240:
-                    practiced_minutes = 240
-                
-                piano.practiced_time = f"{practiced_minutes}分钟"
-                logger.info(f"更新钢琴{piano.number}状态为占用，被{practice_record.student.name}使用中")
-            else:
-                logger.info(f"钢琴{piano.number} - 状态: {'可用' if piano.is_active else '维护中'}，{'被占用' if piano.is_occupied else '空闲'}")
+    # 计算钢琴使用率
+    occupied_pianos = pianos.filter(is_active=True, is_occupied=True).count()
+    active_pianos = pianos.filter(is_active=True).count()
+    piano_usage_rate = f"{int((occupied_pianos / active_pianos * 100) if active_pianos > 0 else 0)}%"
     
     # 获取当前等待队列中的学生
     waiting_students = []
@@ -2007,43 +1915,20 @@ def piano_arrangement(request):
         session__status='active'
     ).order_by('join_time')
     
-    # 计算今天的开始和结束时间（使用本地时区）
-    today_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
-    today_end = today_start + timedelta(days=1) - timedelta(microseconds=1)
+    # 计算等待人数
+    waiting_count = active_waiters.count()
     
-    logger.info(f"今日开始时间: {today_start.strftime('%Y-%m-%d %H:%M:%S')}")
-    logger.info(f"今日结束时间: {today_end.strftime('%Y-%m-%d %H:%M:%S')}")
+    # 计算平均等待时间
+    if active_waiters.exists():
+        total_wait_time = 0
+        for waiter in active_waiters:
+            wait_time = (current_time - timezone.localtime(waiter.join_time)).total_seconds()
+            total_wait_time += wait_time
+        avg_wait_time = f"{int((total_wait_time / active_waiters.count()) / 60)}分钟"
+    else:
+        avg_wait_time = "0分钟"
     
-    # 统计今日签到人数 - 使用date比较而不是datetime比较
-    checked_in_today = AttendanceRecord.objects.filter(
-        check_in_time__date=current_time.date(),
-        session__course__teacher=teacher
-    ).values('student').distinct().count()
-    
-    # 同时统计PracticeRecord中的签到人数
-    practice_checked_in = PracticeRecord.objects.filter(
-        date=current_time.date()
-    ).values('student').distinct().count()
-    
-    # 合并两个统计结果，因为可能有重复，所以需要获取所有学生ID然后去重
-    attendance_student_ids = AttendanceRecord.objects.filter(
-        check_in_time__date=current_time.date(),
-        session__course__teacher=teacher
-    ).values_list('student_id', flat=True)
-    
-    practice_student_ids = PracticeRecord.objects.filter(
-        date=current_time.date()
-    ).values_list('student_id', flat=True)
-    
-    # 合并两个查询集并去重
-    all_student_ids = set(list(attendance_student_ids) + list(practice_student_ids))
-    total_checked_in = len(all_student_ids)
-    
-    logger.info(f"等待队列学生数量: {active_waiters.count()}")
-    logger.info(f"今日考勤记录签到学生数量: {checked_in_today}")
-    logger.info(f"今日练琴记录学生数量: {practice_checked_in}")
-    logger.info(f"今日总签到学生数量(去重): {total_checked_in}")
-    
+    # 处理等待学生列表
     for waiter in active_waiters:
         waiter_join_time = timezone.localtime(waiter.join_time)
         waiting_time = int((current_time - waiter_join_time).total_seconds() / 60)
@@ -2057,174 +1942,29 @@ def piano_arrangement(request):
             'estimated_start_time': estimated_start,
         })
         logger.info(f"等待学生: {waiter.student.name}，等待时间: {waiting_time}分钟")
-    
-    # 获取可用钢琴列表（用于手动分配）
-    available_pianos = Piano.objects.filter(is_active=True, is_occupied=False)
-    
-    # 获取今日签到记录和练习记录
-    from mymanage.students.models import PracticeRecord
-    
-    # 合并两种记录
-    all_today_records = []
-    
-    # 1. 获取考勤记录
-    attendance_records = AttendanceRecord.objects.filter(
-        check_in_time__date=current_time.date()
-    ).select_related('student', 'piano', 'session').order_by('-check_in_time')
-    
-    # 2. 获取练琴记录
+
+    # 获取今日练琴记录
+    today = current_time.date()
     practice_records = PracticeRecord.objects.filter(
-        date=current_time.date()
+        date=today
     ).select_related('student').order_by('-start_time')
-    
-    # 合并记录
-    for record in attendance_records:
-        record.local_check_in = timezone.localtime(record.check_in_time)
-        if record.check_out_time:
-            record.local_check_out = timezone.localtime(record.check_out_time)
-            # 计算持续时间（分钟）
-            time_diff = record.local_check_out - record.local_check_in
-            record.duration_mins = int(time_diff.total_seconds() / 60)
-            
-            # 修正异常持续时间
-            if record.duration_mins < 0:
-                record.duration_mins = 0
-            elif record.duration_mins > 240:  # 超过4小时可能是异常
-                record.duration_mins = 240
-        else:
-            # 如果尚未签退，计算到当前时间的持续时间
-            time_diff = current_time - record.local_check_in
-            record.duration_mins = int(time_diff.total_seconds() / 60)
-            
-            # 修正异常持续时间
-            if record.duration_mins < 0:
-                record.duration_mins = 0
-            elif record.duration_mins > 240:
-                record.duration_mins = 240
-        
-        all_today_records.append(record)
-    
-    for record in practice_records:
-        # 避免添加重复记录 (已经在考勤记录中的)
-        if any(r.student_id == record.student_id and abs((r.check_in_time - record.start_time).total_seconds()) < 300 for r in attendance_records):
-            continue
-            
-        # 添加本地化时间
-        record.local_check_in = timezone.localtime(record.start_time)
-        # 不再赋值check_in_time属性，使用原始的start_time属性
-        
-        # 设置结束时间相关属性
-        if record.end_time:
-            record.local_check_out = timezone.localtime(record.end_time)
-            # 同样不直接设置check_out_time
-        
-        # 确保钢琴编号存在
-        if not hasattr(record, 'piano_number') or record.piano_number is None:
-            # 没有钢琴编号，设置默认值
-            record.piano_number = 1
-            
-        # 添加到记录列表
-        all_today_records.append(record)
-    
-    # 按时间排序 - 使用更安全的方式获取排序键
-    def get_sort_key(record):
-        # 尝试获取开始时间，使用不同可能的字段名
-        if hasattr(record, 'start_time') and record.start_time:
-            return record.start_time
-        elif hasattr(record, 'check_in_time') and record.check_in_time:
-            # 如果是属性而不是字段，直接访问可能会出错
-            try:
-                return record.check_in_time
-            except:
-                pass
-        # 默认返回当前时间作为后备选项
-        return current_time
-    
-    # 使用自定义排序函数
-    try:
-        all_today_records.sort(key=get_sort_key, reverse=True)
-    except Exception as e:
-        logger.error(f"排序练琴记录时出错: {str(e)}")
-        # 如果排序失败，尝试更简单的方法或保持原样
-    
-    logger.info(f"今日总记录数: {len(all_today_records)}")
-    
-    # 钢琴使用率
-    total_pianos = Piano.objects.filter(is_active=True).count()
-    occupied_pianos = Piano.objects.filter(is_active=True, is_occupied=True).count()
-    piano_usage_rate = f"{int(occupied_pianos / total_pianos * 100)}%" if total_pianos > 0 else "0%"
-    
-    # 等待人数
-    waiting_count = WaitingQueue.objects.filter(is_active=True).count()
-    
-    # 平均等待时间
-    average_wait = WaitingQueue.objects.filter(
-        is_active=False,
-        join_time__date=current_time.date()
-    ).aggregate(avg_time=Avg('estimated_wait_time'))
-    avg_wait_time = f"{int(average_wait['avg_time'] or 0)}分钟"
-    
-    # 检查并自动签退超时的记录
-    auto_checkout_threshold = current_time - timedelta(hours=4)  # 4小时自动签退
-    overtime_records = AttendanceRecord.objects.filter(
-        status='checked_in',
-        check_in_time__lt=auto_checkout_threshold
-    )
-    
-    for record in overtime_records:
-        logger.warning(f"自动签退超时记录: {record.student.name} - 签到时间: {record.check_in_time}")
-        try:
-            record.check_out()
-        except Exception as e:
-            logger.error(f"自动签退失败: {str(e)}")
-            # 直接强制签退
-            record.status = 'checked_out'
-            record.check_out_time = current_time
-            record.duration = 4.0  # 4小时
-            record.duration_minutes = 240  # 240分钟
-            record.save()
-        
-        # 确保创建对应的PracticeRecord记录 - 添加此部分代码
-        from mymanage.students.models import PracticeRecord
-        try:
-            # 检查是否已有练琴记录
-            existing_practice = PracticeRecord.objects.filter(
-                student=record.student,
-                date=record.check_in_time.date(),
-                start_time=record.check_in_time
-            ).exists()
-            
-            if not existing_practice:
-                # 为自动签退的记录创建练琴记录
-                piano_number = 1  # 默认钢琴编号
-                if record.piano and hasattr(record.piano, 'number'):
-                    piano_number = record.piano.number
-                
-                PracticeRecord.objects.create(
-                    student=record.student,
-                    date=record.check_in_time.date(),
-                    start_time=record.check_in_time,
-                    end_time=record.check_out_time,
-                    duration=240,  # 4小时（240分钟）
-                    piano_number=piano_number,
-                    status='completed',
-                    attendance_session=record.session
-                )
-                logger.info(f"为自动签退的学生{record.student.name}创建了练琴记录")
-        except Exception as e:
-            logger.error(f"创建练琴记录失败: {str(e)}")
-    
+
+    # 获取今日已签到人数
+    checked_in_today = AttendanceRecord.objects.filter(
+        check_in_time__date=today,
+        status='checked_in'
+    ).count()
+
     context = {
         'teacher': teacher,
         'pianos': pianos,
         'waiting_students': waiting_students,
-        'available_pianos': available_pianos,
-        'today_records': all_today_records,
-        'current_time': current_time,
-        'checked_in_today': total_checked_in,  # 使用合并后的去重统计
         'piano_usage_rate': piano_usage_rate,
         'waiting_count': waiting_count,
         'avg_wait_time': avg_wait_time,
+        'current_time': current_time,
+        'practice_records': practice_records,
+        'checked_in_today': checked_in_today,
     }
     
     return render(request, 'teachers/piano_arrangement.html', context)
@@ -2237,7 +1977,7 @@ def refresh_piano_status(request):
     try:
         # 获取所有钢琴状态
         pianos = Piano.objects.all()
-        current_time = timezone.now()
+        current_time = timezone.localtime(timezone.now())
         
         # 导入所需模型
         from mymanage.students.models import PracticeRecord
@@ -2259,16 +1999,17 @@ def refresh_piano_status(request):
                 ).order_by('-check_in_time').first()
                 
                 if current_record:
-                    # 计算已练习时间
-                    practiced_minutes = int((current_time - current_record.check_in_time).total_seconds() / 60)
+                    # 确保时间是本地化的
+                    local_start_time = timezone.localtime(current_record.check_in_time)
+                    practiced_minutes = int((current_time - local_start_time).total_seconds() / 60)
                     
                     student_info = {
                         'id': current_record.student.id,
                         'name': current_record.student.name,
                         'level': str(current_record.student.level),
-                        'start_time': current_record.check_in_time.strftime('%H:%M'),
+                        'start_time': local_start_time.strftime('%H:%M'),
                         'practiced_time': f"{practiced_minutes}分钟",
-                        'end_time': (current_record.check_in_time + timedelta(minutes=30)).strftime('%H:%M')
+                        'end_time': (local_start_time + timedelta(minutes=30)).strftime('%H:%M')
                     }
                 else:
                     # 检查是否有PracticeRecord在使用此钢琴
@@ -2277,55 +2018,28 @@ def refresh_piano_status(request):
                     ).order_by('-start_time').first()
                     
                     if practice_record:
-                        # 计算已练习时间
-                        practiced_minutes = int((current_time - practice_record.start_time).total_seconds() / 60)
+                        # 确保时间是本地化的
+                        local_start_time = timezone.localtime(practice_record.start_time)
+                        practiced_minutes = int((current_time - local_start_time).total_seconds() / 60)
                         
-                        # 如果计算结果异常，进行修正
+                        # 修正异常时间
                         if practiced_minutes < 0:
                             practiced_minutes = 0
-                        elif practiced_minutes > 240:  # 超过4小时可能是异常
+                        elif practiced_minutes > 240:
                             practiced_minutes = 240
                         
                         student_info = {
                             'id': practice_record.student.id,
                             'name': practice_record.student.name,
                             'level': str(practice_record.student.level),
-                            'start_time': practice_record.start_time.strftime('%H:%M'),
+                            'start_time': local_start_time.strftime('%H:%M'),
                             'practiced_time': f"{practiced_minutes}分钟",
-                            'end_time': (practice_record.start_time + timedelta(minutes=30)).strftime('%H:%M')
+                            'end_time': (local_start_time + timedelta(minutes=30)).strftime('%H:%M')
                         }
                     else:
                         # 钢琴被标记为占用，但找不到使用记录，更新状态
                         piano.is_occupied = False
                         piano.save()
-            else:
-                # 检查是否有PracticeRecord正在使用该钢琴，但钢琴状态未更新
-                practice_record = active_practice_records.filter(
-                    piano_number=piano.number
-                ).order_by('-start_time').first()
-                
-                if practice_record and piano.is_active and not piano.is_occupied:
-                    # 更新钢琴状态
-                    piano.is_occupied = True
-                    piano.save()
-                    
-                    # 计算已练习时间
-                    practiced_minutes = int((current_time - practice_record.start_time).total_seconds() / 60)
-                    
-                    # 如果计算结果异常，进行修正
-                    if practiced_minutes < 0:
-                        practiced_minutes = 0
-                    elif practiced_minutes > 240:  # 超过4小时可能是异常
-                        practiced_minutes = 240
-                    
-                    student_info = {
-                        'id': practice_record.student.id,
-                        'name': practice_record.student.name,
-                        'level': str(practice_record.student.level),
-                        'start_time': practice_record.start_time.strftime('%H:%M'),
-                        'practiced_time': f"{practiced_minutes}分钟",
-                        'end_time': (practice_record.start_time + timedelta(minutes=30)).strftime('%H:%M')
-                    }
             
             piano_data.append({
                 'id': piano.id,
@@ -2875,9 +2589,21 @@ def manual_checkin(request):
             
             # 处理考勤时间
             if check_in_time_str:
-                check_in_time = timezone.make_aware(datetime.fromisoformat(check_in_time_str))
+                try:
+                    # 解析ISO格式的时间字符串，自动处理时区
+                    check_in_time = timezone.make_aware(datetime.fromisoformat(check_in_time_str.replace('Z', '+00:00')))
+                except (ValueError, TypeError) as e:
+                    logger.error(f"时间解析错误: {str(e)}, 原始时间字符串: {check_in_time_str}")
+                    return JsonResponse({
+                        'success': False,
+                        'message': '时间格式错误'
+                    }, status=400)
             else:
                 check_in_time = timezone.now()
+            
+            # 记录时间信息用于调试
+            logger.info(f"手动添加考勤 - 原始时间字符串: {check_in_time_str}")
+            logger.info(f"手动添加考勤 - 解析后时间: {check_in_time}")
             
             # 计算签退时间（签到时间+30分钟）
             check_out_time = check_in_time + timezone.timedelta(minutes=30)

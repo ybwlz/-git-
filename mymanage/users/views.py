@@ -42,7 +42,12 @@ def login_view(request):
                 else:
                     messages.error(request, '用户类型不匹配，请选择正确的用户类型')
             else:
-                messages.error(request, '用户名或密码错误')
+                messages.error(request, '用户名或密码错误，请重试')
+        else:
+            # 处理表单验证错误
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
     else:
         form = UserLoginForm()
     

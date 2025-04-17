@@ -128,6 +128,18 @@
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 100%;
+            position: relative;
+            height: auto;
+        }
+        
+        .main-content {
+            margin-left: 0;
+        }
+    }
 </style>
 {% endblock %}
 
