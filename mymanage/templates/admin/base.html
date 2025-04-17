@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} sidebar-mini{% endblock %}
+
+{% block nav-global %}
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" height="40px">
+        <span>苗韵琴行管理系统</span>
+    </div>
+    
+    <ul class="sidebar-nav">
+        <li class="sidebar-header">主要功能</li>
+        <li class="sidebar-item">
+            <a href="{% url 'admin:index' %}" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>控制面板</span>
+            </a>
+        </li>
+        
+        <li class="sidebar-header">用户管理</li>
+        <li class="sidebar-item">
+            <a href="{% url 'admin:users_user_changelist' %}" class="sidebar-link">
+                <i class="fas fa-users"></i>
+                <span>用户管理</span>
+            </a>
+        </li>
+        
+        <li class="sidebar-header">课程管理</li>
+        <li class="sidebar-item">
+            <a href="{% url 'admin:courses_course_changelist' %}" class="sidebar-link">
+                <i class="fas fa-book"></i>
+                <span>课程管理</span>
+            </a>
+        </li>
+        
+        <li class="sidebar-header">考勤管理</li>
+        <li class="sidebar-item">
+            <a href="{% url 'admin:attendance_attendance_changelist' %}" class="sidebar-link">
+                <i class="fas fa-clipboard-list"></i>
+                <span>考勤记录</span>
+            </a>
+        </li>
+        
+        <li class="sidebar-header">财务管理</li>
+        <li class="sidebar-item">
+            <a href="{% url 'admin:finance_payment_changelist' %}" class="sidebar-link">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>缴费记录</span>
+            </a>
+        </li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    {{ block.super }}
+</div>
+{% endblock %} 

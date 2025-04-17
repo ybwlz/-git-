@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | 苗韵琴行管理系统{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" height="40px" style="margin-right: 10px;">
+    苗韵琴行管理系统
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %} 
