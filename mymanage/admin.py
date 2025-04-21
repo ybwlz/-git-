@@ -1,5 +1,7 @@
 from django.contrib.admin import AdminSite
 from django.utils.translation import gettext_lazy as _
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 class MyManageAdminSite(AdminSite):
     """自定义管理站点，控制应用显示顺序"""
@@ -27,6 +29,9 @@ class MyManageAdminSite(AdminSite):
         
         return app_list
 
+    def login(self, request, extra_context=None):
+        """重写登录视图，重定向到自定义登录页面"""
+        return HttpResponseRedirect(reverse('login') + '?next=' + request.path)
 
 # 创建自定义管理站点实例
 mymanage_admin_site = MyManageAdminSite(name='myadmin')

@@ -8,6 +8,7 @@ from mymanage.admin import mymanage_admin_site
 
 urlpatterns = [
     # 管理后台
+    path('admin/login/', RedirectView.as_view(url='/login/', permanent=False)),  # 重定向admin登录页面
     path('admin/', mymanage_admin_site.urls),
     
     # 用户认证

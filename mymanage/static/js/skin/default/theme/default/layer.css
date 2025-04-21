@@ -78,8 +78,8 @@
   height: 30px;
   margin-left: 0;
   background-position: -149px -31px;
-  *right: -18px;
-  _display: none;
+  right: -18px;
+  display: none;
 }
 
 .layui-layer-setwin .layui-layer-close2:hover {

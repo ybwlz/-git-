@@ -4,6 +4,16 @@ Django settings for mymanage project.
 
 import os
 from pathlib import Path
+import mimetypes
+
+# 添加MIME类型配置
+mimetypes.add_type("text/css", ".css", True)
+mimetypes.add_type("application/javascript", ".js", True)
+mimetypes.add_type("image/png", ".png", True)
+mimetypes.add_type("image/jpeg", ".jpg", True)
+mimetypes.add_type("image/jpeg", ".jpeg", True)
+mimetypes.add_type("image/gif", ".gif", True)
+mimetypes.add_type("image/svg+xml", ".svg", True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -103,11 +113,10 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
+STATIC_ROOT = '/data/miaoyun/staticfiles/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mymanage', 'static'),
 ]
-# 添加静态文件收集目录配置
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files
 MEDIA_URL = '/media/'
