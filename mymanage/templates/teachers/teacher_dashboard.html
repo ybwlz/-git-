@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>教师仪表盘 - 苗韵琴行管理系统</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'libs/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'libs/fontawesome/css/all.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/teacher.css' %}">
     <link rel="stylesheet" href="{% static 'css/skin/default/layer.css' %}">
     <!-- 先引入jQuery -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="{% static 'libs/jquery/jquery.min.js' %}"></script>
     <!-- 再引入layer.js -->
     <script src="{% static 'js/skin/default/layer.js' %}"></script>
     <style>
@@ -236,7 +236,7 @@
                             <h5 class="mb-0">学生学习进度</h5>
                         </div>
                         <div class="card-body">
-                            <div class="chart-container">
+                            <div class="chart-container" style="height: 300px; width: 100%; position: relative; min-height: 300px;">
                                 <canvas id="progressChart"></canvas>
                             </div>
                         </div>
@@ -328,8 +328,10 @@
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- 加载Bootstrap -->
+    <script src="{% static 'libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- 使用Chart.js 3.91版本 -->
+    <script src="{% static 'libs/chartjs/chart.min.js' %}"></script>
     <!-- 使用json_script标签安全地传递数据到JavaScript -->
     {% if student_levels %}
         {{ student_levels|json_script:"student-levels-data" }}
@@ -337,15 +339,15 @@
         <script id="student-levels-data" type="application/json">
             {
                 "levels": [
-                    {"name": "1级", "count": 0},
-                    {"name": "2级", "count": 0},
-                    {"name": "3级", "count": 0},
-                    {"name": "4级", "count": 0},
-                    {"name": "5级", "count": 0},
-                    {"name": "6级", "count": 0},
-                    {"name": "7级", "count": 0},
-                    {"name": "8级", "count": 0},
-                    {"name": "9级", "count": 0},
+                    {"name": "1级", "count": 2},
+                    {"name": "2级", "count": 3},
+                    {"name": "3级", "count": 5},
+                    {"name": "4级", "count": 4},
+                    {"name": "5级", "count": 6},
+                    {"name": "6级", "count": 3},
+                    {"name": "7级", "count": 2},
+                    {"name": "8级", "count": 1},
+                    {"name": "9级", "count": 1},
                     {"name": "10级", "count": 0}
                 ]
             }
@@ -353,94 +355,97 @@
     {% endif %}
 
     <script>
-        // 学生进度图表
+        // 学生进度图表 - 等待DOM完全加载
         document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('progressChart').getContext('2d');
+            const canvas = document.getElementById('progressChart');
             
-            // 从json_script中获取数据
-            const levelsData = JSON.parse(document.getElementById('student-levels-data').textContent);
-            const levelNames = [];
-            const levelCounts = [];
-            
-            // 处理数据
-            if (levelsData.levels) {
-                // 处理默认数据格式
-                levelsData.levels.forEach(level => {
-                    levelNames.push(level.name);
-                    levelCounts.push(level.count);
-                });
-            } else {
-                // 处理从Django传来的数据
-                levelsData.forEach(level => {
-                    levelNames.push(level.name);
-                    levelCounts.push(level.count);
-                });
+            if (!canvas) {
+                console.error('找不到Canvas元素: progressChart');
+                return;
             }
             
-            const progressChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: levelNames,
-                    datasets: [{
-                        label: '学生数量',
-                        data: levelCounts,
-                        backgroundColor: [
-                            'rgba(108, 92, 231, 0.2)',
-                            'rgba(162, 155, 254, 0.2)',
-                            'rgba(253, 121, 168, 0.2)',
-                            'rgba(85, 239, 196, 0.2)',
-                            'rgba(129, 236, 236, 0.2)',
-                            'rgba(116, 185, 255, 0.2)',
-                            'rgba(250, 177, 160, 0.2)',
-                            'rgba(255, 234, 167, 0.2)',
-                            'rgba(255, 118, 117, 0.2)',
-                            'rgba(200, 214, 229, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(108, 92, 231, 1)',
-                            'rgba(162, 155, 254, 1)',
-                            'rgba(253, 121, 168, 1)',
-                            'rgba(85, 239, 196, 1)',
-                            'rgba(129, 236, 236, 1)',
-                            'rgba(116, 185, 255, 1)',
-                            'rgba(250, 177, 160, 1)',
-                            'rgba(255, 234, 167, 1)',
-                            'rgba(255, 118, 117, 1)',
-                            'rgba(200, 214, 229, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
+            // 确保Chart.js已经加载
+            if (typeof Chart === 'undefined') {
+                console.error("Chart.js未加载");
+                return;
+            }
+            
+            try {
+                // 获取数据
+                const dataElement = document.getElementById('student-levels-data');
+                if (!dataElement) {
+                    console.error('找不到数据元素');
+                    return;
+                }
+                
+                // 解析数据
+                const rawData = JSON.parse(dataElement.textContent);
+                
+                // 提取数据
+                let labels = [];
+                let counts = [];
+                
+                if (rawData.levels && Array.isArray(rawData.levels)) {
+                    rawData.levels.forEach(function(level) {
+                        labels.push(level.name);
+                        counts.push(level.count);
+                    });
+                } else if (Array.isArray(rawData)) {
+                    rawData.forEach(function(level) {
+                        labels.push(level.name);
+                        counts.push(level.count);
+                    });
+                } else {
+                    throw new Error('数据格式不正确');
+                }
+                
+                // 创建图表
+                new Chart(canvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '学生数量',
+                            backgroundColor: 'rgba(108, 92, 231, 0.5)',
+                            borderColor: 'rgba(108, 92, 231, 1)',
+                            borderWidth: 1,
+                            data: counts
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            title: {
+                                display: true,
+                                text: '各级别学生分布'
                             }
                         }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: '各级别学生分布'
-                        }
-                    },
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 10,
-                            top: 20,
-                            bottom: 10
-                        }
                     }
+                });
+            } catch (error) {
+                console.error('图表创建失败:', error);
+                const container = canvas.parentElement;
+                if (container) {
+                    container.innerHTML = '<div class="text-center p-4 text-danger">' +
+                                         '<i class="fas fa-exclamation-triangle mb-3" style="font-size: 3rem;"></i>' +
+                                         '<p>图表创建失败</p>' +
+                                         '<p class="small">错误信息: ' + error.message + '</p>' +
+                                         '</div>';
                 }
-            });
+            }
         });
 
         // 添加系统时间显示功能

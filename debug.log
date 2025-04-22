@@ -444,3 +444,23 @@ DEBUG 2025-04-17 13:53:05,132 proactor_events Using proactor: IocpProactor
 DEBUG 2025-04-17 13:54:38,012 proactor_events Using proactor: IocpProactor
 DEBUG 2025-04-17 13:54:43,595 proactor_events Using proactor: IocpProactor
 DEBUG 2025-04-17 14:02:11,152 proactor_events Using proactor: IocpProactor
+DEBUG 2025-04-22 16:07:11,866 __init__ pydot initializing
+DEBUG 2025-04-22 16:07:11,866 __init__ pydot 3.0.4
+DEBUG 2025-04-22 16:07:11,901 dot_parser pydot dot_parser module initializing
+DEBUG 2025-04-22 16:07:11,903 core pydot core module initializing
+DEBUG 2025-04-22 16:08:04,817 __init__ pydot initializing
+DEBUG 2025-04-22 16:08:04,817 __init__ pydot 3.0.4
+DEBUG 2025-04-22 16:08:04,851 dot_parser pydot dot_parser module initializing
+DEBUG 2025-04-22 16:08:04,851 core pydot core module initializing
+DEBUG 2025-04-22 16:09:14,236 __init__ pydot initializing
+DEBUG 2025-04-22 16:09:14,237 __init__ pydot 3.0.4
+DEBUG 2025-04-22 16:09:14,257 dot_parser pydot dot_parser module initializing
+DEBUG 2025-04-22 16:09:14,257 core pydot core module initializing
+DEBUG 2025-04-22 16:09:30,579 __init__ pydot initializing
+DEBUG 2025-04-22 16:09:30,579 __init__ pydot 3.0.4
+DEBUG 2025-04-22 16:09:30,587 dot_parser pydot dot_parser module initializing
+DEBUG 2025-04-22 16:09:30,587 core pydot core module initializing
+DEBUG 2025-04-22 16:10:18,005 __init__ pydot initializing
+DEBUG 2025-04-22 16:10:18,005 __init__ pydot 3.0.4
+DEBUG 2025-04-22 16:10:18,037 dot_parser pydot dot_parser module initializing
+DEBUG 2025-04-22 16:10:18,038 core pydot core module initializing

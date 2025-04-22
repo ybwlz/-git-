@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'mymanage.courses',
     'mymanage.attendance',
     'mymanage.finance',
-    'corsheaders',
+    'corsheaders',   
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -113,7 +114,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT = '/data/miaoyun/staticfiles/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mymanage', 'static'),
 ]
@@ -201,3 +202,11 @@ LOGGING = {
         'level': 'DEBUG',
     },
 } 
+
+# 邮件配置
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'  # QQ邮箱SMTP服务器
+EMAIL_PORT = 587  # QQ邮箱SMTP端口
+EMAIL_USE_TLS = True  # 启用TLS加密
+EMAIL_HOST_USER = '505340458@qq.com'  # 您的QQ邮箱
+EMAIL_HOST_PASSWORD = 'ncoleaugefwmcaca'  # 这里需要填写QQ邮箱的授权码，不是邮箱密码 

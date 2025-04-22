@@ -196,6 +196,12 @@ def update_profile(request):
                     # 确保用户获取正确的引用
                     user = request.user
                     user.avatar = avatar_file
+                    
+                    # 处理邮箱更新
+                    email = request.POST.get('email', '').strip()
+                    if email:
+                        user.email = email
+                        
                     user.save()
                     
                     # 输出保存后的路径
@@ -203,7 +209,15 @@ def update_profile(request):
                     messages.success(request, f'个人信息和头像更新成功！头像大小: {avatar_file.size} 字节')
                 else:
                     print("请求中没有找到avatar文件")
-                    messages.success(request, '个人信息更新成功！但没有接收到头像文件')
+                    # 处理邮箱更新
+                    user = request.user
+                    email = request.POST.get('email', '').strip()
+                    if email or email != user.email:
+                        user.email = email
+                        user.save()
+                        messages.success(request, '个人信息更新成功！邮箱已更新')
+                    else:
+                        messages.success(request, '个人信息更新成功！但没有接收到头像文件')
                 
                 return redirect('students:update_profile')
             else:

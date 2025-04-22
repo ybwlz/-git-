@@ -16,6 +16,7 @@ urlpatterns = [
     path('logout/', user_views.logout_view, name='logout'),
     path('register/', user_views.register_view, name='register'),
     path('password-reset/', user_views.password_reset_view, name='password_reset'),
+    path('password-reset/confirm/<uidb64>/<token>/', user_views.password_reset_confirm_view, name='password_reset_confirm'),
     
     # 应用模块
     path('', TemplateView.as_view(template_name='index.html'), name='home'),

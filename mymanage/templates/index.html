@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>苗韵琴行 - 专业钢琴教育</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- 加载Django静态文件标签并正确引用CSS -->
     {% load static %}
+    <link rel="stylesheet" href="{% static 'libs/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'libs/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <style>
         .hero-section {
@@ -34,7 +33,10 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-music me-2"></i>苗韵琴行
+                <div class="d-flex align-items-center">
+                    <img src="{% static 'img/logo.jpg' %}" alt="苗韵琴行" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                    <span>苗韵琴行</span>
+                </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切换导航">
                 <span class="navbar-toggler-icon"></span>
@@ -152,7 +154,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 mb-4 mb-lg-0">
-                    <img src="/static/img/about_piano.jpg" alt="苗韵琴行" class="about-img">
+                    <img src="{% static 'img/about_piano.jpg' %}" alt="苗韵琴行" class="about-img">
                 </div>
                 <div class="col-lg-6">
                     <h2 class="section-title">关于苗韵琴行</h2>
@@ -272,6 +274,7 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JavaScript -->
+    <script src="{% static 'libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html> 

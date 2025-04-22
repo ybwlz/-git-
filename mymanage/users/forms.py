@@ -16,9 +16,18 @@ class UserRegistrationForm(UserCreationForm):
         widget=forms.RadioSelect(attrs={'class': 'role-selector'})
     )
     
+    email = forms.EmailField(
+        label='电子邮箱（非必填）',
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': '电子邮箱（选填）'
+        })
+    )
+    
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'user_type']
+        fields = ['username', 'email', 'password1', 'password2', 'user_type']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '用户名'}),
         }

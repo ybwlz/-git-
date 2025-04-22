@@ -16,7 +16,7 @@ var isLayui = window.layui && layui.define, ready = {
             }
             return src || js[last].src;
         }();
-        return jsPath.substring(0, jsPath.lastIndexOf('/') + 1);
+        return jsPath.substring(0, jsPath.lastIndexOf('/')) + '/';
     }(),
     
     config: {}, end: {}, minIndex: 0, minLeft: [],
@@ -28,14 +28,13 @@ var isLayui = window.layui && layui.define, ready = {
         return style[style.getPropertyValue ? 'getPropertyValue' : 'getAttribute'](name);
     },
     link: function(href, fn, cssname){
-        if(!layer.path) return;
         var head = document.getElementsByTagName("head")[0], link = document.createElement('link');
         if(typeof fn === 'string') cssname = fn;
         var app = (cssname || href).replace(/\.|\//g, '');
         var id = 'layuicss-'+ app, timeout = 0;
         
         link.rel = 'stylesheet';
-        link.href = layer.path + href;
+        link.href = ready.getPath + href;
         link.id = id;
         
         if(!document.getElementById(id)){

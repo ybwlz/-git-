@@ -1,12 +1,12 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>注册 - 苗韵琴行管理系统</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    {% load static %}
+    <link href="{% static 'libs/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'libs/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <style>
         body {
@@ -247,6 +247,23 @@
                 <div class="mb-3">
                     <div class="input-group">
                         <span class="input-group-text">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        {{ form.email }}
+                    </div>
+                    {% if form.email.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.email.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <small class="form-text text-muted">绑定邮箱后可用于密码找回，建议填写</small>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">
                             <i class="fas fa-lock"></i>
                         </span>
                         {{ form.password1 }}
@@ -285,7 +302,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script>
         // 用户类型选择
         function selectRole(role) {

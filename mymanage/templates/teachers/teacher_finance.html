@@ -236,7 +236,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="height: 300px;">
+                    <div class="chart-container" style="height: 300px; width: 100%; position: relative; min-height: 300px;">
                         <canvas id="incomeChart"></canvas>
                     </div>
                 </div>
@@ -323,7 +323,7 @@
                     <h5 class="mb-0">收入分类</h5>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="height: 250px;">
+                    <div class="chart-container" style="height: 300px; width: 100%; position: relative; min-height: 300px;">
                         <canvas id="categoryChart"></canvas>
                     </div>
                     <!-- 调试信息 -->
@@ -373,8 +373,8 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- 加载Chart.js库 -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<!-- 加载Chart.js 3.91版本库 -->
+<script src="{% static 'libs/chartjs/chart.min.js' %}"></script>
 
 <script>
     // 系统时间更新
@@ -401,18 +401,6 @@
         if (!categoryData || !Array.isArray(categoryData) || categoryData.length === 0) {
             console.log("分类数据为空或格式错误，使用默认空数组");
             categoryData = [];
-            
-            // 如果分类数据为空，显示更友好的提示信息
-            document.addEventListener('DOMContentLoaded', function() {
-                var categoryContainer = document.getElementById('categoryChart').parentNode;
-                categoryContainer.innerHTML = '<div class="text-center p-4">' +
-                    '<i class="fas fa-chart-pie text-muted mb-3" style="font-size: 3rem;"></i>' +
-                    '<p class="text-muted">暂无收入分类数据</p>' +
-                    '<p class="small text-muted">您需要添加至少一笔带有分类的付款记录</p>' +
-                    '<a href="{% url "finance:payment_list" %}" class="btn btn-sm btn-outline-primary mt-2">' +
-                    '<i class="fas fa-plus-circle me-1"></i>添加付款记录</a>' +
-                    '</div>';
-            });
         }
         
         if (!monthlyData || !Array.isArray(monthlyData)) {
@@ -427,16 +415,6 @@
         // 出错时使用默认空数组
         monthlyData = [];
         categoryData = [];
-        
-        // 显示错误提示
-        document.addEventListener('DOMContentLoaded', function() {
-            var categoryContainer = document.getElementById('categoryChart').parentNode;
-            categoryContainer.innerHTML = '<div class="text-center p-4 text-danger">' +
-                '<i class="fas fa-exclamation-triangle mb-3" style="font-size: 3rem;"></i>' +
-                '<p>数据解析错误</p>' +
-                '<p class="small">请刷新页面或联系管理员</p>' +
-                '</div>';
-        });
     }
     
     // 准备月度数据, 确保所有12个月都有数据
@@ -461,64 +439,131 @@
     
     // 页面加载完成后初始化图表
     document.addEventListener('DOMContentLoaded', function() {
-        // 1. 绘制月度收入趋势图
-        var incomeCtx = document.getElementById('incomeChart').getContext('2d');
-        var incomeChart = new Chart(incomeCtx, {
-            type: 'line',
-            data: {
-                labels: allMonths,
-                datasets: [{
-                    label: '收入(元)',
-                    data: monthValues,
-                    backgroundColor: 'rgba(108, 92, 231, 0.2)',
-                    borderColor: 'rgba(108, 92, 231, 1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(108, 92, 231, 1)',
-                    pointBorderColor: '#fff',
-                    pointRadius: 5,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 20000, // 将Y轴最大值从10000增加到20000
-                        ticks: {
-                            stepSize: 4000, // 调整刻度步长为4000
-                            callback: function(value) {
-                                return '¥' + value;
+        console.log("DOM已加载，准备初始化财务图表...");
+        console.log("Chart.js版本:", Chart.version || "未知");
+        
+        // 检查Chart对象是否正确加载
+        if (typeof Chart === 'undefined') {
+            console.error("Chart对象未定义，图表库可能未正确加载");
+            return;
+        }
+        
+        // 1. 初始化月度收入趋势图
+        var incomeCanvas = document.getElementById('incomeChart');
+        if (!incomeCanvas) {
+            console.error("找不到Canvas元素: incomeChart");
+            return;
+        }
+        
+        var incomeCtx = incomeCanvas.getContext('2d');
+        if (!incomeCtx) {
+            console.error("无法获取Canvas上下文");
+            return;
+        }
+        
+        // 检查是否有月度数据
+        var hasMonthlyData = monthValues.some(function(value) { return value > 0; });
+        if (!hasMonthlyData) {
+            var incomeContainer = incomeCanvas.parentElement;
+            incomeContainer.innerHTML = '<div class="text-center p-4">' +
+                '<i class="fas fa-chart-line text-muted mb-3" style="font-size: 3rem;"></i>' +
+                '<p class="text-muted">暂无月度收入数据</p>' +
+                '<p class="small text-muted">您需要添加至少一笔已付款的记录</p>' +
+                '<a href="{% url "finance:payment_list" %}" class="btn btn-sm btn-outline-primary mt-2">' +
+                '<i class="fas fa-plus-circle me-1"></i>添加付款记录</a>' +
+                '</div>';
+            return;
+        }
+        
+        try {
+            var incomeChart = new Chart(incomeCtx, {
+                type: 'line',
+                data: {
+                    labels: allMonths,
+                    datasets: [{
+                        label: '收入(元)',
+                        data: monthValues,
+                        backgroundColor: 'rgba(108, 92, 231, 0.2)',
+                        borderColor: 'rgba(108, 92, 231, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(108, 92, 231, 1)',
+                        pointBorderColor: '#fff',
+                        pointRadius: 5,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '¥' + value;
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
                             }
                         },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
+                        x: {
+                            grid: {
+                                display: false
+                            }
                         }
                     },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                },
-                plugins: {
+                    plugins: {
                     legend: {
                         display: false
                     },
-                    tooltip: {
+                        tooltip: {
                         callbacks: {
-                            label: function(context) {
-                                return '¥' + context.raw;
+                                label: function(context) {
+                                    return '¥' + context.raw;
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+            console.log("月度收入图表已初始化:", incomeChart);
+        } catch (error) {
+            console.error("创建月度收入图表时出错:", error);
+            var incomeContainer = incomeCanvas.parentElement;
+            incomeContainer.innerHTML = '<div class="text-center p-4 text-danger">' +
+                '<i class="fas fa-exclamation-triangle mb-3" style="font-size: 3rem;"></i>' +
+                '<p>图表创建失败</p>' +
+                '<p class="small">错误信息: ' + error.message + '</p>' +
+                '</div>';
+        }
         
-        // 2. 绘制收入分类饼图
-        if (categoryData && categoryData.length > 0) {
+        // 2. 初始化收入分类饼图
+        var categoryCanvas = document.getElementById('categoryChart');
+        if (!categoryCanvas) {
+            console.error("找不到Canvas元素: categoryChart");
+            return;
+        }
+        
+        if (!categoryData || categoryData.length === 0) {
+            var categoryContainer = categoryCanvas.parentElement;
+            categoryContainer.innerHTML = '<div class="text-center p-4">' +
+                '<i class="fas fa-chart-pie text-muted mb-3" style="font-size: 3rem;"></i>' +
+                '<p class="text-muted">暂无收入分类数据</p>' +
+                '<p class="small text-muted">您需要添加至少一笔带有分类的付款记录</p>' +
+                '<a href="{% url "finance:payment_list" %}" class="btn btn-sm btn-outline-primary mt-2">' +
+                '<i class="fas fa-plus-circle me-1"></i>添加付款记录</a>' +
+                '</div>';
+            return;
+        }
+        
+        var categoryCtx = categoryCanvas.getContext('2d');
+        if (!categoryCtx) {
+            console.error("无法获取分类图表Canvas上下文");
+            return;
+        }
+        
+        try {
             var categoryLabels = categoryData.map(function(item) { return item.name; });
             var categoryValues = categoryData.map(function(item) { return item.value; });
             
@@ -528,7 +573,6 @@
                 return item.name + ' (' + percent + '%)';
             });
             
-            var categoryCtx = document.getElementById('categoryChart').getContext('2d');
             var categoryChart = new Chart(categoryCtx, {
                 type: 'doughnut',
                 data: {
@@ -544,85 +588,47 @@
                             'rgba(131, 52, 113, 0.8)'
                         ],
                         borderColor: '#fff',
-                        borderWidth: 2,
-                        hoverOffset: 10  // 鼠标悬停时突出显示
+                        borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     cutout: '65%',
-                    animation: {
-                        animateScale: true,
-                        animateRotate: true,
-                        duration: 1000  // 动画持续时间
-                    },
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                padding: 10,
-                                font: {
-                                    size: 11
-                                },
-                                generateLabels: function(chart) {
-                                    var data = chart.data;
-                                    if (data.labels.length && data.datasets.length) {
-                                        return data.labels.map(function(label, i) {
-                                            var value = data.datasets[0].data[i];
-                                            var total = data.datasets[0].data.reduce(function(acc, val) {
-                                                return acc + val;
-                                            }, 0);
-                                            var percent = total > 0 ? Math.round((value / total) * 100) : 0;
-                                            return {
-                                                text: label,
-                                                fillStyle: data.datasets[0].backgroundColor[i],
-                                                strokeStyle: data.datasets[0].borderColor,
-                                                lineWidth: data.datasets[0].borderWidth,
-                                                index: i
-                                            };
-                                        });
-                                    }
-                                    return [];
-                                }
-                            }
-                        },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 10
+                        }
+                    },
                         tooltip: {
-                            callbacks: {
+                        callbacks: {
                                 label: function(context) {
                                     var label = context.label || '';
                                     var value = context.raw;
-                                    var percent = categoryTotal > 0 ? ((value / categoryTotal) * 100).toFixed(1) : 0;
-                                    return label + ': ¥' + value + ' (' + percent + '%)';
-                                }
+                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    var percentage = Math.floor(((value/total) * 100) + 0.5);
+                                    return label + ': ¥' + value + ' (' + percentage + '%)';
                             }
                         }
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
                     }
                 }
             });
-        } else {
-            // 如果没有分类数据，显示更友好的提示信息
-            var categoryContainer = document.getElementById('categoryChart').parentNode;
-            categoryContainer.innerHTML = '<div class="text-center p-4">' +
-                '<i class="fas fa-chart-pie text-muted mb-3" style="font-size: 3rem;"></i>' +
-                '<p class="text-muted">暂无收入分类数据</p>' +
-                '<p class="small text-muted">您需要添加至少一笔带有分类的付款记录</p>' +
-                '<a href="{% url "finance:payment_list" %}" class="btn btn-sm btn-outline-primary mt-2">' +
-                '<i class="fas fa-plus-circle me-1"></i>添加付款记录</a>' +
-                '</div>';
-        }
-        
-        // 如果月度收入数据全为零，也显示友好提示
-        var hasMonthlyData = monthValues.some(function(value) { return value > 0; });
-        if (!hasMonthlyData) {
-            var incomeContainer = document.getElementById('incomeChart').parentNode;
-            incomeContainer.innerHTML = '<div class="text-center p-4">' +
-                '<i class="fas fa-chart-line text-muted mb-3" style="font-size: 3rem;"></i>' +
-                '<p class="text-muted">暂无月度收入数据</p>' +
-                '<p class="small text-muted">您需要添加至少一笔已付款的记录</p>' +
-                '<a href="{% url "finance:payment_list" %}" class="btn btn-sm btn-outline-primary mt-2">' +
-                '<i class="fas fa-plus-circle me-1"></i>添加付款记录</a>' +
+            console.log("分类图表已初始化:", categoryChart);
+        } catch (error) {
+            console.error("创建分类图表时出错:", error);
+            var categoryContainer = categoryCanvas.parentElement;
+            categoryContainer.innerHTML = '<div class="text-center p-4 text-danger">' +
+                '<i class="fas fa-exclamation-triangle mb-3" style="font-size: 3rem;"></i>' +
+                '<p>图表创建失败</p>' +
+                '<p class="small">错误信息: ' + error.message + '</p>' +
                 '</div>';
         }
     });
