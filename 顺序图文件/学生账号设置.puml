@@ -1,0 +1,40 @@
+@startuml
+!theme cerulean
+skinparam backgroundColor #FFFFFF
+skinparam sequence {
+    ArrowColor #2C3E50
+    ActorBorderColor #2980B9
+    LifeLineBorderColor #2980B9
+    LifeLineBackgroundColor #A9DCDF
+    
+    ParticipantBorderColor #2980B9
+    ParticipantBackgroundColor #A9DCDF
+    ParticipantFontName 微软雅黑
+    ParticipantFontSize 17
+    ParticipantFontColor #2C3E50
+    
+    ActorBackgroundColor #A9DCDF
+    ActorFontColor #2C3E50
+    ActorFontSize 17
+    ActorFontName 微软雅黑
+}
+
+actor 学生 as Student
+participant "移动端" as Mobile #A9DCDF
+participant "服务器" as Server #A9DCDF
+database "数据库" as DB #A9DCDF
+
+Student -> Mobile: 输入原密码和新密码
+Mobile -> Server: 发送修改密码请求
+Server -> DB: 验证并更新密码
+DB --> Server: 返回操作结果
+
+alt 更新成功
+    Server --> Mobile: 返回成功信息
+    Mobile --> Student: 显示"密码已更新"提示
+else 更新失败
+    Server --> Mobile: 返回错误信息
+    Mobile --> Student: 显示错误提示
+end
+
+@enduml 

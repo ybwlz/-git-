@@ -1,0 +1,47 @@
+@startuml
+!theme cerulean
+skinparam backgroundColor #FFFFFF
+skinparam sequence {
+    ArrowColor #2C3E50
+    ActorBorderColor #2980B9
+    LifeLineBorderColor #2980B9
+    LifeLineBackgroundColor #A9DCDF
+    
+    ParticipantBorderColor #2980B9
+    ParticipantBackgroundColor #A9DCDF
+    ParticipantFontName 微软雅黑
+    ParticipantFontSize 17
+    ParticipantFontColor #2C3E50
+    
+    ActorBackgroundColor #A9DCDF
+    ActorFontColor #2C3E50
+    ActorFontSize 17
+    ActorFontName 微软雅黑
+}
+
+actor 学生 as Student
+participant "移动端" as Mobile #A9DCDF
+participant "服务器" as Server #A9DCDF
+database "数据库" as DB #A9DCDF
+
+Student -> Mobile: 点击"开始练琴"按钮
+Mobile -> Server: 发送开始练琴请求
+Server -> DB: 记录练琴开始时间
+DB --> Server: 返回操作结果
+Server --> Mobile: 返回确认信息
+Mobile --> Student: 显示练琴计时开始
+
+Student -> Mobile: 点击"结束练琴"按钮
+Mobile -> Server: 发送结束练琴请求
+Server -> DB: 记录练琴结束时间
+DB --> Server: 返回操作结果
+
+alt 完成练琴任务
+    Server --> Mobile: 返回完成信息
+    Mobile --> Student: 显示"练琴完成"提示
+else 未完成练琴任务
+    Server --> Mobile: 返回未完成信息
+    Mobile --> Student: 显示"练琴时间不足"提示
+end
+
+@enduml 

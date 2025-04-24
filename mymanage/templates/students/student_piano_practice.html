@@ -591,10 +591,10 @@
     <script src="{% static 'libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <!-- jQuery -->
     <script src="{% static 'libs/jquery/jquery.min.js' %}"></script>
-    <!-- jsQR 库 - 添加用于QR码扫描 -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-    <!-- 二维码扫描库 -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- jsQR 库 - 使用本地文件 -->
+    <script src="{% static 'js/lib/jsQR.min.js' %}"></script>
+    <!-- 二维码扫描库 - 使用本地文件 -->
+    <script src="{% static 'js/lib/html5-qrcode.min.js' %}"></script>
     <!-- Layer.js -->
     <script src="{% static 'js/skin/default/layer.js' %}"></script>
     

@@ -792,8 +792,9 @@ def scan_qrcode(request):
                     logger.debug(f"二维码已过期: {qrcode_obj.expires_at} < {timezone.now()}")
                     return JsonResponse({
                         'success': False,
-                        'message': '二维码已过期'
-                    }, status=400)
+                        'message': '二维码已过期，请使用有效的考勤码',
+                        'error_type': 'expired'
+                    }, status=200)  # 返回200状态码但success为false，这样前端可以正常处理
                 
                 # 获取关联的考勤会话
                 session = AttendanceSession.objects.filter(qrcode=qrcode_obj, status='active').first()
@@ -812,8 +813,9 @@ def scan_qrcode(request):
                         if related_session.status == 'closed':
                             return JsonResponse({
                                 'success': False,
-                                'message': '考勤会话已关闭，请联系老师'
-                            }, status=400)
+                                'message': '考勤会话已关闭，请联系老师',
+                                'error_type': 'session_closed'
+                            }, status=200)
                     
                     # 没有找到会话，使用二维码创建一个新的临时会话
                     logger.debug(f"未找到会话，创建新会话")
@@ -846,8 +848,9 @@ def scan_qrcode(request):
                 logger.warning(f"未找到匹配的二维码: {qrcode_data}")
                 return JsonResponse({
                     'success': False,
-                    'message': '无效的二维码或二维码已过期'
-                }, status=400)
+                    'message': '无效的二维码，请确保扫描正确的考勤码',
+                    'error_type': 'invalid_qrcode'
+                }, status=200)
         
         except Exception as e:
             import traceback

@@ -212,16 +212,12 @@
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
-                height: auto;
                 position: relative;
+                height: auto;
             }
             
             .main-content {
                 margin-left: 0;
-            }
-            
-            .sidebar .nav-link:hover {
-                transform: none;
             }
         }
         
@@ -264,10 +260,6 @@
     </style>
 </head>
 <body>
-    <button class="mobile-toggle btn">
-        <i class="fas fa-bars"></i>
-    </button>
-    
     <div class="sidebar col-md-3 col-lg-2 d-md-block">
         <div class="text-center mb-4">
             {% if teacher.avatar %}
@@ -742,20 +734,6 @@
         
         // 初始化应用的所有功能
         function initializeApp() {
-            // 移动端侧边栏切换
-            document.querySelector('.mobile-toggle').addEventListener('click', function() {
-                const sidebar = document.querySelector('.sidebar');
-                const mainContent = document.querySelector('.main-content');
-                
-                if (sidebar.style.width === '280px') {
-                    sidebar.style.width = '0';
-                    mainContent.style.marginLeft = '0';
-                } else {
-                    sidebar.style.width = '280px';
-                    mainContent.style.marginLeft = '280px';
-                }
-            });
-
             // 系统时间显示
             function updateSystemTime() {
                 const now = new Date();

@@ -1,0 +1,258 @@
+@startuml 苗韵钢琴管理系统类图
+
+' 设置主题和样式
+!theme plain
+skinparam backgroundColor white
+skinparam ClassBackgroundColor #FFEFD5
+skinparam ClassBorderColor #8B7355
+skinparam PackageBackgroundColor transparent
+skinparam PackageBorderColor #8B7355
+skinparam ArrowColor #8B7355
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam classFontName Microsoft YaHei
+skinparam packageFontName Microsoft YaHei
+skinparam defaultFontSize 12
+skinparam classAttributeFontSize 11
+
+' 用户管理包
+package "用户管理" {
+    class User {
+        - id: Integer
+        - username: String
+        - password: String
+        - email: String
+        - phone: String
+        - user_type: String
+        - avatar: Image
+        - is_active: Boolean
+        # created_at: DateTime
+        + is_student(): Boolean
+        + is_teacher(): Boolean
+        + is_admin_user(): Boolean
+    }
+}
+
+' 学生管理包
+package "学生管理" {
+    class Student {
+        - id: Integer
+        - user: User
+        - name: String
+        - level: Integer
+        - target_level: Integer
+        - phone: String
+        - parent_name: String
+        - parent_phone: String
+        - school: String
+        - created_at: DateTime
+        - updated_at: DateTime
+        + __str__(): String
+    }
+
+    class PracticeRecord {
+        - id: Integer
+        - student: Student
+        - date: Date
+        - start_time: DateTime
+        - end_time: DateTime
+        - duration: Integer
+        - piano_number: Integer
+        - status: String
+        - attendance_session: AttendanceSession
+        - created_at: DateTime
+        + __str__(): String
+        + save(): void
+    }
+
+    class SheetMusic {
+        - id: Integer
+        - title: String
+        - composer: String
+        - difficulty: String
+        - genre: String
+        - cover_image: Image
+        - pdf_file: File
+        - description: Text
+        - upload_time: DateTime
+        - is_active: Boolean
+        + __str__(): String
+    }
+
+    class SheetMusicPage {
+        - id: Integer
+        - sheet_music: SheetMusic
+        - page_number: Integer
+        - image: Image
+        + __str__(): String
+    }
+}
+
+' 教师管理包
+package "教师管理" {
+    class TeacherProfile {
+        - id: Integer
+        - user: User
+        - name: String
+        - gender: String
+        - phone: String
+        - avatar: Image
+        - bio: Text
+        - specialties: JSON
+        - created_at: DateTime
+        - updated_at: DateTime
+        + __str__(): String
+    }
+
+    class PrivacySetting {
+        - id: Integer
+        - teacher: TeacherProfile
+        - phone_visibility: String
+        - email_visibility: String
+        - bio_visibility: String
+    }
+}
+
+' 课程管理包
+package "课程管理" {
+    class PianoLevel {
+        - id: Integer
+        - level: Integer
+        - description: Text
+        + __str__(): String
+    }
+
+    class Piano {
+        - id: Integer
+        - number: Integer
+        - brand: String
+        - model: String
+        - purchase_date: Date
+        - last_tuned_date: Date
+        - is_active: Boolean
+        - is_occupied: Boolean
+        - is_reserved: Boolean
+        - reserved_until: DateTime
+        - reserved_for: Student
+        - notes: Text
+        + __str__(): String
+        + clean(): void
+        + save(): void
+        + reserve_for_student(): Boolean
+    }
+
+    class Course {
+        - id: Integer
+        - name: String
+        - code: String
+        - description: Text
+        - level: PianoLevel
+        - teacher: TeacherProfile
+        - duration: Duration
+        - created_at: DateTime
+        - students: ManyToMany[Student]
+        - is_active: Boolean
+        + __str__(): String
+    }
+
+    class CourseSchedule {
+        - id: Integer
+        - course: Course
+        - weekday: Integer
+        - start_time: Time
+        - end_time: Time
+        - location: String
+        - is_active: Boolean
+        - is_temporary: Boolean
+        + __str__(): String
+    }
+}
+
+' 考勤管理包
+package "考勤管理" {
+    class QRCode {
+        - id: Integer
+        - course: Course
+        - uuid: UUID
+        - code: String
+        - created_at: DateTime
+        - expires_at: DateTime
+        - qr_code_image: Image
+        + __str__(): String
+    }
+
+    class AttendanceRecord {
+        - id: Integer
+        - session: AttendanceSession
+        - student: Student
+        - piano: Piano
+        - check_in_time: DateTime
+        - check_out_time: DateTime
+        - status: String
+        - duration: Decimal
+        - duration_minutes: Decimal
+        - notes: Text
+        - note: Text
+        - check_in_method: String
+        + __str__(): String
+    }
+
+    class WaitingQueue {
+        - id: Integer
+        - session: AttendanceSession
+        - student: Student
+        - join_time: DateTime
+        - estimated_wait_time: Integer
+        - is_active: Boolean
+        - practice_record: PracticeRecord
+        + __str__(): String
+    }
+}
+
+' 财务管理包
+package "财务管理" {
+    class PaymentCategory {
+        - id: Integer
+        - name: String
+        - description: Text
+        + __str__(): String
+    }
+
+    class Fee {
+        - id: Integer
+        - name: String
+        - category: PaymentCategory
+        - amount: Decimal
+        - description: Text
+        - is_active: Boolean
+        - created_at: DateTime
+        + __str__(): String
+    }
+}
+
+' 定义关系
+User "1" -- "0..1" Student
+User "1" -- "0..1" TeacherProfile
+
+Student "1" -- "*" PracticeRecord
+Student "*" -- "*" Course
+Student "1" -- "*" AttendanceRecord
+Student "1" -- "*" WaitingQueue
+
+TeacherProfile "1" -- "1" PrivacySetting
+TeacherProfile "1" -- "*" Course
+
+Course "1" -- "*" CourseSchedule
+Course "1" -- "*" QRCode
+Course "1" -- "1" PianoLevel
+Course "1" -- "1" TeacherProfile
+
+Piano "1" -- "*" AttendanceRecord
+Piano "0..1" -- "0..1" Student
+
+SheetMusic "1" -- "*" SheetMusicPage
+SheetMusic "*" -- "1" PianoLevel
+
+PaymentCategory "1" -- "*" Fee
+
+@enduml 

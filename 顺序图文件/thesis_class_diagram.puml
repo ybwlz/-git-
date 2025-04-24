@@ -1,0 +1,129 @@
+@startuml 苗韵钢琴管理系统核心类图
+
+' 设置主题和样式
+!theme plain
+skinparam backgroundColor white
+skinparam ClassBackgroundColor #FFEFD5
+skinparam ClassBorderColor #8B7355
+skinparam PackageBackgroundColor transparent
+skinparam PackageBorderColor #8B7355
+skinparam ArrowColor #8B7355
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam classFontName Microsoft YaHei
+skinparam packageFontName Microsoft YaHei
+skinparam defaultFontSize 12
+skinparam classAttributeFontSize 11
+
+' 用户管理包
+package "用户管理" {
+    abstract class User {
+        - id: Integer
+        - username: String
+        - password: String
+        - email: String
+        - phone: String
+        - user_type: String
+        - is_active: Boolean
+        # created_at: DateTime
+    }
+
+    class Student {
+        - id: Integer
+        - name: String
+        - level: Integer
+        - target_level: Integer
+        - parent_name: String
+        - parent_phone: String
+        - school: String
+        # created_at: DateTime
+    }
+
+    class Teacher {
+        - id: Integer
+        - name: String
+        - gender: String
+        - specialties: String
+        - bio: Text
+        # created_at: DateTime
+    }
+}
+
+' 课程管理包
+package "课程管理" {
+    class Course {
+        - id: Integer
+        - name: String
+        - description: Text
+        - teacher_id: Integer
+        - level_id: Integer
+        - duration: Integer
+        - max_students: Integer
+        # created_at: DateTime
+    }
+
+    class Piano {
+        - id: Integer
+        - number: String
+        - brand: String
+        - model: String
+        - status: String
+        - is_active: Boolean
+        - is_occupied: Boolean
+        # maintenance_date: Date
+    }
+}
+
+' 考勤管理包
+package "考勤管理" {
+    class AttendanceSession {
+        - id: Integer
+        - course_id: Integer
+        - date: Date
+        - start_time: Time
+        - end_time: Time
+        - status: String
+    }
+
+    class PracticeRecord {
+        - id: Integer
+        - student_id: Integer
+        - piano_id: Integer
+        - start_time: DateTime
+        - end_time: DateTime
+        - duration: Integer
+        - status: String
+    }
+}
+
+' 财务管理包
+package "财务管理" {
+    class Payment {
+        - id: Integer
+        - student_id: Integer
+        - amount: Decimal
+        - payment_date: Date
+        - category_id: Integer
+        - status: String
+        - notes: Text
+    }
+
+    class PaymentCategory {
+        - id: Integer
+        - name: String
+        - description: Text
+    }
+}
+
+' 定义关系
+User <|-- Student
+User <|-- Teacher
+Course "1" *-- "1" Teacher
+Course "1" o-- "*" Student
+AttendanceSession "1" *-- "1" Course
+PracticeRecord "1" *-- "1" Student
+PracticeRecord "1" *-- "1" Piano
+Payment "*" -- "1" Student
+Payment "*" -- "1" PaymentCategory
+
+@enduml

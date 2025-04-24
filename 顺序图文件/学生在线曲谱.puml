@@ -1,0 +1,42 @@
+@startuml
+!theme cerulean
+skinparam backgroundColor #FFFFFF
+skinparam sequence {
+    ArrowColor #2C3E50
+    ActorBorderColor #2980B9
+    LifeLineBorderColor #2980B9
+    LifeLineBackgroundColor #A9DCDF
+    
+    ParticipantBorderColor #2980B9
+    ParticipantBackgroundColor #A9DCDF
+    ParticipantFontName 微软雅黑
+    ParticipantFontSize 17
+    ParticipantFontColor #2C3E50
+    
+    ActorBackgroundColor #A9DCDF
+    ActorFontColor #2C3E50
+    ActorFontSize 17
+    ActorFontName 微软雅黑
+}
+
+actor 学生 as Student
+participant "移动端" as Mobile #A9DCDF
+participant "服务器" as Server #A9DCDF
+database "数据库" as DB #A9DCDF
+database "文件存储" as Storage #A9DCDF
+
+Student -> Mobile: 点击"查看曲谱"按钮
+Mobile -> Server: 请求曲谱文件
+Server -> Storage: 获取曲谱文件
+Storage --> Server: 返回曲谱文件
+Server --> Mobile: 返回曲谱文件
+Mobile --> Student: 显示曲谱内容
+
+Student -> Mobile: 点击"下载"按钮
+Mobile -> Server: 请求下载曲谱
+Server -> Storage: 获取曲谱文件
+Storage --> Server: 返回曲谱文件
+Server --> Mobile: 返回曲谱文件
+Mobile --> Student: 提供曲谱下载
+
+@enduml 

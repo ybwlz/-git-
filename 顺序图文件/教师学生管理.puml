@@ -1,0 +1,54 @@
+@startuml
+!theme cerulean
+skinparam backgroundColor #FFFFFF
+skinparam sequence {
+    ArrowColor #2C3E50
+    ActorBorderColor #2980B9
+    LifeLineBorderColor #2980B9
+    LifeLineBackgroundColor #A9DCDF
+    
+    ParticipantBorderColor #2980B9
+    ParticipantBackgroundColor #A9DCDF
+    ParticipantFontName 微软雅黑
+    ParticipantFontSize 17
+    ParticipantFontColor #2C3E50
+    
+    ActorBackgroundColor #A9DCDF
+    ActorFontColor #2C3E50
+    ActorFontSize 17
+    ActorFontName 微软雅黑
+}
+
+actor 教师 as Teacher
+participant "前端界面" as Frontend #A9DCDF
+participant "服务器" as Server #A9DCDF
+database "数据库" as DB #A9DCDF
+
+Teacher -> Frontend: 查看学生列表
+Frontend -> Server: 请求学生列表数据
+Server -> DB: 查询学生数据
+DB --> Server: 返回学生列表
+Server --> Frontend: 返回学生列表
+Frontend --> Teacher: 显示学生列表
+
+Teacher -> Frontend: 点击学生查看详情
+Frontend -> Server: 请求学生详细信息
+Server -> DB: 查询学生详情和记录
+DB --> Server: 返回学生资料
+Server --> Frontend: 返回学生详情
+Frontend --> Teacher: 显示学生详情页面
+
+Teacher -> Frontend: 输入学习记录内容
+Frontend -> Server: 发送添加学习记录请求
+Server -> DB: 保存学习记录
+DB --> Server: 返回操作结果
+
+alt 保存成功
+    Server --> Frontend: 返回成功信息
+    Frontend --> Teacher: 显示"记录已保存"提示
+else 保存失败
+    Server --> Frontend: 返回错误信息
+    Frontend --> Teacher: 显示错误提示
+end
+
+@enduml 

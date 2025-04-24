@@ -1,0 +1,53 @@
+@startuml
+!theme cerulean
+skinparam backgroundColor #FFFFFF
+skinparam sequence {
+    ArrowColor #2C3E50
+    ActorBorderColor #2980B9
+    LifeLineBorderColor #2980B9
+    LifeLineBackgroundColor #A9DCDF
+    
+    ParticipantBorderColor #2980B9
+    ParticipantBackgroundColor #A9DCDF
+    ParticipantFontName 微软雅黑
+    ParticipantFontSize 17
+    ParticipantFontColor #2C3E50
+    
+    ActorBackgroundColor #A9DCDF
+    ActorFontColor #2C3E50
+    ActorFontSize 17
+    ActorFontName 微软雅黑
+}
+
+actor 用户 as User
+participant "前端界面" as Frontend #A9DCDF
+participant "服务器" as Server #A9DCDF
+database "数据库" as DB #A9DCDF
+
+User -> Frontend: 输入用户名和密码
+activate Frontend
+Frontend -> Server: 发送登录请求
+activate Server
+
+Server -> DB: 验证用户凭据
+activate DB
+DB --> Server: 返回验证结果
+deactivate DB
+
+alt 验证成功
+    Server -> DB: 获取用户权限和角色
+    activate DB
+    DB --> Server: 返回用户信息
+    deactivate DB
+    
+    Server --> Frontend: 返回登录成功和用户信息
+    Frontend --> User: 显示登录成功并重定向到对应角色主页
+else 验证失败
+    Server --> Frontend: 返回登录失败信息
+    Frontend --> User: 显示错误提示
+end
+
+deactivate Server
+deactivate Frontend
+
+@enduml

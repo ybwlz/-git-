@@ -387,8 +387,8 @@
     <script src="{% static 'libs/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'libs/sweetalert2/sweetalert2.all.min.js' %}"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="{% static 'js/lib/html5-qrcode.min.js' %}"></script>
+    <script src="{% static 'js/lib/jsQR.min.js' %}"></script>
     
     <script>
         $(document).ready(function() {
@@ -548,7 +548,7 @@
                 $('#qrScanModal').modal('hide');
                 
                 $.ajax({
-                    url: "{% url 'students:scan_qrcode' %}",
+                    url: "/students/practice/scan-qrcode/",
                     type: "POST",
                     data: {
                         csrfmiddlewaretoken: getCookie('csrftoken'),
@@ -585,18 +585,42 @@
                             $('#retryBtn').hide();
             $('#scanResultModal').modal('show');
                                             } else {
+                                                // 处理错误情况，显示详细错误信息
+                                                let icon = 'error';
+                                                let title = '扫码失败';
+                                                
+                                                // 根据错误类型显示不同图标和标题
+                                                if (response.error_type === 'expired') {
+                                                    icon = 'warning';
+                                                    title = '二维码已过期';
+                                                } else if (response.error_type === 'invalid_qrcode') {
+                                                    icon = 'error';
+                                                    title = '无效的二维码';
+                                                } else if (response.error_type === 'session_closed') {
+                                                    icon = 'info';
+                                                    title = '考勤会话已关闭';
+                                                }
+                                                
                                                 Swal.fire({
-                                                    icon: 'error',
-                                title: '扫码失败',
-                                text: response.message
-                        });
+                                                    icon: icon,
+                                                    title: title,
+                                                    text: response.message,
+                                                    confirmButtonText: '重新扫码'
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        $('#qrScanModal').modal('show');
+                                                        setTimeout(startScanner, 500);
+                                                    }
+                                                });
+                                                
+                                                // 不再自动重试，让用户手动点击按钮重试
                     }
                 },
-                                        error: function() {
+                                        error: function(xhr, status, error) {
                     Swal.fire({
                         icon: 'error',
                         title: '请求失败',
-                            text: '网络错误，请重试'
+                            text: '网络连接错误，请确保网络正常并重试'
                         });
                     }
                 });

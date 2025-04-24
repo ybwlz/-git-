@@ -1,0 +1,40 @@
+@startuml
+!theme cerulean
+skinparam backgroundColor #FFFFFF
+skinparam sequence {
+    ArrowColor #2C3E50
+    ActorBorderColor #2980B9
+    LifeLineBorderColor #2980B9
+    LifeLineBackgroundColor #A9DCDF
+    
+    ParticipantBorderColor #2980B9
+    ParticipantBackgroundColor #A9DCDF
+    ParticipantFontName 微软雅黑
+    ParticipantFontSize 17
+    ParticipantFontColor #2C3E50
+    
+    ActorBackgroundColor #A9DCDF
+    ActorFontColor #2C3E50
+    ActorFontSize 17
+    ActorFontName 微软雅黑
+}
+
+actor 管理员 as Admin
+participant "前端界面" as Frontend #A9DCDF
+participant "服务器" as Server #A9DCDF
+database "数据库" as DB #A9DCDF
+
+Admin -> Frontend: 输入用户信息
+Frontend -> Server: 发送创建用户请求
+Server -> DB: 存储用户信息
+DB --> Server: 返回操作结果
+
+alt 添加成功
+    Server --> Frontend: 返回成功信息
+    Frontend --> Admin: 显示"用户创建成功"提示
+else 添加失败
+    Server --> Frontend: 返回错误信息
+    Frontend --> Admin: 显示错误提示
+end
+
+@enduml 
