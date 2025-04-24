@@ -1949,11 +1949,27 @@ def piano_arrangement(request):
         date=today
     ).select_related('student').order_by('-start_time')
 
-    # 获取今日已签到人数
-    checked_in_today = AttendanceRecord.objects.filter(
+    # 设置今日日期变量
+    today_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+    today_end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
+    
+    # 获取PracticeRecord中今日练琴的非重复学生
+    practice_student_ids = set(PracticeRecord.objects.filter(
+        date=today,
+        student__courses__teacher=teacher
+    ).values_list('student_id', flat=True).distinct())
+    
+    # 获取AttendanceRecord中今日签到的非重复学生
+    attendance_student_ids = set(AttendanceRecord.objects.filter(
         check_in_time__date=today,
-        status='checked_in'
-    ).count()
+        session__course__teacher=teacher
+    ).values_list('student_id', flat=True).distinct())
+    
+    # 合并两类记录中的学生ID
+    all_attended_student_ids = attendance_student_ids.union(practice_student_ids)
+    
+    # 计算今日总出勤人数（去重后）
+    attendance_today = len(all_attended_student_ids)
 
     context = {
         'teacher': teacher,
@@ -1964,7 +1980,7 @@ def piano_arrangement(request):
         'avg_wait_time': avg_wait_time,
         'current_time': current_time,
         'practice_records': practice_records,
-        'checked_in_today': checked_in_today,
+        'attendance_today': attendance_today,
     }
     
     return render(request, 'teachers/piano_arrangement.html', context)

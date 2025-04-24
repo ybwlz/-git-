@@ -789,12 +789,11 @@ def scan_qrcode(request):
                 
                 # 检查二维码是否有效
                 if not qrcode_obj.is_valid():
-                    logger.debug(f"二维码已过期: {qrcode_obj.expires_at} < {timezone.now()}")
+                    logger.warning(f"二维码已过期: {qrcode_data}")
                     return JsonResponse({
                         'success': False,
-                        'message': '二维码已过期，请使用有效的考勤码',
-                        'error_type': 'expired'
-                    }, status=200)  # 返回200状态码但success为false，这样前端可以正常处理
+                        'message': '二维码已过期，请联系教师重新生成'
+                    })
                 
                 # 获取关联的考勤会话
                 session = AttendanceSession.objects.filter(qrcode=qrcode_obj, status='active').first()
@@ -1431,6 +1430,7 @@ def end_practice(request):
     """结束练琴函数"""
     if request.method == 'POST':
         practice_id = request.POST.get('practice_id')
+        qrcode_data = request.POST.get('qrcode_data')
         
         if not practice_id:
             return JsonResponse({
@@ -1438,14 +1438,59 @@ def end_practice(request):
                 'message': '缺少练习ID'
             })
         
+        # 验证二维码参数
+        if not qrcode_data:
+            return JsonResponse({
+                'success': False,
+                'message': '请先扫描钢琴上的二维码'
+            })
+        
         try:
             from mymanage.courses.models import Piano
-            from mymanage.attendance.models import AttendanceRecord
+            from mymanage.attendance.models import AttendanceRecord, QRCode
             import logging
+            import uuid
             
             # 获取日志记录器
             logger = logging.getLogger(__name__)
-            logger.info(f"收到结束练琴请求: 练习ID={practice_id}")
+            logger.info(f"收到结束练琴请求: 练习ID={practice_id}, 二维码数据={qrcode_data}")
+            
+            # 验证二维码数据
+            try:
+                # 尝试清理二维码数据
+                qrcode_data = qrcode_data.strip().strip('"\'')
+                logger.debug(f"处理后的二维码数据: {qrcode_data}")
+                
+                # 尝试将数据解析为UUID
+                uuid_obj = uuid.UUID(qrcode_data)
+                
+                # 查找对应的二维码记录
+                qrcode_obj = QRCode.objects.filter(code=qrcode_data).first()
+                
+                if not qrcode_obj:
+                    logger.warning(f"未找到匹配的二维码: {qrcode_data}")
+                    return JsonResponse({
+                        'success': False,
+                        'message': '无效的二维码，请重新扫描'
+                    })
+                
+                # 检查二维码是否已过期
+                if not qrcode_obj.is_valid():
+                    logger.warning(f"二维码已过期: {qrcode_data}")
+                    return JsonResponse({
+                        'success': False,
+                        'message': '二维码已过期，请联系教师重新生成'
+                    })
+                
+                # 验证成功，继续结束练琴流程
+                logger.info(f"二维码验证成功: {qrcode_data}")
+                
+            except (ValueError, TypeError) as e:
+                logger.error(f"二维码解析错误: {str(e)}")
+                return JsonResponse({
+                    'success': False,
+                    'message': '无效的二维码格式，请重新扫描'
+                })
             
             # 获取练习记录
             practice = get_object_or_404(PracticeRecord, id=practice_id)

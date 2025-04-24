@@ -324,8 +324,7 @@
                                             <th>学生</th>
                                             <th>签到时间</th>
                                             <th>签退时间</th>
-                                            <th>考勤时长</th>
-                                            <th>练习总时长</th>
+                                            <th>已练琴时间</th>
                                             <th>状态</th>
                                             <th>操作</th>
                                         </tr>
@@ -358,13 +357,10 @@
                                                 </td>
                                                 <td>
                                                     {% if record.duration_minutes %}
-                                                        {{ record.duration_minutes|floatformat:"1" }} 分钟
+                                                        <span class="badge bg-info">{{ record.duration_minutes|floatformat:"0" }} 分钟</span>
                                                     {% else %}
-                                                        <span class="text-muted">进行中</span>
+                                                        <span class="badge bg-info">进行中</span>
                                                     {% endif %}
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-info">{{ record.total_practice_time|default:"0"|floatformat:"1" }} 分钟</span>
                                                 </td>
                                                 <td>
                                                     {% if record.status == 'checked_in' %}
@@ -702,5 +698,6 @@
         }
     });
     </script>
+<div style="text-align: center; padding: 10px; color: #6c757d; margin-top: 20px;">© 2023 苗韵琴行. 保留所有权利. <a href="https://beian.miit.gov.cn/" target="_blank" style="color: #6c757d;">黔ICP备2025048659号</a></div>
 </body>
 </html> 
