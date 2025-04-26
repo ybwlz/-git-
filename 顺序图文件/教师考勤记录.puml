@@ -24,31 +24,10 @@ participant "前端界面" as Frontend #A9DCDF
 participant "服务器" as Server #A9DCDF
 database "数据库" as DB #A9DCDF
 
-Teacher -> Frontend: 选择班级/课程
-Frontend -> Server: 请求学生名单
-Server -> DB: 查询学生数据
-DB --> Server: 返回学生名单
-Server --> Frontend: 返回学生名单
-Frontend --> Teacher: 显示学生名单和考勤表单
-
-Teacher -> Frontend: 标记学生出勤状态
-Frontend -> Server: 发送考勤记录
-Server -> DB: 保存考勤记录
-DB --> Server: 返回操作结果
-
-alt 保存成功
-    Server --> Frontend: 返回成功信息
-    Frontend --> Teacher: 显示"考勤记录已保存"提示
-else 保存失败
-    Server --> Frontend: 返回错误信息
-    Frontend --> Teacher: 显示错误提示
-end
-
-Teacher -> Frontend: 查看考勤统计
-Frontend -> Server: 请求考勤统计数据
-Server -> DB: 查询考勤数据
-DB --> Server: 返回考勤数据
-Server --> Frontend: 返回统计数据
-Frontend --> Teacher: 显示考勤统计图表
+Teacher -> Frontend: 选择课程
+Frontend -> Server: 生成二维码
+Server -> DB: 创建考勤会话
+DB --> Server: 返回成功
+Server --> Frontend: 显示二维码
 
 @enduml 

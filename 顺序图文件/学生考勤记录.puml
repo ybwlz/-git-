@@ -20,21 +20,15 @@ skinparam sequence {
 }
 
 actor 学生 as Student
-participant "移动端" as Mobile #A9DCDF
+participant "前端界面" as Frontend #A9DCDF
 participant "服务器" as Server #A9DCDF
 database "数据库" as DB #A9DCDF
 
-Student -> Mobile: 填写请假申请
-Mobile -> Server: 发送请假申请
-Server -> DB: 保存请假申请
-DB --> Server: 返回操作结果
-
-alt 申请成功
-    Server --> Mobile: 返回成功信息
-    Mobile --> Student: 显示"请假申请已提交"提示
-else 申请失败
-    Server --> Mobile: 返回错误信息
-    Mobile --> Student: 显示错误提示
-end
+Student -> Frontend: 扫描课程二维码
+Frontend -> Server: 发送签到请求
+Server -> DB: 创建考勤记录
+DB --> Server: 返回记录ID
+Server --> Frontend: 返回签到成功
+Frontend --> Student: 显示签到成功
 
 @enduml 

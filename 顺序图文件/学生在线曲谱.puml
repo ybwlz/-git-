@@ -20,23 +20,20 @@ skinparam sequence {
 }
 
 actor 学生 as Student
-participant "移动端" as Mobile #A9DCDF
+participant "前端界面" as Frontend #A9DCDF
 participant "服务器" as Server #A9DCDF
 database "数据库" as DB #A9DCDF
-database "文件存储" as Storage #A9DCDF
 
-Student -> Mobile: 点击"查看曲谱"按钮
-Mobile -> Server: 请求曲谱文件
-Server -> Storage: 获取曲谱文件
-Storage --> Server: 返回曲谱文件
-Server --> Mobile: 返回曲谱文件
-Mobile --> Student: 显示曲谱内容
+Student -> Frontend: 打开曲谱页面
+Frontend -> Server: 请求曲谱数据
+Server -> DB: 获取曲谱信息
+DB --> Server: 返回曲谱数据
+Server --> Frontend: 返回曲谱内容
+Frontend --> Student: 显示曲谱
 
-Student -> Mobile: 点击"下载"按钮
-Mobile -> Server: 请求下载曲谱
-Server -> Storage: 获取曲谱文件
-Storage --> Server: 返回曲谱文件
-Server --> Mobile: 返回曲谱文件
-Mobile --> Student: 提供曲谱下载
+Student -> Frontend: 点击下载曲谱
+Frontend -> Server: 下载请求
+Server --> Frontend: 返回曲谱文件
+Frontend --> Student: 完成下载
 
 @enduml 
